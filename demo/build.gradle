@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+group 'al.aoli.exception.demo'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+application {
+    mainClass = 'al.aoli.exception.demo.Main'
+}
+
+run {
+    dependsOn ":instrumentation:jar"
+    var p = project(":instrumentation")
+    jvmArgs "-javaagent:${p.buildDir}/libs/${p.name}.jar"
+}
