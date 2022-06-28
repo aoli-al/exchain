@@ -1,14 +1,17 @@
 package al.aoli.exception.instrumentation.runtime
 
+import al.aoli.exception.instrumentation.analyzers.ExceptionTreeAnalyzer
 import net.bytebuddy.asm.Advice
 
 object ExceptionAdvices {
     @Advice.OnMethodExit(onThrowable = Throwable::class)
     @JvmStatic
-    fun exit(@Advice.Thrown thrown: Throwable?) {
+    fun exit(@Advice.Thrown thrown: Throwable?, @Advice.Origin origin: String) {
         if (thrown != null) {
-            println("from function")
-            thrown.printStackTrace(System.out)
+            ExceptionTreeAnalyzer.push(thrown)
+            if ("Main" in origin) {
+                ExceptionTreeAnalyzer.showDependency(thrown)
+            }
         }
     }
 }

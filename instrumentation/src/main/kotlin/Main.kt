@@ -1,11 +1,11 @@
 package al.aoli.exception.instrumentation
 
+import al.aoli.exception.instrumentation.runtime.ExceptionAdvices
 import al.aoli.exception.instrumentation.transformers.ExceptionBlockTransformer
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.asm.AsmVisitorWrapper
 import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.dynamic.DynamicType
-import net.bytebuddy.dynamic.scaffold.TypeWriter.MethodPool.Record.ForDefinedMethod
 import net.bytebuddy.matcher.ElementMatchers.*
 import net.bytebuddy.utility.JavaModule
 import org.objectweb.asm.ClassReader
@@ -36,8 +36,8 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
 //        .type(not(nameStartsWith<TypeDescription>("al.aoli")
 //            .or(nameStartsWith("java.util"))
 //            .or(nameStartsWith("java.lang"))))
-//        .transform(
-//            AgentBuilder.Transformer.ForAdvice().advice(not(isConstructor()), ExceptionAdvices::class.java.name))
+        .transform(
+            AgentBuilder.Transformer.ForAdvice().advice(not(isConstructor()), ExceptionAdvices::class.java.name))
         .transform { builder, type, _, _ ->
             builder
                 .visit(

@@ -1,5 +1,6 @@
 package al.aoli.exception.instrumentation.transformers
 
+import al.aoli.exception.instrumentation.dataflow.InstrumentationLabel
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ASM8
@@ -12,7 +13,7 @@ class TryBlockTransformer(visitor: MethodVisitor, access: Int, methodName: Strin
     private val endLabels = mutableMapOf<Label, Label>()
 
     override fun visitTryCatchBlock(start: Label, end: Label, handler: Label, type: String?) {
-        if (type != null) {
+        if (type != null && handler !is InstrumentationLabel) {
             val e = Label()
             endLabels[end] = e
             super.visitTryCatchBlock(start, e, e, "java/lang/Throwable")
