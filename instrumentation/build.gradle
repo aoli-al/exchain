@@ -12,8 +12,11 @@ repositories {
 dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-    implementation group: 'net.bytebuddy', name: 'byte-buddy-dep', version: '1.12.11'
-    implementation group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.12.11'
+    implementation group: 'net.bytebuddy', name: 'byte-buddy-dep', version: '1.12.12'
+    implementation group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.12.12'
+    implementation group: 'org.ow2.asm', name: 'asm', version: '9.3'
+    implementation group: 'org.ow2.asm', name: 'asm-commons', version: '9.3'
+    implementation group: 'org.ow2.asm', name: 'asm-analysis', version: '9.3'
 }
 
 test {

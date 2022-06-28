@@ -5,9 +5,9 @@ import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.asm.AsmVisitorWrapper
 import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.dynamic.DynamicType
+import net.bytebuddy.dynamic.scaffold.TypeWriter.MethodPool.Record.ForDefinedMethod
 import net.bytebuddy.matcher.ElementMatchers.*
 import net.bytebuddy.utility.JavaModule
-import net.bytebuddy.utility.nullability.MaybeNull
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import java.io.File
@@ -36,15 +36,16 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
 //        .type(not(nameStartsWith<TypeDescription>("al.aoli")
 //            .or(nameStartsWith("java.util"))
 //            .or(nameStartsWith("java.lang"))))
-        .transform { builder, _, _, _ ->
-            builder.visit(
-                AsmVisitorWrapper.ForDeclaredMethods()
-                    .writerFlags(ClassWriter.COMPUTE_MAXS or ClassWriter.COMPUTE_FRAMES)
-                    .readerFlags(ClassReader.EXPAND_FRAMES)
-                    .invokable(any(), ExceptionBlockTransformer())
-            )
-        }
 //        .transform(
 //            AgentBuilder.Transformer.ForAdvice().advice(not(isConstructor()), ExceptionAdvices::class.java.name))
+        .transform { builder, type, _, _ ->
+            builder
+                .visit(
+                    AsmVisitorWrapper.ForDeclaredMethods()
+                        .writerFlags(ClassWriter.COMPUTE_MAXS or ClassWriter.COMPUTE_FRAMES)
+                        .readerFlags(ClassReader.EXPAND_FRAMES)
+                        .invokable(any(), ExceptionBlockTransformer(type.typeName))
+                )
+        }
         .installOn(instrumentation)
 }
