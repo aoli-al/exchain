@@ -17,11 +17,30 @@ class Test {
         return 1;
     }
 
+    static class Exception1 extends RuntimeException {}
+    static class Exception2 extends RuntimeException {}
+
     public void scene2() {
         try {
-            foo();
-        } catch (Exception e) {
-            foo();
+            throw new Exception1();
+        } catch (Exception e1) {
+            try {
+                throw new Exception2();
+            } catch (Exception e2) {
+            }
+            throw e1;
+        }
+    }
+
+    public void scene9() {
+        try {
+            throw new Exception1();
+        } catch (Exception e1) {
+            try {
+                throw new Exception2();
+            } catch (Exception e2) {
+                throw e2;
+            }
         }
     }
 
@@ -32,60 +51,77 @@ class Test {
             foo();
         }
     }
-//
-//
-//    /**
-//     * Root -> RuntimeException:foo
-//     *      |> RuntimeException:bar
-//     */
-//    public void scene5() {
-//        try {
-//            foo();
-//            return;
-//        } catch (Exception e) {
-//        }
-//        bar();
-////        throw new RuntimeException("2");
-//    }
-//
-//    /**
-//     * Root -> RuntimeException:foo -> RuntimeException:bar
-//     */
-//    public void scene6() {
-//        try {
-//            foo();
-//            return;
-//        } catch (Exception e) {
-//            bar();
-//        }
-////        throw new RuntimeException("2");
-//    }
-//
-//    public void scene3() {
-//        try {
-//            foo();
-//            return;
-//        } catch (Exception e) {
-//        }
-//        bar();
-//        //
-//    }
-//
-//    public void scene4() {
-//        try {
-//            foo();
-//        } catch (Exception e) {
-//            bar();
-////            throw new RuntimeException("2");
-//        }
-//    }
-//
-//    public void bar() {
-//        throw new RuntimeException("2");
-//    }
-//
+
+    public void scene4() {
+        try {
+            foo();
+        }
+        catch (Exception e) {
+            throw e;
+        }
+    }
+
+    public void scene6() {
+        try {
+            foo();
+        }
+        catch (Exception e) {
+            throw new RuntimeException("2");
+        }
+    }
+
+    public void scene5() {
+        try {
+            foo();
+        }
+        catch (Exception e) {
+            ex();
+        }
+    }
+
+    public void scene7() {
+        try {
+            foo();
+        }
+        catch (Exception e) {
+            foo();
+        }
+    }
+
+    public void scene8() {
+        synchronized (this) {
+            foo();
+        }
+    }
+
+    public void iden(Throwable e) {
+        throw (RuntimeException) e;
+    }
+
+    public void scene10() {
+        try {
+            foo();
+        }
+        catch (RuntimeException e) {
+            if (bar()) {
+                return;
+            }
+            else if (bar()) {
+                throw new RuntimeException();
+            }
+        }
+    }
+
+
     public void foo() {
         throw new RuntimeException("1");
+    }
+
+    public void ex() {
+        throw new RuntimeException("3");
+    }
+    public boolean bar() {
+        return true;
     }
 
 }
@@ -93,7 +129,21 @@ class Test {
 public class Main {
     public static void main(String[] args) {
         Test t = new Test();
-//        System.out.println(t.scene1());
-        t.scene2();
+        try {
+            t.scene4();
+        } catch (Exception e) {
+        }
+        try {
+            t.scene5();
+        } catch (Exception e) {
+        }
+        try {
+            t.scene6();
+        } catch (Exception e) {
+        }
+        try {
+            t.scene8();
+        } catch (Exception e) {
+        }
     }
 }

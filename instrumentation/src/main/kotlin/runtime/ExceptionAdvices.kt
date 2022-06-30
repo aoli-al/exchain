@@ -8,10 +8,7 @@ object ExceptionAdvices {
     @JvmStatic
     fun exit(@Advice.Thrown thrown: Throwable?, @Advice.Origin origin: String) {
         if (thrown != null) {
-            ExceptionTreeAnalyzer.push(thrown)
-            if ("Main" in origin) {
-                ExceptionTreeAnalyzer.showDependency(thrown)
-            }
+            ExceptionTreeAnalyzer.push(thrown, origin)
         }
     }
 }

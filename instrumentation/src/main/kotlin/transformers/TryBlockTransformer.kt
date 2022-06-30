@@ -1,19 +1,24 @@
 package al.aoli.exception.instrumentation.transformers
 
 import al.aoli.exception.instrumentation.dataflow.InstrumentationLabel
+import al.aoli.exception.instrumentation.runtime.ExceptionRuntime
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ASM8
 import org.objectweb.asm.Opcodes.INVOKESTATIC
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.GeneratorAdapter
+import org.objectweb.asm.commons.Method
 
-class TryBlockTransformer(visitor: MethodVisitor, access: Int, methodName: String, descriptor: String):
+class TryBlockTransformer(private val owner: String, visitor: MethodVisitor, access: Int, methodName: String, descriptor: String):
     GeneratorAdapter(ASM8, visitor, access, methodName, descriptor) {
     private val endLabels = mutableMapOf<Label, Label>()
+    private val visitedTryBlock = mutableSetOf<Pair<Label, Label>>()
 
     override fun visitTryCatchBlock(start: Label, end: Label, handler: Label, type: String?) {
-        if (type != null && handler !is InstrumentationLabel) {
+        val range = Pair(start, end)
+        if (type != null && handler !is InstrumentationLabel && range !in visitedTryBlock) {
+            visitedTryBlock.add(range)
             val e = Label()
             endLabels[end] = e
             super.visitTryCatchBlock(start, e, e, "java/lang/Throwable")
@@ -28,12 +33,10 @@ class TryBlockTransformer(visitor: MethodVisitor, access: Int, methodName: Strin
             val id = newLocal(Type.getType(Throwable::class.java))
             storeLocal(id)
             loadLocal(id)
-            visitMethodInsn(
-                INVOKESTATIC,
-                "al/aoli/exception/instrumentation/runtime/ExceptionRuntime",
-                "onException",
-                "(Ljava/lang/Throwable;)V",
-                false
+            push("$owner:$name")
+            invokeStatic(Type.getType(ExceptionRuntime::class.java),
+                Method("onException", Type.VOID_TYPE,
+                    arrayOf(Type.getType(Throwable::class.java), Type.getType(String::class.java)))
             )
             loadLocal(id)
             throwException()

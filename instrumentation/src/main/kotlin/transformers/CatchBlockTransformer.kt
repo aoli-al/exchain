@@ -73,23 +73,46 @@ class CatchBlockTransformer(private val owner: String,
                                     )
                                 )
                             }
+                        } else {
+                            instructions.insert(
+                                inst, MethodInsnNode(
+                                    INVOKESTATIC,
+                                    "al/aoli/exception/instrumentation/runtime/ExceptionRuntime",
+                                    "onCatch",
+                                    "()V"
+                                )
+                            )
                         }
                     }
                 }
             }
         }
+
+        val callCatch = InsnList()
+        callCatch.add(InsnNode(DUP))
+        callCatch.add(MethodInsnNode(
+            INVOKESTATIC,
+            "al/aoli/exception/instrumentation/runtime/ExceptionRuntime",
+            "onCatchBegin",
+            "(Ljava/lang/Throwable;)V",
+        ))
+
+        instructions.insert(handler.next.next, callCatch)
+
         val end = LabelNode(InstrumentationLabel())
         val skip = LabelNode()
         val insnList = InsnList()
         insnList.add(JumpInsnNode(GOTO, skip))
         insnList.add(end)
-
+        insnList.add(InsnNode(DUP))
+        insnList.add(LdcInsnNode("$owner:$name"))
         insnList.add(MethodInsnNode(
             INVOKESTATIC,
             "al/aoli/exception/instrumentation/runtime/ExceptionRuntime",
             "onCatchWithException",
-            "(Ljava/lang/Throwable;)V",
+            "(Ljava/lang/Throwable;Ljava/lang/String;)V",
         ))
+        insnList.add(InsnNode(ATHROW))
 
         insnList.add(skip)
         instructions.insert(endInst, insnList)
@@ -125,7 +148,11 @@ class CatchBlockTransformer(private val owner: String,
         }.toMap()
 
 
+        val processedHandlers = mutableSetOf<LabelNode>()
         for (tryCatchBlock in this.tryCatchBlocks) {
+            if (tryCatchBlock.handler in processedHandlers) continue
+            if (tryCatchBlock.type == null) continue
+            processedHandlers.add(tryCatchBlock.handler)
             val tryReachedBlocks = computeReachBlocks(tryCatchBlock.start, instructionMap)
             val handlerReachedBlocks = computeReachBlocks(tryCatchBlock.handler, instructionMap)
             processCatchFrames(tryReachedBlocks, handlerReachedBlocks, instructionMap, tryCatchBlock.handler)
@@ -134,5 +161,12 @@ class CatchBlockTransformer(private val owner: String,
         tryCatchBlocks?.addAll(0, newTryCatchBlocks)
 
         accept(mv)
+    }
+
+    companion object {
+        var varIndex = 0
+        fun newLocalVar(): String {
+            return "LOCAL_VAR_${varIndex++}"
+        }
     }
 }

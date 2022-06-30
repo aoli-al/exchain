@@ -20,7 +20,7 @@ class ExceptionBlockTransformer(val typeName: String): AsmVisitorWrapper.ForDecl
         val name = instrumentedMethod.name
         val descriptor = instrumentedMethod.descriptor
         return CatchBlockTransformer(typeName,
-            TryBlockTransformer(methodVisitor, access, name, descriptor),
+            TryBlockTransformer(typeName, methodVisitor, access, name, descriptor),
             access, name, descriptor, null,
             instrumentedMethod.exceptionTypes.asErasures().toInternalNames()
         )
