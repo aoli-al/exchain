@@ -1,11 +1,10 @@
 package al.aoli.exception.instrumentation.transformers
 
-import al.aoli.exception.instrumentation.dataflow.InstrumentationLabel
+import al.aoli.exception.instrumentation.analyzers.InstrumentationLabel
 import al.aoli.exception.instrumentation.runtime.ExceptionRuntime
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ASM8
-import org.objectweb.asm.Opcodes.INVOKESTATIC
 import org.objectweb.asm.Type
 import org.objectweb.asm.commons.GeneratorAdapter
 import org.objectweb.asm.commons.Method

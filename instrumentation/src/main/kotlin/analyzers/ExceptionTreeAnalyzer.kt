@@ -45,6 +45,7 @@ object ExceptionTreeAnalyzer {
     }
 
     fun catchEnd() {
+        caughtExceptions.removeLast()
         showDependency(exceptionStack.removeLast())
     }
 }

@@ -6,7 +6,7 @@ import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.implementation.Implementation
 import net.bytebuddy.pool.TypePool
 import org.objectweb.asm.MethodVisitor
-class ExceptionBlockTransformer(val typeName: String): AsmVisitorWrapper.ForDeclaredMethods.MethodVisitorWrapper {
+class TryCatchBlockTransformer(val typeName: String): AsmVisitorWrapper.ForDeclaredMethods.MethodVisitorWrapper {
     override fun wrap(
         instrumentedType: TypeDescription,
         instrumentedMethod: MethodDescription,

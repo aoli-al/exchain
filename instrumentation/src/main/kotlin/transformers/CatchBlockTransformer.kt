@@ -1,7 +1,6 @@
 package al.aoli.exception.instrumentation.transformers
 
-import al.aoli.exception.instrumentation.dataflow.InstrumentationLabel
-import com.sun.jdi.LocalVariable
+import al.aoli.exception.instrumentation.analyzers.InstrumentationLabel
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
@@ -12,7 +11,7 @@ class DataFlowAnalyzer<V: Value>(interpreter: Interpreter<V>): Analyzer<V>(inter
     val predecessors = mutableMapOf<Int, MutableSet<Int>>()
 
     override fun newControlFlowEdge(insnIndex: Int, successorIndex: Int) {
-        successors.getOrPut(insnIndex, { mutableSetOf() }).add(successorIndex)
+        successors.getOrPut(insnIndex) { mutableSetOf() }.add(successorIndex)
         super.newControlFlowEdge(insnIndex, successorIndex)
     }
 

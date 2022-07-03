@@ -1,7 +1,7 @@
 package al.aoli.exception.instrumentation
 
 import al.aoli.exception.instrumentation.runtime.ExceptionAdvices
-import al.aoli.exception.instrumentation.transformers.ExceptionBlockTransformer
+import al.aoli.exception.instrumentation.transformers.TryCatchBlockTransformer
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.asm.AsmVisitorWrapper
 import net.bytebuddy.description.type.TypeDescription
@@ -27,7 +27,7 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
                 dynamicType: DynamicType
             ) {
                 super.onTransformation(typeDescription, classLoader, module, loaded, dynamicType)
-                File("/tmp/${dynamicType.typeDescription.typeName}.class").writeBytes(dynamicType.bytes);
+                File("/tmp/${dynamicType.typeDescription.typeName}.class").writeBytes(dynamicType.bytes)
             }
         })
         .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly())
@@ -46,15 +46,15 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
 //        .type(not(nameStartsWith<TypeDescription>("al.aoli")
 //            .or(nameStartsWith("java.util"))
 //            .or(nameStartsWith("java.lang"))))
-        .transform(
-            AgentBuilder.Transformer.ForAdvice().advice(not(isConstructor()), ExceptionAdvices::class.java.name))
+//        .transform(
+//            AgentBuilder.Transformer.ForAdvice().advice(not(isConstructor()), ExceptionAdvices::class.java.name))
         .transform { builder, type, _, _ ->
             builder
                 .visit(
                     AsmVisitorWrapper.ForDeclaredMethods()
                         .writerFlags(ClassWriter.COMPUTE_MAXS or ClassWriter.COMPUTE_FRAMES)
                         .readerFlags(ClassReader.EXPAND_FRAMES)
-                        .invokable(any(), ExceptionBlockTransformer(type.typeName))
+                        .invokable(any(), TryCatchBlockTransformer(type.typeName))
                 )
         }
         .installOn(instrumentation)
