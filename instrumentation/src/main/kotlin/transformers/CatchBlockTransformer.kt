@@ -1,21 +1,11 @@
 package al.aoli.exception.instrumentation.transformers
 
+import al.aoli.exception.instrumentation.analyzers.DataFlowAnalyzer
 import al.aoli.exception.instrumentation.analyzers.InstrumentationLabel
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
 import org.objectweb.asm.tree.analysis.*
-
-class DataFlowAnalyzer<V: Value>(interpreter: Interpreter<V>): Analyzer<V>(interpreter) {
-    val successors = mutableMapOf<Int, MutableSet<Int>>()
-    val predecessors = mutableMapOf<Int, MutableSet<Int>>()
-
-    override fun newControlFlowEdge(insnIndex: Int, successorIndex: Int) {
-        successors.getOrPut(insnIndex) { mutableSetOf() }.add(successorIndex)
-        super.newControlFlowEdge(insnIndex, successorIndex)
-    }
-
-}
 
 class CatchBlockTransformer(private val owner: String,
                             private val mv: MethodVisitor,
