@@ -22,9 +22,20 @@ public class DataFlowTest {
     }
 
     public void scene2() {
-
+        int count = 0;
+        while (count < 50) {
+            try {
+                functionWithException();
+            } catch (Exception e) {
+                count ++;
+            }
+        }
     }
 
+
+    public void functionWithException() {
+        throw new RuntimeException("exception");
+    }
     public Object createObjectWithException() {
         throw new RuntimeException("exception");
     }

@@ -8,7 +8,7 @@ import org.objectweb.asm.tree.*
 import org.objectweb.asm.tree.analysis.AnalyzerException
 import org.objectweb.asm.tree.analysis.Interpreter
 
-class DataflowInterpreter: Interpreter<DataFlowValue>(ASM8), Opcodes {
+class DataFlowInterpreter: Interpreter<DataFlowValue>(ASM8), Opcodes {
     val values = mutableMapOf<AbstractInsnNode, DataFlowValue>()
     val fields = mutableMapOf<String, DataFlowValue>()
     override fun newValue(type: Type?): DataFlowValue {
@@ -77,7 +77,7 @@ class DataflowInterpreter: Interpreter<DataFlowValue>(ASM8), Opcodes {
                     )
                 }
             }
-            JSR -> newValue(Type.VOID_TYPE)
+            JSR -> newValue(Type.VOID_TYPE, insn)
             GETSTATIC -> newValue(Type.getType((insn as FieldInsnNode).desc), insn)
             NEW -> newValue(Type.getObjectType((insn as TypeInsnNode).desc), insn)
             else -> throw Error("Internal error.")

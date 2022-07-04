@@ -1,11 +1,12 @@
 package al.aoli.exception.instrumentation.transformers
 
 import al.aoli.exception.instrumentation.analyzers.DataFlowAnalyzer
+import al.aoli.exception.instrumentation.analyzers.DataFlowInterpreter
+import al.aoli.exception.instrumentation.analyzers.DataFlowValue
 import al.aoli.exception.instrumentation.analyzers.InstrumentationLabel
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
-import org.objectweb.asm.tree.analysis.*
 
 class CatchBlockTransformer(private val owner: String,
                             private val mv: MethodVisitor,
@@ -129,13 +130,23 @@ class CatchBlockTransformer(private val owner: String,
 
 //        modifiedInstructions.add(instructions)
 
-        val analyzer = DataFlowAnalyzer(BasicInterpreter())
+        val interpreter = DataFlowInterpreter()
+        val analyzer = DataFlowAnalyzer(interpreter)
         analyzer.analyze(owner, this)
+        val branchValues = mutableMapOf<AbstractInsnNode, DataFlowValue>()
+
+        for (entry in analyzer.successors) {
+            val insn = instructions[entry.key]
+            entry.value.map { instructions[it] }
+                .forEach {
+                    branchValues.getOrPut(it) { DataFlowValue(null, null, mutableSetOf(), true) }
+                        .merge( interpreter.values.getOrPut(insn) { DataFlowValue(null, null, mutableSetOf(), true) }) }
+        }
+
 
         val instructionMap = analyzer.successors.map { entry ->
             Pair(instructions[entry.key], entry.value.map { instructions[it] }.toSet())
         }.toMap()
-
 
         val processedHandlers = mutableSetOf<LabelNode>()
         for (tryCatchBlock in this.tryCatchBlocks) {
