@@ -11,15 +11,18 @@ import org.objectweb.asm.tree.analysis.Interpreter
 class DataFlowInterpreter: Interpreter<DataFlowValue>(ASM8), Opcodes {
     val values = mutableMapOf<AbstractInsnNode, DataFlowValue>()
     val fields = mutableMapOf<String, DataFlowValue>()
-    override fun newValue(type: Type?): DataFlowValue {
+    override fun newValue(type: Type?): DataFlowValue? {
         return newValue(type, null)
     }
 
-    private fun newValue(type: Type?, origin: AbstractInsnNode?, vararg inputs: DataFlowValue): DataFlowValue {
+    private fun newValue(type: Type?, origin: AbstractInsnNode?, vararg inputs: DataFlowValue): DataFlowValue? {
         return newValue(type, origin, inputs.toSet())
     }
 
-    private fun newValue(type: Type?, origin: AbstractInsnNode?, inputs: Collection<DataFlowValue> = emptySet()): DataFlowValue {
+    private fun newValue(type: Type?, origin: AbstractInsnNode?, inputs: Collection<DataFlowValue> = emptySet()): DataFlowValue? {
+        if (type == Type.VOID_TYPE) {
+            return null
+        }
         val value = DataFlowValue(type, origin, inputs, false)
         if (origin != null) {
             values[origin] = value
@@ -28,7 +31,7 @@ class DataFlowInterpreter: Interpreter<DataFlowValue>(ASM8), Opcodes {
     }
 
 
-    override fun newOperation(insn: AbstractInsnNode): DataFlowValue {
+    override fun newOperation(insn: AbstractInsnNode): DataFlowValue? {
         return when (insn.opcode) {
             ACONST_NULL -> newValue(Type.getObjectType("null"), insn)
             ICONST_M1, ICONST_0, ICONST_1, ICONST_2, ICONST_3, ICONST_4, ICONST_5 -> newValue(
@@ -114,7 +117,7 @@ class DataFlowInterpreter: Interpreter<DataFlowValue>(ASM8), Opcodes {
                 val fieldInsn = (insn as FieldInsnNode)
                 val key = fieldKey(fieldInsn)
                 fields.getOrPut(key) {
-                    newValue(Type.getObjectType(fieldInsn.desc))
+                    newValue(Type.getObjectType(fieldInsn.desc))!!
                 }.merge(value1)
                 null
             }
@@ -136,7 +139,7 @@ class DataFlowInterpreter: Interpreter<DataFlowValue>(ASM8), Opcodes {
                 val fieldInsn = (insn as FieldInsnNode)
                 val key = fieldKey(fieldInsn)
                 fields.getOrPut(key) {
-                    newValue(Type.getObjectType(fieldInsn.desc))
+                    newValue(Type.getObjectType(fieldInsn.desc))!!
                 }
                 null
             }
@@ -178,24 +181,28 @@ class DataFlowInterpreter: Interpreter<DataFlowValue>(ASM8), Opcodes {
         value1: DataFlowValue,
         value2: DataFlowValue,
         value3: DataFlowValue
-    ): DataFlowValue {
+    ): DataFlowValue? {
         return newValue(null, insn, value1, value2, value3)
     }
 
-    override fun naryOperation(insn: AbstractInsnNode, values: MutableList<out DataFlowValue>): DataFlowValue {
+    override fun naryOperation(insn: AbstractInsnNode, values: MutableList<out DataFlowValue>): DataFlowValue? {
         val opcode = insn.opcode
         return if (opcode == MULTIANEWARRAY) {
             newValue(Type.getType((insn as MultiANewArrayInsnNode).desc), insn, values)
         } else if (opcode == INVOKEDYNAMIC) {
-            newValue(
-                Type.getReturnType((insn as InvokeDynamicInsnNode).desc), insn,
-                values
-            )
+            val returnType = Type.getReturnType((insn as InvokeDynamicInsnNode).desc)
+            if (returnType != Type.VOID_TYPE) {
+                newValue(returnType, insn, values)
+            } else {
+                null
+            }
         } else {
-            newValue(
-                Type.getReturnType((insn as MethodInsnNode).desc), insn,
-                values
-            )
+            val returnType = Type.getReturnType((insn as MethodInsnNode).desc)
+            if (returnType != Type.VOID_TYPE) {
+                newValue(returnType, insn, values)
+            } else {
+                null
+            }
         }
     }
 
