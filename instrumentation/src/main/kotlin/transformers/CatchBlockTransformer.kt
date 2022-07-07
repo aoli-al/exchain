@@ -1,12 +1,11 @@
 package al.aoli.exception.instrumentation.transformers
 
 import al.aoli.exception.instrumentation.analyzers.DataFlowAnalyzer
-import al.aoli.exception.instrumentation.analyzers.DataFlowInterpreter
-import al.aoli.exception.instrumentation.analyzers.DataFlowValue
 import al.aoli.exception.instrumentation.analyzers.InstrumentationLabel
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
+import org.objectweb.asm.tree.analysis.SourceInterpreter
 
 class CatchBlockTransformer(private val owner: String,
                             private val mv: MethodVisitor,
@@ -14,8 +13,8 @@ class CatchBlockTransformer(private val owner: String,
     : MethodNode(ASM8, access, name, descriptor, signature, exceptions) {
     val modifiedInstructions = InsnList()
 
-    fun processCatchFrames(tryReachedBlocks: Set<AbstractInsnNode>, handlerReachedBlocks: Set<AbstractInsnNode>,
-                           instructionMap: Map<AbstractInsnNode, Set<AbstractInsnNode>>, handler: LabelNode) {
+    private fun processCatchFrames(tryReachedBlocks: Set<AbstractInsnNode>, handlerReachedBlocks: Set<AbstractInsnNode>,
+                                   instructionMap: Map<AbstractInsnNode, Set<AbstractInsnNode>>, handler: LabelNode) {
         var maxLabelIndex = 0
         var endInst: AbstractInsnNode? = null
         for (inst in (handlerReachedBlocks - tryReachedBlocks)) {
@@ -130,18 +129,43 @@ class CatchBlockTransformer(private val owner: String,
 
 //        modifiedInstructions.add(instructions)
 
-        val interpreter = DataFlowInterpreter()
+        val interpreter = SourceInterpreter()
         val analyzer = DataFlowAnalyzer(interpreter)
-        analyzer.analyze(owner, this)
-        val branchValues = mutableMapOf<AbstractInsnNode, DataFlowValue>()
-
-        for (entry in analyzer.successors) {
-            val insn = instructions[entry.key]
-            entry.value.map { instructions[it] }
-                .forEach {
-                    branchValues.getOrPut(it) { DataFlowValue(null, null, mutableSetOf(), true) }
-                        .merge( interpreter.values.getOrPut(insn) { DataFlowValue(null, null, mutableSetOf(), true) }) }
+        val normalResult = analyzer.analyze(owner, this, false)
+        val exceptionResult = analyzer.analyze(owner, this, true)
+        val affectedVars = mutableSetOf<Int>()
+        for (index in normalResult.indices) {
+            if (normalResult[index] != null) {
+                for (localIndex in 0 until normalResult[index].locals) {
+                    val normalLocal = normalResult[index].getLocal(localIndex)
+                    val exceptionLocal = exceptionResult[index].getLocal(localIndex)
+                    if (normalLocal != exceptionLocal) {
+                        for (insn in normalLocal.insns) {
+                            if (insn is VarInsnNode) {
+                                affectedVars.add(insn.`var`)
+                            }
+                        }
+                    }
+                }
+            }
         }
+
+        if (affectedVars.isNotEmpty()) {
+            println("Method $owner:$name:$desc: [${affectedVars.joinToString(", ")}]")
+        }
+//        for (frame in result1) {
+//            for (i in 0 until frame.locals) {
+//            }
+//        }
+//        val branchValues = mutableMapOf<AbstractInsnNode, DataFlowValue>()
+
+//        for (entry in analyzer.successors) {
+//            val insn = instructions[entry.key]
+//            entry.value.map { instructions[it] }
+//                .forEach {
+//                    branchValues.getOrPut(it) { DataFlowValue(null, null, mutableSetOf(), true) }
+//                        .merge( interpreter.values.getOrPut(insn) { DataFlowValue(null, null, mutableSetOf(), true) }) }
+//        }
 
 
         val instructionMap = analyzer.successors.map { entry ->

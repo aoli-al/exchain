@@ -8,6 +8,7 @@ public class DataFlowTest {
         while (count < 50) {
             try {
                 functionWithException();
+                count ++;
             } catch (Exception e) {
                 count ++;
             }
@@ -20,7 +21,7 @@ public class DataFlowTest {
         //...
         if (a > 0) {
             if (b < 0) {
-                foo.functionWithException(c);
+//                foo.functionWithException(c);
             }
         }
     }
