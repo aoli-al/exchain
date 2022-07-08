@@ -1,6 +1,9 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.7.0'
+    id "com.github.johnrengelman.shadow" version "7.1.2"
 }
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
 
 group 'al.aoli.exception.instrumentation'
 version 'unspecified'
@@ -30,10 +33,19 @@ jar {
         attributes 'Can-Redefine-Classes': true
         attributes 'Can-Retransform-Classes': true
     }
-    from(sourceSets.main.output) {
-        includes.addAll(jar.includes)
-    }
-    from {
-        configurations.compileClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+}
+
+//task relocateShadowJar(type: ConfigureShadowRelocation) {
+//    target = tasks.shadowJar
+//
+//}
+//
+//tasks.shadowJar.dependsOn tasks.relocateShadowJar
+
+shadowJar {
+    archiveBaseName.set('instrumentation')
+    archiveClassifier.set('')
+    archiveVersion.set('')
+
+    relocate 'org.objectweb.asm', 'shadow.asm'
 }

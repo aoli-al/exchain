@@ -6,10 +6,15 @@ import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
 import org.objectweb.asm.tree.analysis.SourceInterpreter
+import java.io.File
 
 class CatchBlockTransformer(private val owner: String,
                             private val mv: MethodVisitor,
-                            access: Int, name: String, descriptor: String, signature: String?, exceptions: Array<String>?)
+                            access: Int,
+                            name: String,
+                            descriptor: String,
+                            signature: String?,
+                            exceptions: Array<String>?)
     : MethodNode(ASM8, access, name, descriptor, signature, exceptions) {
     val modifiedInstructions = InsnList()
 
@@ -129,68 +134,72 @@ class CatchBlockTransformer(private val owner: String,
 
 //        modifiedInstructions.add(instructions)
 
-        val interpreter = SourceInterpreter()
-        val analyzer = DataFlowAnalyzer(interpreter)
-        val normalResult = analyzer.analyze(owner, this, false)
-        val exceptionResult = analyzer.analyze(owner, this, true)
-        val affectedVars = mutableSetOf<Int>()
-        for (index in normalResult.indices) {
-            if (normalResult[index] != null) {
-                for (localIndex in 0 until normalResult[index].locals) {
-                    val normalLocal = normalResult[index].getLocal(localIndex)
-                    val exceptionLocal = exceptionResult[index].getLocal(localIndex)
-                    if (normalLocal != exceptionLocal) {
-                        for (insn in normalLocal.insns) {
-                            if (insn is VarInsnNode) {
-                                affectedVars.add(insn.`var`)
+        if (tryCatchBlocks.isNotEmpty()) {
+            val interpreter = SourceInterpreter()
+            val analyzer = DataFlowAnalyzer(interpreter)
+            val normalResult = analyzer.analyze(owner, this, false)
+            val exceptionResult = analyzer.analyze(owner, this, true)
+            val affectedVars = mutableSetOf<Int>()
+            for (index in normalResult.indices) {
+                if (normalResult[index] != null) {
+                    for (localIndex in 0 until normalResult[index].locals) {
+                        val normalLocal = normalResult[index].getLocal(localIndex)
+                        val exceptionLocal = exceptionResult[index].getLocal(localIndex)
+                        if (normalLocal != exceptionLocal) {
+                            for (insn in normalLocal.insns) {
+                                if (insn is VarInsnNode) {
+                                    affectedVars.add(insn.`var`)
+                                }
                             }
                         }
                     }
                 }
             }
-        }
+            if (affectedVars.isNotEmpty()) {
+                dataFlowOutput.appendText("Method $owner:$name:$desc: [${affectedVars.joinToString(", ")}]\n")
+                println("Method $owner:$name:$desc: [${affectedVars.joinToString(", ")}]")
+            } else {
+                dataFlowOutput.appendText("Method $owner:$name:$desc: EMPTY\n")
+                println("Method $owner:$name:$desc: EMPTY")
+            }
+            if (exceptions.isNotEmpty()) {
 
-        if (affectedVars.isNotEmpty()) {
-            println("Method $owner:$name:$desc: [${affectedVars.joinToString(", ")}]")
-        }
-//        for (frame in result1) {
-//            for (i in 0 until frame.locals) {
+            }
+
+//            val instructionMap = analyzer.successors.map { entry ->
+//                Pair(instructions[entry.key], entry.value.map { instructions[it] }.toSet())
+//            }.toMap()
+//
+//            val processedHandlers = mutableSetOf<LabelNode>()
+//            for (tryCatchBlock in this.tryCatchBlocks) {
+//                if (tryCatchBlock.handler in processedHandlers) continue
+//                if (tryCatchBlock.type == null) continue
+//                processedHandlers.add(tryCatchBlock.handler)
+//                val tryReachedBlocks = computeReachBlocks(tryCatchBlock.start, instructionMap)
+//                val handlerReachedBlocks = computeReachBlocks(tryCatchBlock.handler, instructionMap)
+//                processCatchFrames(tryReachedBlocks, handlerReachedBlocks, instructionMap, tryCatchBlock.handler)
 //            }
-//        }
-//        val branchValues = mutableMapOf<AbstractInsnNode, DataFlowValue>()
-
-//        for (entry in analyzer.successors) {
-//            val insn = instructions[entry.key]
-//            entry.value.map { instructions[it] }
-//                .forEach {
-//                    branchValues.getOrPut(it) { DataFlowValue(null, null, mutableSetOf(), true) }
-//                        .merge( interpreter.values.getOrPut(insn) { DataFlowValue(null, null, mutableSetOf(), true) }) }
-//        }
-
-
-        val instructionMap = analyzer.successors.map { entry ->
-            Pair(instructions[entry.key], entry.value.map { instructions[it] }.toSet())
-        }.toMap()
-
-        val processedHandlers = mutableSetOf<LabelNode>()
-        for (tryCatchBlock in this.tryCatchBlocks) {
-            if (tryCatchBlock.handler in processedHandlers) continue
-            if (tryCatchBlock.type == null) continue
-            processedHandlers.add(tryCatchBlock.handler)
-            val tryReachedBlocks = computeReachBlocks(tryCatchBlock.start, instructionMap)
-            val handlerReachedBlocks = computeReachBlocks(tryCatchBlock.handler, instructionMap)
-            processCatchFrames(tryReachedBlocks, handlerReachedBlocks, instructionMap, tryCatchBlock.handler)
+//
+//            tryCatchBlocks?.addAll(0, newTryCatchBlocks)
         }
 
-        tryCatchBlocks?.addAll(0, newTryCatchBlocks)
+
+
 
         accept(mv)
     }
 
     companion object {
         var varIndex = 0
+        val dataFlowOutput = File("/tmp/data-flow.txt")
+        val exceptionOutput = File("/tmp/exception.txt")
         fun newLocalVar(): String {
             return "LOCAL_VAR_${varIndex++}"
         }
+
+        init {
+            dataFlowOutput.writeText("")
+        }
+
     }
 }

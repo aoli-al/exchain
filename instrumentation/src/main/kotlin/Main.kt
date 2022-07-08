@@ -18,34 +18,37 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
         .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
         .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
         .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
-        .with(object: AgentBuilder.Listener.Adapter() {
-            override fun onTransformation(
-                typeDescription: TypeDescription,
-                classLoader: ClassLoader?,
-                module: JavaModule?,
-                loaded: Boolean,
-                dynamicType: DynamicType
-            ) {
-                super.onTransformation(typeDescription, classLoader, module, loaded, dynamicType)
-                File("/tmp/${dynamicType.typeDescription.typeName}.class").writeBytes(dynamicType.bytes)
-            }
-        })
+//        .with(object: AgentBuilder.Listener.Adapter() {
+//            override fun onTransformation(
+//                typeDescription: TypeDescription,
+//                classLoader: ClassLoader?,
+//                module: JavaModule?,
+//                loaded: Boolean,
+//                dynamicType: DynamicType
+//            ) {
+//                super.onTransformation(typeDescription, classLoader, module, loaded, dynamicType)
+//                File("/tmp/${dynamicType.typeDescription.typeName}.class").writeBytes(dynamicType.bytes)
+//            }
+//        })
         .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly())
         .disableClassFormatChanges()
-//        .type(nameStartsWith("org.apache.fineract.accounting.closure.service.GLClosureWritePlatformServiceJpaRepositoryImpl"))
-        .type(nameStartsWith<TypeDescription>("org.apache.fineract")
-            .or(nameStartsWith("org.springframework.cglib.proxy"))
-            .or(nameStartsWith("org.glassfish.jersey.servlet"))
-            .or(nameStartsWith("org.apache.catalina.core"))
-            .or(nameStartsWith<TypeDescription>("al.aoli.exception.demo"))
-            .and(not(nameContains("FastClassBySpringCGLIB")))
-            .and(not(nameContains("\$Proxy")))
-//            .or(nameStartsWith("org.springframework"))
-//            .or(nameStartsWith("org.apache.catalina"))
-        )
-//        .type(not(nameStartsWith<TypeDescription>("al.aoli")
-//            .or(nameStartsWith("java.util"))
-//            .or(nameStartsWith("java.lang"))))
+        .type(not(
+            nameStartsWith<TypeDescription>("java")
+                .or(nameStartsWith("jdk"))
+                .or(nameStartsWith("com.sun"))
+                .or(nameStartsWith("net.bytebuddy"))
+                .or(nameStartsWith("org.objectweb"))
+                .or(nameStartsWith("shadow.asm"))
+                .or(nameStartsWith("kotlin"))
+                .or(nameStartsWith("al.aoli.exception.instrumentation"))))
+//        .type(nameStartsWith<TypeDescription>("org.apache.fineract")
+//            .or(nameStartsWith("org.springframework.cglib.proxy"))
+//            .or(nameStartsWith("org.glassfish.jersey.servlet"))
+//            .or(nameStartsWith("org.apache.catalina.core"))
+//            .or(nameStartsWith<TypeDescription>("al.aoli.exception.demo"))
+//            .and(not(nameContains("FastClassBySpringCGLIB")))
+//            .and(not(nameContains("\$Proxy")))
+//        )
 //        .transform(
 //            AgentBuilder.Transformer.ForAdvice().advice(not(isConstructor()), ExceptionAdvices::class.java.name))
         .transform { builder, type, _, _ ->

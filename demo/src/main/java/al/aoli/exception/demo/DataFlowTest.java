@@ -1,8 +1,36 @@
 package al.aoli.exception.demo;
 
 import java.util.Random;
+import java.util.zip.DataFormatException;
 
 public class DataFlowTest {
+
+    public void scene7() throws DataFormatException {
+        throw new DataFormatException("123");
+    }
+
+    public static class Dummy {
+        void foo() {}
+    }
+
+
+
+    public void scene6() {
+        Dummy f = new Dummy();
+        try {
+            f.foo();
+            functionWithParameter(a);
+            functionWithException();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            e.printStackTrace();
+        }
+        System.out.println(a);
+    }
+
+    public void functionWithParameter(int a) {}
+
+
     public void scene2() {
         int count = 0;
         while (count < 50) {
@@ -57,6 +85,7 @@ public class DataFlowTest {
     int getB() {
         return 0;
     }
+
 
     public void scene3() {
         try {

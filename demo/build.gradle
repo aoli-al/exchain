@@ -24,7 +24,7 @@ application {
 }
 
 run {
-    dependsOn ":instrumentation:jar"
+    dependsOn ":instrumentation:shadowJar"
     var p = project(":instrumentation")
     jvmArgs "-javaagent:${p.buildDir}/libs/${p.name}.jar"
 }
