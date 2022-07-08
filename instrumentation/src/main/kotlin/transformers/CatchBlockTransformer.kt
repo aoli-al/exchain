@@ -133,6 +133,7 @@ class CatchBlockTransformer(private val owner: String,
         super.visitEnd()
 
 //        modifiedInstructions.add(instructions)
+        val functionName = "$owner:$name:$desc"
 
         if (tryCatchBlocks.isNotEmpty()) {
             val interpreter = SourceInterpreter()
@@ -155,15 +156,13 @@ class CatchBlockTransformer(private val owner: String,
                     }
                 }
             }
-            if (affectedVars.isNotEmpty()) {
-                dataFlowOutput.appendText("Method $owner:$name:$desc: [${affectedVars.joinToString(", ")}]\n")
-                println("Method $owner:$name:$desc: [${affectedVars.joinToString(", ")}]")
-            } else {
-                dataFlowOutput.appendText("Method $owner:$name:$desc: EMPTY\n")
-                println("Method $owner:$name:$desc: EMPTY")
-            }
-            if (exceptions.isNotEmpty()) {
 
+            if (affectedVars.isNotEmpty()) {
+                dataFlowOutput.appendText("Method $functionName: [${affectedVars.joinToString(", ")}]\n")
+                println("Method : [${affectedVars.joinToString(", ")}]")
+            } else {
+                dataFlowOutput.appendText("Method $functionName: EMPTY\n")
+                println("Method $owner:$name:$desc: EMPTY")
             }
 
 //            val instructionMap = analyzer.successors.map { entry ->
@@ -184,6 +183,9 @@ class CatchBlockTransformer(private val owner: String,
         }
 
 
+        if (exceptions.isNotEmpty()) {
+            exceptionOutput.appendText("Method $functionName: [${exceptions.joinToString(", ")}]\n")
+        }
 
 
         accept(mv)
@@ -199,6 +201,7 @@ class CatchBlockTransformer(private val owner: String,
 
         init {
             dataFlowOutput.writeText("")
+            exceptionOutput.writeText("")
         }
 
     }

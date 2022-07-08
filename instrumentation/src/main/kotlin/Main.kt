@@ -3,6 +3,7 @@ package al.aoli.exception.instrumentation
 import al.aoli.exception.instrumentation.runtime.ExceptionAdvices
 import al.aoli.exception.instrumentation.transformers.TryCatchBlockTransformer
 import net.bytebuddy.agent.builder.AgentBuilder
+import net.bytebuddy.asm.Advice
 import net.bytebuddy.asm.AsmVisitorWrapper
 import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.dynamic.DynamicType
@@ -53,6 +54,7 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
 //            AgentBuilder.Transformer.ForAdvice().advice(not(isConstructor()), ExceptionAdvices::class.java.name))
         .transform { builder, type, _, _ ->
             builder
+                .visit(Advice.to(ExceptionAdvices::class.java).on(isMethod()))
                 .visit(
                     AsmVisitorWrapper.ForDeclaredMethods()
                         .writerFlags(ClassWriter.COMPUTE_MAXS or ClassWriter.COMPUTE_FRAMES)
@@ -60,5 +62,6 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
                         .invokable(any(), TryCatchBlockTransformer(type.typeName))
                 )
         }
+
         .installOn(instrumentation)
 }

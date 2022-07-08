@@ -3,7 +3,7 @@
 
 unaffected_count = 0
 affected_count = 0
-with open("/tmp/stats.txt") as f:
+with open("/tmp/data-flow.txt") as f:
     for line in f:
         if "EMPTY" in line:
             unaffected_count += 1

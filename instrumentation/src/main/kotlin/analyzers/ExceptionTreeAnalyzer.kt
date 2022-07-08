@@ -1,10 +1,47 @@
 package al.aoli.exception.instrumentation.analyzers
 
+import java.io.File
+
 object ExceptionTreeAnalyzer {
     private val DUMMY = Node(Throwable("dummy"), "")
 
     private val exceptionStack = mutableListOf(DUMMY)
     private val caughtExceptions = mutableListOf(DUMMY)
+    private val output = File("/tmp/enter.txt")
+    private val visitedOrigins = mutableSetOf<String>()
+
+    init {
+        output.writeText("")
+    }
+
+    fun methodEnter(origin: String) {
+        if (origin in visitedOrigins) return
+        visitedOrigins.add(origin)
+        val data = origin.split("@")
+
+        val clazz = Class.forName(data[0])
+
+        for (method in clazz.declaredMethods) {
+//            if (method.name == results[1] && method.para)
+            if (data[1] == method.name) {
+//                method.isAccessible = true
+                println(method)
+                method.toString()
+
+                val params = method.parameterTypes.joinToString(",") { it.name }
+
+                if ("($params)" == data[2]) {
+                    val exceptions = method.exceptionTypes.joinToString(",") { it.name }
+                    output.appendText("Enter: ${data[0]}.${data[1]}${data[2]}, throws: [$exceptions]\n")
+                    return
+                }
+            }
+        }
+
+        output.appendText("Error: cannot find method with origin: $origin\n")
+
+    }
+
 
     fun push(throwable: Throwable, origin: String): Boolean {
         if (throwable == exceptionStack.last().throwable) return false

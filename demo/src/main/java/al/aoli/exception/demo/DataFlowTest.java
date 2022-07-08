@@ -6,11 +6,36 @@ import java.util.zip.DataFormatException;
 public class DataFlowTest {
 
     public void scene7() throws DataFormatException {
-        throw new DataFormatException("123");
+        Dummy dummy = new Dummy();
+        dummy.complex(new Dummy(), null, null, 0);
     }
 
-    public static class Dummy {
+    public static class Base {
+        void bar() {
+        }
+
+        void test(Dummy d) throws DataFormatException {
+            d.bar();
+            testInternal();
+        }
+
+        private void testInternal() throws DataFormatException {
+            throw new DataFormatException("123");
+        }
+
+    }
+
+    public static class Dummy extends Base {
         void foo() {}
+        @Override
+        void test(Dummy d) throws DataFormatException {
+            super.test(d);
+        }
+
+        void complex(Dummy d, String[][] a, String[][][] b, int c) throws DataFormatException {
+            test(d);
+        }
+
     }
 
 
