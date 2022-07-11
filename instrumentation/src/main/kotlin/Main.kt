@@ -1,6 +1,8 @@
 package al.aoli.exception.instrumentation
 
 import al.aoli.exception.instrumentation.runtime.ExceptionAdvices
+import al.aoli.exception.instrumentation.server.ExceptionService
+import al.aoli.exception.instrumentation.server.ExceptionServiceImpl
 import al.aoli.exception.instrumentation.transformers.TryCatchBlockTransformer
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.asm.Advice
@@ -13,6 +15,8 @@ import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import java.io.File
 import java.lang.instrument.Instrumentation
+import java.rmi.registry.LocateRegistry
+import java.rmi.server.UnicastRemoteObject
 
 fun premain(arguments: String?, instrumentation: Instrumentation) {
     AgentBuilder.Default()
@@ -31,7 +35,7 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
 //                File("/tmp/${dynamicType.typeDescription.typeName}.class").writeBytes(dynamicType.bytes)
 //            }
 //        })
-        .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly())
+//        .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly())
         .disableClassFormatChanges()
         .type(not(
             nameStartsWith<TypeDescription>("java")
@@ -41,17 +45,21 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
                 .or(nameStartsWith("org.objectweb"))
                 .or(nameStartsWith("shadow.asm"))
                 .or(nameStartsWith("kotlin"))
-                .or(nameStartsWith("al.aoli.exception.instrumentation"))))
+                .or(nameStartsWith("al.aoli.exception.instrumentation"))
+                .or(nameStartsWith("org.quartz"))
+                .or(nameStartsWith("com.intellij"))
+                .or(nameContains("FastClassBySpringCGLIB"))
+                .or(nameContains("\$Proxy")))
+        )
+
 //        .type(nameStartsWith<TypeDescription>("org.apache.fineract")
 //            .or(nameStartsWith("org.springframework.cglib.proxy"))
 //            .or(nameStartsWith("org.glassfish.jersey.servlet"))
 //            .or(nameStartsWith("org.apache.catalina.core"))
 //            .or(nameStartsWith<TypeDescription>("al.aoli.exception.demo"))
-//            .and(not(nameContains("FastClassBySpringCGLIB")))
+//            .and(not(nameContains("")))
 //            .and(not(nameContains("\$Proxy")))
 //        )
-//        .transform(
-//            AgentBuilder.Transformer.ForAdvice().advice(not(isConstructor()), ExceptionAdvices::class.java.name))
         .transform { builder, type, _, _ ->
             builder
                 .visit(Advice.to(ExceptionAdvices::class.java).on(isMethod()))
@@ -64,4 +72,8 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
         }
 
         .installOn(instrumentation)
+
+    LocateRegistry.createRegistry(9898).bind(
+        ExceptionService::class.simpleName, UnicastRemoteObject.exportObject(
+            ExceptionServiceImpl, 0))
 }

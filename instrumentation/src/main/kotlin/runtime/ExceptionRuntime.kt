@@ -1,24 +1,34 @@
 package al.aoli.exception.instrumentation.runtime
 
+import al.aoli.exception.instrumentation.runtime.exceptions.ExceptionInjector
+import al.aoli.exception.instrumentation.server.ExceptionServiceImpl
+
 object ExceptionRuntime {
 
     @JvmStatic
     fun onException(e: Throwable, origin: String) {
-        ExceptionTreeAnalyzer.push(e, origin)
+        if (!ExceptionServiceImpl.started) return
+        ExceptionInjector.thrownExceptions(e)
+//        ExceptionTreeAnalyzer.push(e, origin)
     }
 
     @JvmStatic
     fun onCatch() {
-        ExceptionTreeAnalyzer.catchEnd()
+        if (!ExceptionServiceImpl.started) return
+//        ExceptionTreeAnalyzer.catchEnd()
     }
 
     @JvmStatic
     fun onCatchBegin(e: Throwable) {
-        ExceptionTreeAnalyzer.exceptionCaught(e)
+        if (!ExceptionServiceImpl.started) return
+        ExceptionInjector.thrownExceptions(e)
+//        ExceptionTreeAnalyzer.exceptionCaught(e)
     }
 
     @JvmStatic
     fun onCatchWithException(e: Throwable, origin: String) {
-        ExceptionTreeAnalyzer.catchWithException(e, origin)
+        if (!ExceptionServiceImpl.started) return
+        ExceptionInjector.thrownExceptions(e)
+//        ExceptionTreeAnalyzer.catchWithException(e, origin)
     }
 }

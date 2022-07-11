@@ -6,7 +6,7 @@ import net.bytebuddy.description.type.TypeDescription
 import net.bytebuddy.implementation.Implementation
 import net.bytebuddy.pool.TypePool
 import org.objectweb.asm.MethodVisitor
-class TryCatchBlockTransformer(val typeName: String): AsmVisitorWrapper.ForDeclaredMethods.MethodVisitorWrapper {
+class TryCatchBlockTransformer(private val typeName: String): AsmVisitorWrapper.ForDeclaredMethods.MethodVisitorWrapper {
     override fun wrap(
         instrumentedType: TypeDescription,
         instrumentedMethod: MethodDescription,
@@ -20,8 +20,8 @@ class TryCatchBlockTransformer(val typeName: String): AsmVisitorWrapper.ForDecla
         val name = instrumentedMethod.name
         val descriptor = instrumentedMethod.descriptor
         return CatchBlockTransformer(typeName,
-            methodVisitor,
-//            TryBlockTransformer(typeName, methodVisitor, access, name, descriptor),
+//            methodVisitor,
+            TryBlockTransformer(typeName, methodVisitor, access, name, descriptor),
             access, name, descriptor, null,
             instrumentedMethod.exceptionTypes.asErasures().toInternalNames()
         )

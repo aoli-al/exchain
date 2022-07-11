@@ -131,7 +131,6 @@ class CatchBlockTransformer(private val owner: String,
     override fun visitEnd() {
         super.visitEnd()
 
-//        modifiedInstructions.add(instructions)
         val functionName = "$owner:$name:$desc"
 
         if (tryCatchBlocks.isNotEmpty()) {
@@ -158,33 +157,27 @@ class CatchBlockTransformer(private val owner: String,
 
             if (affectedVars.isNotEmpty()) {
                 dataFlowOutput.appendText("Method $functionName: [${affectedVars.joinToString(", ")}]\n")
-                println("Method : [${affectedVars.joinToString(", ")}]")
             } else {
                 dataFlowOutput.appendText("Method $functionName: EMPTY\n")
-                println("Method $owner:$name:$desc: EMPTY")
             }
 
-//            val instructionMap = analyzer.successors.map { entry ->
-//                Pair(instructions[entry.key], entry.value.map { instructions[it] }.toSet())
-//            }.toMap()
-//
-//            val processedHandlers = mutableSetOf<LabelNode>()
-//            for (tryCatchBlock in this.tryCatchBlocks) {
-//                if (tryCatchBlock.handler in processedHandlers) continue
-//                if (tryCatchBlock.type == null) continue
-//                processedHandlers.add(tryCatchBlock.handler)
-//                val tryReachedBlocks = computeReachBlocks(tryCatchBlock.start, instructionMap)
-//                val handlerReachedBlocks = computeReachBlocks(tryCatchBlock.handler, instructionMap)
-//                processCatchFrames(tryReachedBlocks, handlerReachedBlocks, instructionMap, tryCatchBlock.handler)
-//            }
-//
-//            tryCatchBlocks?.addAll(0, newTryCatchBlocks)
+            val instructionMap = analyzer.successors.map { entry ->
+                Pair(instructions[entry.key], entry.value.map { instructions[it] }.toSet())
+            }.toMap()
+
+            val processedHandlers = mutableSetOf<LabelNode>()
+            for (tryCatchBlock in this.tryCatchBlocks) {
+                if (tryCatchBlock.handler in processedHandlers) continue
+                if (tryCatchBlock.type == null) continue
+                processedHandlers.add(tryCatchBlock.handler)
+                val tryReachedBlocks = computeReachBlocks(tryCatchBlock.start, instructionMap)
+                val handlerReachedBlocks = computeReachBlocks(tryCatchBlock.handler, instructionMap)
+                processCatchFrames(tryReachedBlocks, handlerReachedBlocks, instructionMap, tryCatchBlock.handler)
+            }
+
+            tryCatchBlocks?.addAll(newTryCatchBlocks)
         }
 
-
-        if (exceptions.isNotEmpty()) {
-            exceptionOutput.appendText("Method $functionName: [${exceptions.joinToString(", ")}]\n")
-        }
 
 
         accept(mv)
@@ -193,14 +186,12 @@ class CatchBlockTransformer(private val owner: String,
     companion object {
         var varIndex = 0
         val dataFlowOutput = File("/tmp/data-flow.txt")
-        val exceptionOutput = File("/tmp/exception.txt")
         fun newLocalVar(): String {
             return "LOCAL_VAR_${varIndex++}"
         }
 
         init {
             dataFlowOutput.writeText("")
-            exceptionOutput.writeText("")
         }
 
     }
