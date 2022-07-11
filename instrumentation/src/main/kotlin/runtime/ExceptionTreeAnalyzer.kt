@@ -1,4 +1,4 @@
-package al.aoli.exception.instrumentation.analyzers
+package al.aoli.exception.instrumentation.runtime
 
 import java.io.File
 import java.lang.reflect.Method
@@ -38,9 +38,9 @@ object ExceptionTreeAnalyzer {
         caughtExceptions.add(exceptionStack.last())
     }
 
-    fun catchWithException(throwable: Throwable, origin: String) {
-        push(throwable, origin)
-        if (throwable != caughtExceptions.last().throwable) {
+    fun catchWithException(e: Throwable, origin: String) {
+        push(e, origin)
+        if (e != caughtExceptions.last().throwable) {
             val node = exceptionStack.removeAt(exceptionStack.size - 2)
             showDependency(node)
         }

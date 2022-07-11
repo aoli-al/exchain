@@ -1,6 +1,5 @@
 package al.aoli.exception.instrumentation.transformers
 
-import al.aoli.exception.instrumentation.analyzers.InstrumentationLabel
 import al.aoli.exception.instrumentation.runtime.ExceptionRuntime
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor

@@ -1,7 +1,5 @@
 package al.aoli.exception.instrumentation.runtime
 
-import al.aoli.exception.instrumentation.analyzers.ExceptionTreeAnalyzer
-
 object ExceptionRuntime {
 
     @JvmStatic

@@ -1,7 +1,6 @@
 package al.aoli.exception.instrumentation.transformers
 
 import al.aoli.exception.instrumentation.analyzers.DataFlowAnalyzer
-import al.aoli.exception.instrumentation.analyzers.InstrumentationLabel
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
