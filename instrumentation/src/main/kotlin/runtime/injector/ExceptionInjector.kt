@@ -1,44 +1,50 @@
 package al.aoli.exception.instrumentation.runtime.exceptions
 
-import al.aoli.exception.instrumentation.server.ExceptionServiceImpl
 import java.io.File
 import java.lang.reflect.Method
 import kotlin.random.Random
 
 object ExceptionInjector {
-    private const val generatorThreshold = 0.0
+//    private const val generatorThreshold = 1
+    private const val generatorThreshold = 0.05
+//    private const val generatorThreshold = 0
     private var exceptionThrown = false
     val caughtExceptions = mutableSetOf<Throwable>()
-    val output = File("/tmp/caught.txt")
+    val caughtLog = File("/tmp/caught.txt")
+    val injectionLog = File("/tmp/injection.txt")
+    val random = Random(System.currentTimeMillis())
 
     init {
-        output.writeText("")
+        caughtLog.writeText("")
+        injectionLog.writeText("")
     }
 
     fun methodEnter(origin: String, method: Method) {
-        try {
-            if (exceptionThrown) return
-            val generators = method.exceptionTypes
-                .filter { it in Generators.generators }
-                .map { Generators.generators[it]!! }
-                .toList()
+        if (exceptionThrown) return
+        val generators = method.exceptionTypes
+            .filter { it in Generators.generators }
+            .map { Generators.generators[it]!! }
+            .toList()
 
-            if (generators.isEmpty()) return
-            if (Random.nextDouble() < generatorThreshold) {
-                exceptionThrown = true
-                throw generators.random().generate()
-            }
-        } catch (thrown: Throwable) {
-            println("WHAT!, $thrown")
-            thrown.printStackTrace()
+        if (generators.isEmpty()) return
+        if (random.nextDouble() < generatorThreshold) {
+            exceptionThrown = true
+
+            val exception = generators.random(random).generate()
+            injectionLog.writeText("Exception injected: $exception at ${stackTraceToString(Thread.currentThread().stackTrace)}")
+            throw exception
         }
+    }
+
+    fun stackTraceToString(e: Array<StackTraceElement>): String {
+        return "<" + e.joinToString(",") + ">"
     }
 
     fun thrownExceptions(e: Throwable) {
         try {
             if (e in caughtExceptions) return
             caughtExceptions.add(e)
-            output.appendText("$e at ${e.stackTrace.firstOrNull()?.toString()}\n")
+            caughtLog.appendText("$e thrown at ${stackTraceToString(e.stackTrace)}\n")
         } catch (thrown: Throwable) {
             println("WHAT!, $thrown")
             thrown.printStackTrace()

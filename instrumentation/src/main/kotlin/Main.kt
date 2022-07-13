@@ -51,7 +51,6 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
                 .or(nameContains("FastClassBySpringCGLIB"))
                 .or(nameContains("\$Proxy")))
         )
-
 //        .type(nameStartsWith<TypeDescription>("org.apache.fineract")
 //            .or(nameStartsWith("org.springframework.cglib.proxy"))
 //            .or(nameStartsWith("org.glassfish.jersey.servlet"))
@@ -73,7 +72,11 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
 
         .installOn(instrumentation)
 
-    LocateRegistry.createRegistry(9898).bind(
-        ExceptionService::class.simpleName, UnicastRemoteObject.exportObject(
-            ExceptionServiceImpl, 0))
+    val t = Thread {
+//        println("what?")
+        LocateRegistry.createRegistry(9898).bind(
+            ExceptionService::class.simpleName, UnicastRemoteObject.exportObject(
+                ExceptionServiceImpl, 0))
+    }
+    t.start()
 }

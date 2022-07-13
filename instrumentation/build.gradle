@@ -1,9 +1,9 @@
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.7.0'
     id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "java"
 }
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
 
 group 'al.aoli.exception.instrumentation'
 version 'unspecified'
@@ -49,3 +49,10 @@ shadowJar {
 
     relocate 'org.objectweb.asm', 'shadow.asm'
 }
+
+task startInstrumentation(dependsOn: 'classes', type: JavaExec) {
+    mainClass = "al.aoli.exception.instrumentation.DoIntegrationTestKt"
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+

@@ -1,5 +1,7 @@
 package al.aoli.exception.demo;
 
+import java.io.IOException;
+
 public class ControlFlowTest {
 
     public String scene16() {
@@ -12,6 +14,19 @@ public class ControlFlowTest {
             }
         }
         return null;
+    }
+
+    public void scene17() {
+        try {
+            String value = getString();
+            System.out.println("123");
+        } catch (IOException e) {
+            System.out.println("Exception!");
+        }
+    }
+
+    public String getString() throws IOException {
+        return "123";
     }
 
 
