@@ -16,7 +16,7 @@ def read_exception_data(path: str) -> Dict[str, List[str]]:
 if __name__=="__main__":
     normal = read_exception_data("data/no_injection")
     #  for i in range(20):
-    i = 2
+    i = 0
     case = read_exception_data(f"data/injection_{i}")
     diff = case.keys() - normal.keys()
     print(diff)
