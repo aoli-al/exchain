@@ -23,18 +23,18 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
         .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
         .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
         .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
-//        .with(object: AgentBuilder.Listener.Adapter() {
-//            override fun onTransformation(
-//                typeDescription: TypeDescription,
-//                classLoader: ClassLoader?,
-//                module: JavaModule?,
-//                loaded: Boolean,
-//                dynamicType: DynamicType
-//            ) {
-//                super.onTransformation(typeDescription, classLoader, module, loaded, dynamicType)
-//                File("/tmp/${dynamicType.typeDescription.typeName}.class").writeBytes(dynamicType.bytes)
-//            }
-//        })
+        .with(object: AgentBuilder.Listener.Adapter() {
+            override fun onTransformation(
+                typeDescription: TypeDescription,
+                classLoader: ClassLoader?,
+                module: JavaModule?,
+                loaded: Boolean,
+                dynamicType: DynamicType
+            ) {
+                super.onTransformation(typeDescription, classLoader, module, loaded, dynamicType)
+                File("/tmp/${dynamicType.typeDescription.typeName}.class").writeBytes(dynamicType.bytes)
+            }
+        })
 //        .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly())
         .disableClassFormatChanges()
         .type(not(
@@ -72,11 +72,11 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
 
         .installOn(instrumentation)
 
-    val t = Thread {
-//        println("what?")
-        LocateRegistry.createRegistry(9898).bind(
-            ExceptionService::class.simpleName, UnicastRemoteObject.exportObject(
-                ExceptionServiceImpl, 0))
-    }
-    t.start()
+//    val t = Thread {
+////        println("what?")
+//        LocateRegistry.createRegistry(9898).bind(
+//            ExceptionService::class.simpleName, UnicastRemoteObject.exportObject(
+//                ExceptionServiceImpl, 0))
+//    }
+//    t.start()
 }

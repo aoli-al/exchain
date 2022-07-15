@@ -25,6 +25,9 @@ application {
 
 run {
     dependsOn ":instrumentation:shadowJar"
-    var p = project(":instrumentation")
-    jvmArgs "-javaagent:${p.buildDir}/libs/${p.name}.jar"
+    dependsOn ":native:build"
+    var instrumentation = project(":instrumentation")
+    jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
+    var nat= project(":native")
+    jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.so"
 }

@@ -2,6 +2,7 @@ package al.aoli.exception.instrumentation.runtime
 
 import al.aoli.exception.instrumentation.runtime.exceptions.ExceptionInjector
 import al.aoli.exception.instrumentation.server.ExceptionServiceImpl
+import java.lang.reflect.Method
 
 object ExceptionRuntime {
 
@@ -30,5 +31,9 @@ object ExceptionRuntime {
         if (!ExceptionServiceImpl.started) return
         ExceptionInjector.thrownExceptions(e)
 //        ExceptionTreeAnalyzer.catchWithException(e, origin)
+    }
+
+    @JvmStatic
+    fun onExceptionStackInfo(method: Array<Method>, loc: Array<Int>) {
     }
 }

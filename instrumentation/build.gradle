@@ -35,13 +35,6 @@ jar {
     }
 }
 
-//task relocateShadowJar(type: ConfigureShadowRelocation) {
-//    target = tasks.shadowJar
-//
-//}
-//
-//tasks.shadowJar.dependsOn tasks.relocateShadowJar
-
 shadowJar {
     archiveBaseName.set('instrumentation')
     archiveClassifier.set('')

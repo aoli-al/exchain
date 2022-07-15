@@ -4,6 +4,7 @@ import al.aoli.exception.instrumentation.analyzers.DataFlowAnalyzer
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
+import org.objectweb.asm.tree.analysis.BasicInterpreter
 import org.objectweb.asm.tree.analysis.SourceInterpreter
 import java.io.File
 
@@ -134,32 +135,32 @@ class CatchBlockTransformer(private val owner: String,
         val functionName = "$owner:$name:$desc"
 
         if (tryCatchBlocks.isNotEmpty()) {
-            val interpreter = SourceInterpreter()
-            val analyzer = DataFlowAnalyzer(interpreter)
-            val normalResult = analyzer.analyze(owner, this, false)
-            val exceptionResult = analyzer.analyze(owner, this, true)
-            val affectedVars = mutableSetOf<Int>()
-            for (index in normalResult.indices) {
-                if (normalResult[index] != null) {
-                    for (localIndex in 0 until normalResult[index].locals) {
-                        val normalLocal = normalResult[index].getLocal(localIndex)
-                        val exceptionLocal = exceptionResult[index].getLocal(localIndex)
-                        if (normalLocal != exceptionLocal) {
-                            for (insn in normalLocal.insns) {
-                                if (insn is VarInsnNode) {
-                                    affectedVars.add(insn.`var`)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (affectedVars.isNotEmpty()) {
-                dataFlowOutput.appendText("Method $functionName: [${affectedVars.joinToString(", ")}]\n")
-            } else {
-                dataFlowOutput.appendText("Method $functionName: EMPTY\n")
-            }
+            val analyzer = DataFlowAnalyzer(BasicInterpreter())
+            // DON'T RUN analyzer twice! It will modify the successors!
+            analyzer.analyze(owner, this, false)
+//            val exceptionResult = analyzer.analyze(owner, this, true)
+//            val affectedVars = mutableSetOf<Int>()
+//            for (index in normalResult.indices) {
+//                if (normalResult[index] != null) {
+//                    for (localIndex in 0 until normalResult[index].locals) {
+//                        val normalLocal = normalResult[index].getLocal(localIndex)
+//                        val exceptionLocal = exceptionResult[index].getLocal(localIndex)
+//                        if (normalLocal != exceptionLocal) {
+//                            for (insn in normalLocal.insns) {
+//                                if (insn is VarInsnNode) {
+//                                    affectedVars.add(insn.`var`)
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//
+//            if (affectedVars.isNotEmpty()) {
+//                dataFlowOutput.appendText("Method $functionName: [${affectedVars.joinToString(", ")}]\n")
+//            } else {
+//                dataFlowOutput.appendText("Method $functionName: EMPTY\n")
+//            }
 
             val instructionMap = analyzer.successors.map { entry ->
                 Pair(instructions[entry.key], entry.value.map { instructions[it] }.toSet())

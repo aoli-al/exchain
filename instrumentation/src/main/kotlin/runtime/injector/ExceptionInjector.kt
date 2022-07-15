@@ -6,8 +6,8 @@ import kotlin.random.Random
 
 object ExceptionInjector {
 //    private const val generatorThreshold = 1
-    private const val generatorThreshold = 0.05
-//    private const val generatorThreshold = 0
+//    private const val generatorThreshold = 0.05
+    private const val generatorThreshold = 0
     private var exceptionThrown = false
     val caughtExceptions = mutableSetOf<Throwable>()
     val caughtLog = File("/tmp/caught.txt")

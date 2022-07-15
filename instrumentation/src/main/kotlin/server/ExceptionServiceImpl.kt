@@ -9,8 +9,8 @@ interface ExceptionService: Remote {
 }
 
 object ExceptionServiceImpl: ExceptionService {
-    var started = false
-//    var started = true
+//    var started = false
+    var started = true
     override fun start() {
         started = true
     }
