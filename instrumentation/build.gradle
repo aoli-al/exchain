@@ -48,11 +48,12 @@ shadowJar {
     archiveVersion.set('')
 
     relocate 'org.objectweb.asm', 'shadow.asm'
+    dependsOn ':native:linkDebug'
 }
+
 
 task startInstrumentation(dependsOn: 'classes', type: JavaExec) {
     mainClass = "al.aoli.exception.instrumentation.DoIntegrationTestKt"
     classpath = sourceSets.main.runtimeClasspath
 }
-
 
