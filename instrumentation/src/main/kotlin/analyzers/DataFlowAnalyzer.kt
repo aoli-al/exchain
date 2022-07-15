@@ -1,4 +1,4 @@
-package al.aoli.exception.instrumentation.analyzers
+package al.aoli.exchain.instrumentation.analyzers
 
 import org.objectweb.asm.tree.MethodNode
 import org.objectweb.asm.tree.TryCatchBlockNode

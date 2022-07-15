@@ -1,7 +1,6 @@
-package al.aoli.exception.demo;
+package al.aoli.exchain.demo;
 
 import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
 import java.util.zip.DataFormatException;
 
 public class Main {

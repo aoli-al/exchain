@@ -5,7 +5,7 @@ plugins {
 }
 
 
-group 'al.aoli.exception.instrumentation'
+group 'al.aoli.exchain.instrumentation'
 version 'unspecified'
 
 repositories {
@@ -29,7 +29,7 @@ test {
 jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
     manifest {
-        attributes 'Premain-Class': "al.aoli.exception.instrumentation.MainKt"
+        attributes 'Premain-Class': "al.aoli.exchain.instrumentation.MainKt"
         attributes 'Can-Redefine-Classes': true
         attributes 'Can-Retransform-Classes': true
     }
@@ -46,7 +46,7 @@ shadowJar {
 
 
 task startInstrumentation(dependsOn: 'classes', type: JavaExec) {
-    mainClass = "al.aoli.exception.instrumentation.DoIntegrationTestKt"
+    mainClass = "al.aoli.exchain.instrumentation.DoIntegrationTestKt"
     classpath = sourceSets.main.runtimeClasspath
 }
 

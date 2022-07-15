@@ -1,4 +1,4 @@
-import al.aoli.exception.instrumentation.runtime.AffectedVariableAnalyzer;
+import al.aoli.exchain.instrumentation.runtime.AffectedVariableAnalyzer;
 import org.junit.jupiter.api.Test;
 
 public class AffectedVariableAnalyzerTest {

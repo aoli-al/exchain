@@ -1,4 +1,4 @@
-package al.aoli.exception.instrumentation.server
+package al.aoli.exchain.instrumentation.server
 
 import java.rmi.Remote
 import java.rmi.RemoteException

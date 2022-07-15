@@ -1,7 +1,6 @@
-package al.aoli.exception.instrumentation
+package al.aoli.exchain.instrumentation
 
-import al.aoli.exception.instrumentation.server.ExceptionService
-import al.aoli.exception.instrumentation.server.ExceptionServiceImpl
+import al.aoli.exchain.instrumentation.server.ExceptionService
 import java.rmi.registry.LocateRegistry
 
 fun main() {

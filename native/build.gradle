@@ -4,7 +4,7 @@ plugins {
     id 'cpp-library'
 }
 
-group 'al.aoli.exception.native'
+group 'al.aoli.exchain.native'
 version 'unspecified'
 
 library {

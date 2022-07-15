@@ -3,7 +3,7 @@ plugins {
     id 'application'
 }
 
-group 'al.aoli.exception.demo'
+group 'al.aoli.exchain.demo'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -20,7 +20,7 @@ test {
 }
 
 application {
-    mainClass = 'al.aoli.exception.demo.Main'
+    mainClass = 'al.aoli.exchain.demo.Main'
 }
 
 run {
