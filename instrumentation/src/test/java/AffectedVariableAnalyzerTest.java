@@ -1,4 +1,4 @@
-import al.aoli.exchain.instrumentation.runtime.AffectedVariableAnalyzer;
+import al.aoli.exchain.instrumentation.analyzers.AffectedVarDriver;
 import org.junit.jupiter.api.Test;
 
 public class AffectedVariableAnalyzerTest {
@@ -22,6 +22,8 @@ public class AffectedVariableAnalyzerTest {
 
     @Test
     void testLoadClass() {
-        AffectedVariableAnalyzer.INSTANCE.analyzeAffectedVar(Dummy.class);
+        AffectedVarDriver.INSTANCE.analyzeAffectedVar(
+                Dummy.class, "test()V",
+                );
     }
 }
