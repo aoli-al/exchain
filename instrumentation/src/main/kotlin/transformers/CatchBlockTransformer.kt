@@ -1,6 +1,7 @@
 package al.aoli.exchain.instrumentation.transformers
 
 import al.aoli.exchain.instrumentation.analyzers.DataFlowAnalyzer
+import al.aoli.exchain.instrumentation.analyzers.ExceptionFlowAnalyzer
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
@@ -116,25 +117,13 @@ class CatchBlockTransformer(private val owner: String,
 
     private val newTryCatchBlocks = ArrayList<TryCatchBlockNode>()
 
-    private fun computeReachBlocks(inst: AbstractInsnNode, instructionMap: Map<AbstractInsnNode, Set<AbstractInsnNode>>): Set<AbstractInsnNode> {
-        val workItems = mutableListOf(inst)
-        val reachedBlocks = mutableSetOf<AbstractInsnNode>()
-        while (workItems.isNotEmpty()) {
-            val currentInstruction = workItems.removeFirst()
-            if (currentInstruction in reachedBlocks) continue
-            reachedBlocks.add(currentInstruction)
-            workItems.addAll(instructionMap.getOrDefault(currentInstruction, emptySet()))
-        }
-        return reachedBlocks
-    }
-
     override fun visitEnd() {
         super.visitEnd()
 
         val functionName = "$owner:$name:$desc"
 
         if (tryCatchBlocks.isNotEmpty()) {
-            val analyzer = DataFlowAnalyzer(BasicInterpreter())
+            val analyzer = ExceptionFlowAnalyzer(instructions, BasicInterpreter())
             // DON'T RUN analyzer twice! It will modify the successors!
             analyzer.analyze(owner, this, false)
 //            val exceptionResult = analyzer.analyze(owner, this, true)
@@ -161,18 +150,15 @@ class CatchBlockTransformer(private val owner: String,
 //                dataFlowOutput.appendText("Method $functionName: EMPTY\n")
 //            }
 
-            val instructionMap = analyzer.successors.map { entry ->
-                Pair(instructions[entry.key], entry.value.map { instructions[it] }.toSet())
-            }.toMap()
 
             val processedHandlers = mutableSetOf<LabelNode>()
             for (tryCatchBlock in this.tryCatchBlocks) {
                 if (tryCatchBlock.handler in processedHandlers) continue
                 if (tryCatchBlock.type == null) continue
                 processedHandlers.add(tryCatchBlock.handler)
-                val tryReachedBlocks = computeReachBlocks(tryCatchBlock.start, instructionMap)
-                val handlerReachedBlocks = computeReachBlocks(tryCatchBlock.handler, instructionMap)
-                processCatchFrames(tryReachedBlocks, handlerReachedBlocks, instructionMap, tryCatchBlock.handler)
+                val tryReachedBlocks = analyzer.reachableBlocks(tryCatchBlock.start)
+                val handlerReachedBlocks = analyzer.reachableBlocks(tryCatchBlock.handler)
+                processCatchFrames(tryReachedBlocks, handlerReachedBlocks, analyzer.instructionSuccessors, tryCatchBlock.handler)
             }
 
             tryCatchBlocks?.addAll(newTryCatchBlocks)

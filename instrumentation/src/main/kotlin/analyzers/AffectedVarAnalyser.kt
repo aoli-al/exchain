@@ -1,15 +1,19 @@
 package al.aoli.exchain.instrumentation.analyzers
 
+import org.objectweb.asm.tree.AbstractInsnNode
+import org.objectweb.asm.tree.InsnList
+import org.objectweb.asm.tree.InsnNode
 import org.objectweb.asm.tree.TryCatchBlockNode
 import org.objectweb.asm.tree.analysis.Analyzer
 import org.objectweb.asm.tree.analysis.Interpreter
 import org.objectweb.asm.tree.analysis.Value
 
-class AffectedVarAnalyser<V: Value>(interpreter: Interpreter<V>, val throwIndex: Int, val catchIndex: Int) :
-    Analyzer<V>(interpreter) {
+class AffectedVarAnalyser<V: Value>(insnList: InsnList, interpreter: Interpreter<V>, val throwInsn: AbstractInsnNode, val catchInsn: AbstractInsnNode?) :
+    DataFlowAnalyzer<V>(insnList, interpreter) {
 
     override fun newControlFlowExceptionEdge(insnIndex: Int, successorIndex: Int): Boolean {
-        return throwIndex == insnIndex && successorIndex == catchIndex
+        if (catchInsn == null) return false
+        return instructions[insnIndex] == throwInsn && instructions[successorIndex] == catchInsn
     }
 
     override fun newControlFlowExceptionEdge(insnIndex: Int, tryCatchBlock: TryCatchBlockNode?): Boolean {

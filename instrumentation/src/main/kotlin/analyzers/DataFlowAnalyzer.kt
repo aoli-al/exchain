@@ -1,39 +1,36 @@
 package al.aoli.exchain.instrumentation.analyzers
 
+import org.objectweb.asm.tree.AbstractInsnNode
+import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.MethodNode
-import org.objectweb.asm.tree.TryCatchBlockNode
 import org.objectweb.asm.tree.analysis.Analyzer
 import org.objectweb.asm.tree.analysis.Frame
 import org.objectweb.asm.tree.analysis.Interpreter
 import org.objectweb.asm.tree.analysis.Value
 
-class DataFlowAnalyzer<V: Value>(interpreter: Interpreter<V>): Analyzer<V>(interpreter) {
-    val successors = mutableMapOf<Int, MutableSet<Int>>()
+open class DataFlowAnalyzer<V: Value>(val instructions: InsnList, interpreter: Interpreter<V>): Analyzer<V>(interpreter) {
+    val indexSuccessors = mutableMapOf<Int, MutableSet<Int>>()
+    val instructionSuccessors = mutableMapOf<AbstractInsnNode, MutableSet<AbstractInsnNode>>()
     val predecessors = mutableMapOf<Int, MutableSet<Int>>()
-    private var includeCatchBlock = false
-    private var method: MethodNode? = null
+
+    fun reachableBlocks(from: AbstractInsnNode): Set<AbstractInsnNode> {
+        val workItems = mutableListOf(from)
+        val reachedBlocks = mutableSetOf<AbstractInsnNode>()
+        while (workItems.isNotEmpty()) {
+            val currentInstruction = workItems.removeFirst()
+            if (currentInstruction in reachedBlocks) continue
+            reachedBlocks.add(currentInstruction)
+            workItems.addAll(instructionSuccessors.getOrDefault(currentInstruction, emptySet()))
+        }
+        return reachedBlocks
+    }
+
+
     override fun newControlFlowEdge(insnIndex: Int, successorIndex: Int) {
-        successors.getOrPut(insnIndex) { mutableSetOf() }.add(successorIndex)
+        indexSuccessors.getOrPut(insnIndex) { mutableSetOf() }.add(successorIndex)
+        instructionSuccessors.getOrPut(instructions[insnIndex]) { mutableSetOf() }
+            .add(instructions[successorIndex])
         super.newControlFlowEdge(insnIndex, successorIndex)
     }
 
-    fun analyze(owner: String?, method: MethodNode?, enableException: Boolean = false): Array<Frame<V>> {
-        this.method = method
-        includeCatchBlock = enableException
-        return analyze(owner, method)
-    }
-
-    override fun newControlFlowExceptionEdge(insnIndex: Int, tryCatchBlock: TryCatchBlockNode?): Boolean {
-        if (includeCatchBlock) {
-            val insn = method?.instructions?.get(insnIndex)!!
-            return when (insn.opcode) {
-                AALOAD, AASTORE, ANEWARRAY, ARETURN, ARRAYLENGTH, ATHROW, BALOAD, BASTORE, CALOAD, CASTORE, CHECKCAST,
-                DALOAD, DASTORE, DRETURN, FALOAD, FASTORE, FRETURN, GETFIELD, GETSTATIC, IALOAD, IASTORE, INSTANCEOF,
-                INVOKEDYNAMIC, INVOKEINTERFACE, INVOKESPECIAL, INVOKESTATIC, INVOKEVIRTUAL, IRETURN, LALOAD, LASTORE,
-                LDC, LRETURN, MONITOREXIT, MULTIANEWARRAY, NEW, PUTFIELD, PUTSTATIC, RETURN, SALOAD, SASTORE -> true
-                else -> false
-            }
-        }
-        return false
-    }
 }
