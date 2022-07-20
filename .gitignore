@@ -44,3 +44,5 @@ gradle-app.setting
 .classpath
 scripts/data
 bin/
+_codebraid/
+*.pdf
