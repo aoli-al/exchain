@@ -1,6 +1,7 @@
 package al.aoli.exchain.instrumentation
 
 import al.aoli.exchain.instrumentation.runtime.ExceptionAdvices
+import al.aoli.exchain.instrumentation.runtime.NativeRuntime
 import al.aoli.exchain.instrumentation.transformers.TryCatchBlockTransformer
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.asm.Advice
@@ -15,6 +16,7 @@ import java.io.File
 import java.lang.instrument.Instrumentation
 
 fun premain(arguments: String?, instrumentation: Instrumentation) {
+    NativeRuntime.initializedCallback()
     AgentBuilder.Default()
         .with(AgentBuilder.RedefinitionStrategy.REDEFINITION)
         .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
@@ -67,6 +69,7 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
         }
 
         .installOn(instrumentation)
+
 
 //    val t = Thread {
 ////        println("what?")

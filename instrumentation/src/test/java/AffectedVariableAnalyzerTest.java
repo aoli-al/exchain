@@ -9,6 +9,15 @@ public class AffectedVariableAnalyzerTest {
         int c;
         int d;
 
+        void scene2() {
+            if (true) {
+                int a = 123;
+                possibleThrown();
+            }
+            else {
+            }
+            int b = 456;
+        }
         // Affected vars are a, b
         void scene() {
             for (int i = 0; i < 100; i++) {
@@ -16,9 +25,10 @@ public class AffectedVariableAnalyzerTest {
                 try {
                     possibleThrown();
                     a = 1;
-
                     if (a == 0) {
-
+                        String foo = "123";
+                    } else {
+                        int bar = 456;
                     }
                 } catch (Throwable e) {
                     System.out.println("?");
@@ -36,7 +46,7 @@ public class AffectedVariableAnalyzerTest {
     @Test
     void testLoadClass() {
         AffectedVarDriver.INSTANCE.analyzeAffectedVar(
-                Dummy.class, "scene()V",
-                14, 32);
+                Dummy.class, "scene2()V",
+                4, -1);
     }
 }

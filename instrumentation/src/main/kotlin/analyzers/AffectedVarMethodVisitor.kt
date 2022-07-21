@@ -1,15 +1,14 @@
 package al.aoli.exchain.instrumentation.analyzers
 
 import mu.KotlinLogging
-import org.objectweb.asm.ConstantDynamic
-import org.objectweb.asm.Handle
-import org.objectweb.asm.Label
-import org.objectweb.asm.Opcodes
-import org.objectweb.asm.Opcodes.INVOKESTATIC
+import org.objectweb.asm.*
+import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.AbstractInsnNode
+import org.objectweb.asm.tree.FieldInsnNode
 import org.objectweb.asm.tree.LabelNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.tree.VarInsnNode
 import org.objectweb.asm.tree.analysis.Frame
 import org.objectweb.asm.tree.analysis.SourceValue
 
@@ -20,6 +19,7 @@ class AffectedVarMethodVisitor(val throwIndex: Int, val catchIndex: Int, val own
     var byteCodeOffset = 0;
     var throwInsn: AbstractInsnNode? = null
     var catchInsn: AbstractInsnNode? = null
+    private val isStatic = access and ACC_STATIC != 0
 
     private fun checkThrowInsn() {
         if (byteCodeOffset == throwIndex) {
@@ -151,25 +151,87 @@ class AffectedVarMethodVisitor(val throwIndex: Int, val catchIndex: Int, val own
     }
 
     private fun processAffectedInsns(affectedInsns: Set<AbstractInsnNode>, frames: Array<Frame<SourceValue>>) {
-        for (affectedInsn in affectedInsns) {
-            val frame = frames[instructions.indexOf(affectedInsn)]
-            when (affectedInsn) {
+        val affectedVars = mutableListOf<Int>()
+        val affectedFields = mutableListOf<String>()
+        val throwInsnFrame = frames[instructions.indexOf(throwInsn)]
+        for (insn in affectedInsns) {
+            val frame = frames[instructions.indexOf(insn)]
+            when (insn) {
                 is MethodInsnNode -> {
-                    when (affectedInsn.opcode) {
-                        INVOKESTATIC -> {
-                            println("Invoke static ${affectedInsn.owner}:${affectedInsn.name}${affectedInsn.desc}")
+                    if (insn.opcode != INVOKESTATIC && insn.opcode != INVOKEDYNAMIC && catchInsn != null) {
+                        val value = try {
+                            for (type in Type.getArgumentTypes(insn.desc)) {
+                                frame.pop()
+                            }
+                            frame.pop()
+                        } catch (e: IndexOutOfBoundsException) {
+                            logger.error { "Processing instruction $insn failed." }
+                            continue
                         }
-                        else -> {
-                            println("Invoke ${affectedInsn.owner}:${affectedInsn.name}${affectedInsn.desc}")
+                        for (src in value.insns) {
+                            val srcFrame = frames[instructions.indexOf(src)]
+                            // If a method call is declared in a field the field must be from `this`.
+                            if (src is FieldInsnNode && src.opcode == GETFIELD) {
+                                val fieldValue = srcFrame.pop()
+                                if (fieldValue.insns.size != 1) continue
+                                val fieldSrc = fieldValue.insns.first()
+                                if (fieldSrc is VarInsnNode && fieldSrc.opcode == ALOAD && fieldSrc.`var` == 0) {
+                                    affectedFields.add(src.name)
+                                }
+                            }
+                            // If a method call is from a local object, check if the object is on the stack.
+                            if (src is VarInsnNode && src.opcode == ALOAD) {
+                                try {
+                                    if (throwInsnFrame.getLocal(src.`var`) == srcFrame.getLocal(src.`var`)) {
+                                        affectedVars.add(src.`var`)
+                                    }
+                                } catch (e: IndexOutOfBoundsException) {
+                                    logger.info { "Local object is not on the stack!" }
+                                }
+                            }
+                        }
+                    }
+                }
+                is FieldInsnNode -> {
+                    if (insn.opcode == PUTFIELD) {
+                        val objRef = try {
+                            frame.pop()
+                            frame.pop()
+                        } catch (e: IndexOutOfBoundsException) {
+                            logger.error { "Processing instruction $insn failed." }
+                            continue
+                        }
+                        for (src in objRef.insns) {
+                            if (src is VarInsnNode) {
+                                if (src.`var` == 0) {
+                                    affectedFields.add(insn.name)
+                                } else {
+                                    affectedVars.add(src.`var`)
+                                }
+                            }
+                        }
+                    }
+                }
+                is VarInsnNode -> {
+                    if (catchInsn == null) continue
+                    when (insn.opcode) {
+                        ISTORE, LSTORE, FSTORE, DSTORE, ASTORE -> {
+                            if (insn.`var` < throwInsnFrame.locals) {
+                                affectedVars.add(insn.`var`)
+                            }
                         }
                     }
                 }
             }
         }
+        println(affectedFields)
+        println(affectedVars)
     }
 
     override fun visitEnd() {
         super.visitEnd()
+        if (isStatic) return
+
         val tryCatchLocations = mutableListOf<Pair<Int, Int>>()
         for (tryCatchBlock in tryCatchBlocks) {
             if (tryCatchBlock.handler == catchInsn) {
@@ -190,6 +252,7 @@ class AffectedVarMethodVisitor(val throwIndex: Int, val catchIndex: Int, val own
                         affectedInsns.remove(insn)
                     }
                 }
+                affectedInsns.remove(throwInsn)
             }
             processAffectedInsns(affectedInsns, analyzer.frames)
         } else {

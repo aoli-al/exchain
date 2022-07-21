@@ -5,11 +5,16 @@ title: Exception Analysis
 
 # Classification
 
-- Exception only affects control flow
+Goal: Identify special properties of target program that
+may affect the accuracy/performance of our algorithm.
+
+Thoughs: pure control-/data- exception chain does not exist.
+
+<!-- - Exception only affects control flow
     - Exceptions are thrown ([example](#control-flow))
         - within the same method
-        - across different methods
-- Exception affects both control and data flow
+        - across different methods -->
+- Target application patterns
     - Affected vars are initialized ([example](#initialization))
         - before the exception
         - after the exception
@@ -22,7 +27,7 @@ title: Exception Analysis
 
 # Examples
 
-## Control Flow
+<!-- ## Control Flow
 
 ```{.java .numberLines .lineAnchors}
 void test1() {
@@ -39,7 +44,7 @@ void test2() {
         throw new Exception();
     }
 }
-```
+``` -->
 
 ## Initialization
 
@@ -97,13 +102,26 @@ int local2(Object obj) {
 
 ## Optimization Oppertunities
 
-### Accuracy
-### Performance
+### Accuracy & Performance
 
 - Enabling dynamic taint analysis dynamically
+- How to identify benign exceptions?
+    - Expected excpetions (not always benign)
+        - Declared exception
+        - Caught by specific catch block
+    - Unexpected exceptions
+        - Runtime excpetion
+        - Caught by wildcard catch block
+- Efficient but less accurate taint analysis
+    - Most exceptions are NPE (ignore primitive types?)
+- Singleton/Static variables v.s. normal objects
+- How do we justify our hypothesis?
+    - Case study
+    - Failure injection analysis
 
 
-## Static Data-flow Analysis
+
+<!-- ## Static Data-flow Analysis
 
 - Exception only affects control flow ([example](#control-flow-exception))
 - Exception affects both contorl and data flow
@@ -277,7 +295,7 @@ void foo() {
         anotherPossibleThrown();
     }
 }
-```
+``` -->
 
 
 # Exceptions through data flow
@@ -447,7 +465,7 @@ public class Main extends Thread {
 }
 ```
 
-[FLINK-5232](https://issues.apache.org/jira/browse/FLINK-8785)
+[FLINK-5232](https://issues.apache.org/jira/browse/FLINK-5232)
 
 
 

@@ -34,6 +34,7 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
-    fun onExceptionStackInfo(method: Array<Method>, loc: Array<Int>) {
+    fun onExceptionStackInfo(clazz: Class<Any>, method: String, throwLocation: Long, catchLocation: Long): IntArray {
+        return intArrayOf()
     }
 }

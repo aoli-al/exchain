@@ -17,9 +17,15 @@ def read_exception_data(path: str) -> Dict[str, List[str]]:
 
 if __name__=="__main__":
     normal, normal_exceptions = read_exception_data("data/no_injection")
-    for i in range(4, 5):
+    for i in range(0, 20):
+        print(f"============================================== {i}")
         case, case_exceptions = read_exception_data(f"data/injection_{i}")
         diff = case.keys() - normal.keys()
         print(diff)
-        for exception in case_exceptions - normal_exceptions:
-            print(exception.split("thrown at")[0])
+        for e in diff:
+            print(e)
+            print(case[e])
+            print("===")
+        #  for exception in case_exceptions - normal_exceptions:
+            #  print(exception.split("thrown at")[0])
+        print("==============================================")

@@ -30,4 +30,5 @@ run {
     jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
     var nat= project(":native")
     jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.so"
+    jvmArgs "-Xcheck:jni"
 }
