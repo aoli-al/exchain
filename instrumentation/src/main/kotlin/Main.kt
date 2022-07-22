@@ -2,6 +2,7 @@ package al.aoli.exchain.instrumentation
 
 import al.aoli.exchain.instrumentation.runtime.ExceptionAdvices
 import al.aoli.exchain.instrumentation.runtime.NativeRuntime
+import al.aoli.exchain.instrumentation.store.TransformedCodeStore
 import al.aoli.exchain.instrumentation.transformers.TryCatchBlockTransformer
 import net.bytebuddy.agent.builder.AgentBuilder
 import net.bytebuddy.asm.Advice
@@ -30,6 +31,7 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
 //            ) {
 //                super.onTransformation(typeDescription, classLoader, module, loaded, dynamicType)
 //                File("/tmp/${dynamicType.typeDescription.typeName}.class").writeBytes(dynamicType.bytes)
+//                TransformedCodeStore.store[dynamicType.typeDescription.typeName] = dynamicType.bytes
 //            }
 //        })
 ////        .with(AgentBuilder.Listener.StreamWriting.toSystemOut().withTransformationsOnly())
@@ -63,12 +65,4 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
 
 
     NativeRuntime.initializedCallback()
-
-//    val t = Thread {
-////        println("what?")
-//        LocateRegistry.createRegistry(9898).bind(
-//            ExceptionService::class.simpleName, UnicastRemoteObject.exportObject(
-//                ExceptionServiceImpl, 0))
-//    }
-//    t.start()
 }

@@ -19,7 +19,7 @@ class ExceptionProcessor {
     const char *kRuntimeClassName =
         "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime";
     const char *kMethodName = "onExceptionStackInfo";
-    const char *kDescriptor = "(Ljava/lang/Class;Ljava/lang/String;JJ)[I";
+    const char *kDescriptor = "(Ljava/lang/String;Ljava/lang/String;JJ)[I";
 
    public:
     ExceptionProcessor(jvmtiEnv *jvmti, JNIEnv *jni, jthread thread,
@@ -36,7 +36,7 @@ class ExceptionProcessor {
    private:
     void SendStackFrameInfo(jvmtiFrameInfo frameInfo);
     std::string GetMethodSignature(jmethodID method);
-    std::string GetClassSignature(jclass clazz);
+    std::string GetClassSignature(jmethodID clazz);
     bool CheckJvmTIError(jvmtiError error, std::string msg);
     bool ShouldIgnoreClass(std::string signature);
 

@@ -15,7 +15,7 @@ import org.objectweb.asm.tree.analysis.SourceValue
 
 private val logger = KotlinLogging.logger {}
 class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val owner: String, access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?):
-    MethodNode(Opcodes.ASM8, access, name, descriptor, signature, exceptions) {
+    MethodNode(ASM8, access, name, descriptor, signature, exceptions) {
     var byteCodeOffset = 0L
     var throwInsn: AbstractInsnNode? = null
     var catchInsn: AbstractInsnNode? = null
@@ -43,7 +43,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
     override fun visitVarInsn(opcode: Int, varIndex: Int) {
         super.visitVarInsn(opcode, varIndex)
         checkThrowInsn()
-        byteCodeOffset += if (varIndex < 4 && opcode != Opcodes.RET) {
+        byteCodeOffset += if (varIndex < 4 && opcode != RET) {
             1
         } else if (varIndex > 256) {
             4
@@ -87,8 +87,8 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
     ) {
         super.visitMethodInsn(opcodeAndSource, owner, name, descriptor, isInterface)
         checkThrowInsn()
-        val opcode = opcodeAndSource and Opcodes.SOURCE_MASK.inv()
-        byteCodeOffset += if (opcode == Opcodes.INVOKEINTERFACE) {
+        val opcode = opcodeAndSource and SOURCE_MASK.inv()
+        byteCodeOffset += if (opcode == INVOKEINTERFACE) {
             5
         } else {
             3
@@ -133,7 +133,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
         super.visitIntInsn(opcode, operand)
         checkThrowInsn()
         byteCodeOffset += when (opcode) {
-            Opcodes.BIPUSH, Opcodes.NEWARRAY -> 2
+            BIPUSH, NEWARRAY -> 2
             else -> 3
         }
     }
@@ -160,7 +160,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
             val frame = frames[instructions.indexOf(insn)]
             when (insn) {
                 is MethodInsnNode -> {
-                    if (insn.opcode != INVOKESTATIC && insn.opcode != INVOKEDYNAMIC && catchInsn != null) {
+                    if (insn.opcode != INVOKESTATIC && insn.opcode != INVOKEDYNAMIC) {
                         val value = try {
                             for (type in Type.getArgumentTypes(insn.desc)) {
                                 frame.pop()
@@ -173,7 +173,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
                         for (src in value.insns) {
                             val srcFrame = frames[instructions.indexOf(src)]
                             // If a method call is declared in a field the field must be from `this`.
-                            if (src is FieldInsnNode && src.opcode == GETFIELD) {
+                            if (src is FieldInsnNode && src.opcode == GETFIELD && !isStatic) {
                                 val fieldValue = srcFrame.pop()
                                 if (fieldValue.insns.size != 1) continue
                                 val fieldSrc = fieldValue.insns.first()
@@ -205,7 +205,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
                         }
                         for (src in objRef.insns) {
                             if (src is VarInsnNode) {
-                                if (src.`var` == 0) {
+                                if (src.`var` == 0 && !isStatic) {
                                     affectedFields.add(insn.name)
                                 } else {
                                     affectedVars.add(src.`var`)
@@ -232,7 +232,6 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
 
     override fun visitEnd() {
         super.visitEnd()
-        if (isStatic) return
 
         val tryCatchLocations = mutableListOf<Pair<Int, Int>>()
         for (tryCatchBlock in tryCatchBlocks) {

@@ -4,6 +4,7 @@ import java.util.Random;
 import java.util.zip.DataFormatException;
 
 public class DataFlowTest {
+    public Dummy dummy = new Dummy();
 
     public void scene7() throws DataFormatException {
         Dummy dummy = new Dummy();

@@ -4,20 +4,22 @@
 #include <iostream>
 #include <set>
 
+#include "plog/Log.h"
+
 bool initialized = false;
 std::set<jthread> working_threads;
 
 JNIEXPORT void JNICALL Java_al_aoli_exchain_instrumentation_runtime_NativeRuntime_initializedCallback(JNIEnv *env, jclass clazz) {
-    std::cout << "INITIALIZED" << std::endl;
+    PLOG_INFO << "Native runtime started.";
     initialized = true;
 }
 
 JNIEXPORT void JNICALL Java_al_aoli_exchain_instrumentation_runtime_NativeRuntime_registerWorkingThread(JNIEnv *env, jthread thread) {
-    std::cout << "Thread registered!" << std::endl;
+    PLOG_INFO << "Worker thread: " << thread << " registered!";
     working_threads.insert(thread);
 }
 
 JNIEXPORT void JNICALL Java_al_aoli_exchain_instrumentation_runtime_NativeRuntime_unregisterWorkingThread(JNIEnv *env, jthread thread) {
-    std::cout << "Thread unregistered!" << std::endl;
+    PLOG_INFO << "Worker thread: " << thread << " unregistered!";
     working_threads.erase(thread);
 }
