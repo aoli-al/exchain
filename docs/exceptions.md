@@ -328,6 +328,8 @@ void sendRequest(HTTPClient client, Request r) {
 
 ```
 
+// Local var, method call
+
 
 ```
 Exception Chain:
@@ -366,6 +368,8 @@ Response retryRecursive(Request r, int retryCount) {
 }
 ```
 
+// Local variable
+
 ```
 Exception Tree: Root -> Exception1:4 -> Exception1:4 -> UnexpectedException:2
 Failure Exception: UnexpectedException
@@ -395,6 +399,8 @@ void publishEvent(Event event) {
     }
 }
 ```
+
+// local variable
 
 ```
 Exception Tree: Root -> Exception1:3 -> Exception2:11
@@ -497,6 +503,8 @@ void sendRequest(Request r) {
 }
 ```
 
+// local varaibles
+
 ```
 Exception Tree: Root -> Exception1:6
                      |> Exception1:6
@@ -553,6 +561,8 @@ class Endpoint {
 
 ```
 
+// local variables, fields
+
 ## With threads
 
 ```{.java .numberLines .lineAnchors}
@@ -577,6 +587,8 @@ void process(int jobId) {
     stateMap[jobId].call(); // NullPointerException is thrown
 }
 ```
+
+// data collections?
 ```
 Exception Tree: Root -> IOException:5 -> CreateException:7
                      |> NullPointerException:19
@@ -606,6 +618,8 @@ void commitRequest(int id) {
     totalCommits++;
 }
 ```
+
+// fields
 
 ```
 Exception Tree: RecoveryRequest -> Root -> OOMException:6

@@ -14,9 +14,9 @@ import org.objectweb.asm.tree.analysis.SourceValue
 
 
 private val logger = KotlinLogging.logger {}
-class AffectedVarMethodVisitor(val throwIndex: Int, val catchIndex: Int, val owner: String, access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?):
+class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val owner: String, access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?):
     MethodNode(Opcodes.ASM8, access, name, descriptor, signature, exceptions) {
-    var byteCodeOffset = 0;
+    var byteCodeOffset = 0L
     var throwInsn: AbstractInsnNode? = null
     var catchInsn: AbstractInsnNode? = null
     private val isStatic = access and ACC_STATIC != 0
@@ -150,9 +150,11 @@ class AffectedVarMethodVisitor(val throwIndex: Int, val catchIndex: Int, val own
         }
     }
 
+
+    val affectedVars = mutableListOf<Int>()
+    val affectedFields = mutableListOf<String>()
+
     private fun processAffectedInsns(affectedInsns: Set<AbstractInsnNode>, frames: Array<Frame<SourceValue>>) {
-        val affectedVars = mutableListOf<Int>()
-        val affectedFields = mutableListOf<String>()
         val throwInsnFrame = frames[instructions.indexOf(throwInsn)]
         for (insn in affectedInsns) {
             val frame = frames[instructions.indexOf(insn)]
@@ -238,12 +240,12 @@ class AffectedVarMethodVisitor(val throwIndex: Int, val catchIndex: Int, val own
                 tryCatchLocations.add(Pair(instructions.indexOf(tryCatchBlock.start), instructions.indexOf(tryCatchBlock.end)))
             }
         }
-        if (throwInsn != null && (catchIndex == -1 || catchInsn != null)) {
+        if (throwInsn != null && (catchIndex == -1L || catchInsn != null)) {
             val interpreter = AffectedVarInterpreter(instructions, throwInsn!!, tryCatchLocations)
             val analyzer = AffectedVarAnalyser(instructions, interpreter, throwInsn!!, catchInsn)
             analyzer.analyze(owner, this)
             val affectedInsns = interpreter.affectedInsns
-            if (catchIndex != -1) {
+            if (catchIndex != -1L) {
                 val normalRunInterpreter = AffectedVarInterpreter(instructions, throwInsn!!, emptyList())
                 val normalRunAnalyzer = AffectedVarAnalyser(instructions, normalRunInterpreter, throwInsn!!, null)
                 normalRunAnalyzer.analyze(owner, this)

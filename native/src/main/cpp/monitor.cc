@@ -3,70 +3,44 @@
 
 #include <iostream>
 #include <vector>
+#include <set>
 
-#include "runtime.h"
+#include "runtime.hpp"
+#include "processor.hpp"
 
-const int kMaxStackDepth = 100;
 
 
-std::string GetMethodInformation(jvmtiEnv *jvmti, jmethodID method) {
-    char *name, *signature;
-    jvmti->GetMethodName(method, &name, &signature, NULL);
-    std::string info = std::string(name) + std::string(signature);
-    jvmti->Deallocate((unsigned char *)name);
-    jvmti->Deallocate((unsigned char *)signature);
-    return info;
-}
+// void GetLocalVariables(jvmtiEnv *jvmti, jlocation current_location, jmethodID method, std::string method_name) {
+//     jvmtiLocalVariableEntry *table_ptr;
+//     jint entry_count;
+//     if (CheckJvmTIError(
+//             jvmti,
+//             jvmti->GetLocalVariableTable(method, &entry_count, &table_ptr),
+//             "get local variable table failed.")) {
+//         for (int i = 0; i < entry_count; i++) {
+//             if (table_ptr[i].start_location >= current_location) {
+//                 continue;
+//             }
+//         }
+//     }
+//     jvmti->Deallocate((unsigned char *)table_ptr);
+// }
 
-void SendStackFrameInfo(
-    jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
-    std::vector<std::pair<jmethodID, jlocation>> exception_trace,
-    jmethodID catch_method, jlocation catch_location) {
-    std::cout << "method start!" << std::endl;
-    auto class_name =
-        "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime";
-    auto method_name = "onExceptionStackInfo";
-    auto descriptor = "(Ljava/lang/Class;Ljava/lang/String;JJ)[I";
-    auto clazz = env->FindClass(class_name);
-    auto method_id = env->GetStaticMethodID(clazz, method_name, descriptor);
-    for (auto trace : exception_trace) {
-        jclass throw_class;
-        jvmti->GetMethodDeclaringClass(trace.first, &throw_class);
-        auto method = GetMethodInformation(jvmti, trace.first);
-        jstring method_jstring = env->NewStringUTF(method.c_str());
-        jlong catch_current_method =
-            catch_method == trace.first ? catch_location : -1;
-        jintArray result = (jintArray)env->CallStaticObjectMethod(
-            clazz, method_id, throw_class, method_jstring, trace.second,
-            catch_current_method);
-    }
-}
+
+static std::set<jthread> processing_threads;
+
 
 void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
                                jmethodID method, jlocation location,
                                jobject exception, jmethodID catch_method,
                                jlocation catch_location) {
     if (!initialized) return;
-    std::vector<std::pair<jmethodID, jlocation>> exception_trace;
-    jvmtiFrameInfo frames[kMaxStackDepth];
-    int count;
-    auto err = jvmti->GetStackTrace(thread, 0, kMaxStackDepth, frames, &count);
-    if (err == JVMTI_ERROR_NONE) {
-        for (int stack_idx = 0; stack_idx < count; stack_idx++) {
-            auto method_info =
-                GetMethodInformation(jvmti, frames[stack_idx].method);
-            exception_trace.emplace_back(frames[stack_idx].method,
-                                         frames[stack_idx].location);
-            std::cout << "Stack: " << method_info << ":"
-                      << frames[stack_idx].location << std::endl;
-            if (frames[stack_idx].method == catch_method) {
-                break;
-            }
-        }
-        std::cout << "Stack end!" << std::endl;
-        SendStackFrameInfo(jvmti, env, thread, std::move(exception_trace),
-                           catch_method, catch_location);
-    }
+    if (working_threads.find(thread) != working_threads.end()) return;
+    std::cout << "ENTER: " << thread << std::endl;
+    exchain::ExceptionProcessor processor(
+        jvmti, env, thread, method, location, catch_method, catch_location);
+    processor.Process();
+    std::cout << "Leave: " << thread << std::endl;
 }
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
@@ -77,6 +51,7 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
     capabilities.can_generate_exception_events = 1;
     capabilities.can_get_bytecodes = 1;
     capabilities.can_get_constant_pool = 1;
+    capabilities.can_access_local_variables = 1;
     jvmti->AddCapabilities(&capabilities);
 
     jvmtiEventCallbacks callbacks = {0};

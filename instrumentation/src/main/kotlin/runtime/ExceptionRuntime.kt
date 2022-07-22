@@ -1,5 +1,6 @@
 package al.aoli.exchain.instrumentation.runtime
 
+import al.aoli.exchain.instrumentation.analyzers.AffectedVarDriver
 import al.aoli.exchain.instrumentation.runtime.exceptions.ExceptionInjector
 import al.aoli.exchain.instrumentation.server.ExceptionServiceImpl
 import java.lang.reflect.Method
@@ -35,6 +36,13 @@ object ExceptionRuntime {
 
     @JvmStatic
     fun onExceptionStackInfo(clazz: Class<Any>, method: String, throwLocation: Long, catchLocation: Long): IntArray {
+        val thread = Thread {
+            AffectedVarDriver.analyzeAffectedVar(clazz, method, throwLocation, catchLocation)
+        }
+        NativeRuntime.registerWorkingThread(thread)
+        thread.start()
+        thread.join()
+        NativeRuntime.unregisterWorkingThread(thread)
         return intArrayOf()
     }
 }
