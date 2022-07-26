@@ -11,6 +11,7 @@ public class Main {
         void print() {
             System.out.println(f);
             test();
+            f.getClass();
         }
 
         static void possibleThrow() {
@@ -20,7 +21,9 @@ public class Main {
         static void test() {
             DataFlowTest test = new DataFlowTest();
             int a = 3;
-            possibleThrow();
+            if (a < 10) {
+                possibleThrow();
+            }
             test.dummy.foo();
             test.scene2();
             a = 5;

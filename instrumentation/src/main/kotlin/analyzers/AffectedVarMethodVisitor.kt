@@ -240,12 +240,13 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
             }
         }
         if (throwInsn != null && (catchIndex == -1L || catchInsn != null)) {
-            val interpreter = AffectedVarInterpreter(instructions, throwInsn!!, tryCatchLocations)
+            val throwInsnIndex = instructions.indexOf(throwInsn)
+            val interpreter = AffectedVarInterpreter(instructions, throwInsnIndex, tryCatchLocations)
             val analyzer = AffectedVarAnalyser(instructions, interpreter, throwInsn!!, catchInsn)
             analyzer.analyze(owner, this)
             val affectedInsns = interpreter.affectedInsns
             if (catchIndex != -1L) {
-                val normalRunInterpreter = AffectedVarInterpreter(instructions, throwInsn!!, emptyList())
+                val normalRunInterpreter = AffectedVarInterpreter(instructions, throwInsnIndex, emptyList())
                 val normalRunAnalyzer = AffectedVarAnalyser(instructions, normalRunInterpreter, throwInsn!!, null)
                 normalRunAnalyzer.analyze(owner, this)
                 for (insn in analyzer.reachableBlocks(catchInsn!!)) {

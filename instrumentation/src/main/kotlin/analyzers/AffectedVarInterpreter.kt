@@ -6,9 +6,8 @@ import org.objectweb.asm.tree.analysis.BasicInterpreter
 import org.objectweb.asm.tree.analysis.SourceValue
 import org.objectweb.asm.tree.analysis.SourceInterpreter
 
-class AffectedVarInterpreter(val insnList: InsnList, val throwInsn: AbstractInsnNode, val tryBlocks: List<Pair<Int, Int>>) : SourceInterpreter(ASM8) {
+class AffectedVarInterpreter(val insnList: InsnList, val throwInsnIndex: Int, val tryBlocks: List<Pair<Int, Int>>) : SourceInterpreter(ASM8) {
 
-    private var thrownInstructionVisited = false
     val affectedInsns = mutableSetOf<AbstractInsnNode>()
     val affectedInsnInTry = mutableSetOf<AbstractInsnNode>()
     val visitedInsns = mutableSetOf<AbstractInsnNode>()
@@ -19,10 +18,7 @@ class AffectedVarInterpreter(val insnList: InsnList, val throwInsn: AbstractInsn
             return
         }
         visitedInsns.add(insn)
-        if (throwInsn == insn) {
-            thrownInstructionVisited = true
-        }
-        if (thrownInstructionVisited) {
+        if (insnList.indexOf(insn) > throwInsnIndex) {
             affectedInsns.add(insn)
             val insnIndex = insnList.indexOf(insn)
             for (tryBlock in tryBlocks) {
