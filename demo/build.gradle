@@ -8,11 +8,14 @@ version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
+    compileOnly  'edu.gmu.swe.phosphor:Phosphor:0.1.0-SNAPSHOT'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+//    implementation group: 'org.apache.tomcat.embed', name: 'tomcat-embed-core', version: '9.0.38'
 }
 
 test {
@@ -30,4 +33,14 @@ run {
     jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
     var nat= project(":native")
     jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.so"
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "al.aoli.exchain.demo.Main"
+    }
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }

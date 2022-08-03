@@ -39,8 +39,8 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
                                jmethodID method, jlocation location,
                                jobject exception, jmethodID catch_method,
                                jlocation catch_location) {
-    if (!initialized) return;
-    if (working_threads.find(thread) != working_threads.end()) return;
+    // if (!initialized) return;
+    // if (working_threads.find(thread) != working_threads.end()) return;
     PLOG_INFO << "Start processing: " << thread;
 
     std::thread new_thread([=]() {
