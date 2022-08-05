@@ -39,14 +39,31 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
                                jmethodID method, jlocation location,
                                jobject exception, jmethodID catch_method,
                                jlocation catch_location) {
-    // if (!initialized) return;
-    // if (working_threads.find(thread) != working_threads.end()) return;
     PLOG_INFO << "Start processing: " << thread;
-
+    for (auto stored: processing_threads) {
+        if (env->IsSameObject(stored, thread)) {
+            return;
+        }
+    }
+    // We need to create a new thread to avoid internal exceptions.
     std::thread new_thread([=]() {
-        exchain::ExceptionProcessor processor(
-            jvmti, env, thread, method, location, catch_method, catch_location);
+        JavaVM *jvm;
+        auto result = env->GetJavaVM(&jvm);
+        if (result != 0) {
+            LOG_ERROR << "Failed to get JavaVM: " << result;
+        }
+        jvm->AttachCurrentThread((void **)&env, NULL);
+
+        auto cls = env->FindClass("java/lang/Thread");
+        auto mid = env->GetStaticMethodID(cls, "currentThread", "()Ljava/lang/Thread;");
+        jthread current_thread = env->CallStaticObjectMethod(cls, mid);
+        processing_threads.insert(current_thread);
+        exchain::ExceptionProcessor processor(jvmti, env, thread, method,
+                                              location, catch_method,
+                                              catch_location, exception);
         processor.Process();
+        processing_threads.erase(current_thread);
+        jvm->DetachCurrentThread();
     });
     new_thread.join();
     PLOG_INFO << "Finish processing: " << thread;

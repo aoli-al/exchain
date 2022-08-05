@@ -27,13 +27,35 @@ application {
 }
 
 run {
+}
+
+task instrumentJar(type: JavaExec) {
+    // This looks hacky...
+    main = "-jar"
+    var jarPath = "/home/aoli/repos/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
+    var src= jar.getArchiveFile().get().asFile.absolutePath
+    var dst = "${buildDir}/libs/instrumented"
+    args jarPath, src, dst
+    dependsOn jar
+}
+
+
+task runInstrumentedJar(type: JavaExec) {
+    executable = "/home/aoli/repos/jre-inst/bin/java"
+
+    main = "-jar"
     dependsOn ":instrumentation:shadowJar"
     dependsOn ":native:build"
     var instrumentation = project(":instrumentation")
     jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
+    jvmArgs "-javaagent:/home/aoli/repos/phosphor/phosphor-jigsaw-javaagent/target/phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
     var nat= project(":native")
     jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.so"
+
+    args "${buildDir}/libs/instrumented/${project.name}-${version}.jar"
 }
+
+runInstrumentedJar.dependsOn instrumentJar
 
 jar {
     manifest {

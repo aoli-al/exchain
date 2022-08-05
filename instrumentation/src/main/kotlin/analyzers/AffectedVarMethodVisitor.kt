@@ -151,8 +151,8 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
     }
 
 
-    val affectedVars = mutableListOf<Int>()
-    val affectedFields = mutableListOf<String>()
+    val affectedVars = mutableSetOf<Int>()
+    val affectedFields = mutableSetOf<String>()
 
     private fun processAffectedInsns(affectedInsns: Set<AbstractInsnNode>, frames: Array<Frame<SourceValue>>) {
         val throwInsnFrame = frames[instructions.indexOf(throwInsn)]

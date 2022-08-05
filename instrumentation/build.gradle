@@ -10,6 +10,7 @@ version 'unspecified'
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -22,6 +23,7 @@ dependencies {
     implementation group: 'org.ow2.asm', name: 'asm-analysis', version: '9.3'
     implementation group: 'io.github.microutils', name: 'kotlin-logging-jvm', version: '2.1.23'
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
+    compileOnly  'edu.gmu.swe.phosphor:Phosphor:0.1.0-SNAPSHOT'
 }
 
 test {

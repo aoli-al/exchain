@@ -1,8 +1,14 @@
 package al.aoli.exchain.instrumentation.runtime
 
 import al.aoli.exchain.instrumentation.analyzers.AffectedVarDriver
+import al.aoli.exchain.instrumentation.analyzers.AffectedVarResults
 import al.aoli.exchain.instrumentation.runtime.exceptions.ExceptionInjector
 import al.aoli.exchain.instrumentation.server.ExceptionServiceImpl
+import edu.columbia.cs.psl.phosphor.runtime.MultiTainter
+import edu.columbia.cs.psl.phosphor.runtime.Taint
+import edu.columbia.cs.psl.phosphor.struct.PowerSetTree
+import edu.columbia.cs.psl.phosphor.struct.PowerSetTree.SetNode
+import java.lang.RuntimeException
 import java.lang.reflect.Method
 
 object ExceptionRuntime {
@@ -35,12 +41,14 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
-    fun onExceptionStackInfo(clazz: String, method: String, throwLocation: Long, catchLocation: Long): IntArray {
-        AffectedVarDriver.analyzeAffectedVar(clazz, method, throwLocation, catchLocation)
-//        NativeRuntime.registerWorkingThread(thread)
-//        thread.start()
-//        thread.join()
-//        NativeRuntime.unregisterWorkingThread(thread)
-        return intArrayOf()
+    fun onExceptionStackInfo(clazz: String, method: String, throwLocation: Long, catchLocation: Long): AffectedVarResults {
+        return AffectedVarDriver.analyzeAffectedVar(clazz, method, throwLocation, catchLocation)
+    }
+
+    @JvmStatic
+    fun taintObject(obj: Any?, idx: Int, thread: Thread, depth: Int, exception: Any): Taint<*>? {
+        if (obj == null) return null
+        if (obj !is SetNode) return null
+        return AffectedVarDriver.taintAffectedVar(obj, idx, thread, depth, System.identityHashCode(exception))
     }
 }

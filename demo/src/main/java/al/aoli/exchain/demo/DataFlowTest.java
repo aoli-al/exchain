@@ -1,5 +1,7 @@
 package al.aoli.exchain.demo;
 
+import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
+
 import java.util.Random;
 import java.util.zip.DataFormatException;
 
@@ -138,12 +140,18 @@ public class DataFlowTest {
 
         String s = null;
         try {
+            System.out.println(MultiTainter.getTaint(o));
             s = o.toString();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
-        System.out.println(s.length());
+        System.out.println(MultiTainter.getTaint(s));
+        if (s == null) {
+            s = "123$";
+        }
+        System.out.println("hwllo");
+
     }
 
 
