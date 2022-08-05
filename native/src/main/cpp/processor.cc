@@ -35,6 +35,7 @@ bool ExceptionProcessor::ShouldIgnoreClass(std::string method_name) {
            method_name.rfind("Lch/qos/", 0) != std::string::npos ||
            method_name.rfind("Lshadow/asm", 0) != std::string::npos ||
            method_name.rfind("Lnet/bytebuddy", 0) != std::string::npos ||
+           method_name.rfind("Lorg/springframework/boot", 0) != std::string::npos ||
            method_name.rfind("Lal/aoli/exchain/instrumentation", 0) !=
                std::string::npos ||
            method_name.rfind("Lorg/slf4j", 0) != std::string::npos ||
@@ -80,15 +81,25 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
     jstring class_jstring = jni_->NewStringUTF(class_signature.c_str());
     jlong catch_current_method =
         catch_method_ == frame.method ? catch_location_ : -1;
+    jboolean is_throw_insn = depth == 0;
 
     jobject result = (jintArray)jni_->CallStaticObjectMethod(
         clazz, method_id, class_jstring, method_jstring, frame.location,
-        catch_current_method);
+        catch_current_method, is_throw_insn);
 
-    ProcessAffectedVarResults(frame, depth, result);
+    if (result == NULL) {
+        return;
+    }
+
+    jstring location_string = jni_->NewStringUTF(
+        (class_signature + ":" + method + ":" + std::to_string(frame.location))
+            .c_str());
+
+    ProcessAffectedVarResults(frame, depth, result, is_throw_insn, location_string);
 
     PLOG_INFO << "JAVA returns object: " << result;
 }
+
 
 jint ExceptionProcessor::GetCorrespondingTaintObjectSlot(jvmtiFrameInfo frame, int depth, int slot, jvmtiLocalVariableEntry *table, int table_size) {
     jobject object;
@@ -109,15 +120,9 @@ jint ExceptionProcessor::GetCorrespondingTaintObjectSlot(jvmtiFrameInfo frame, i
 
 
 void ExceptionProcessor::ProcessAffectedVarResults(jvmtiFrameInfo frame,
-                                                   int depth, jobject result) {
-    auto clazz = jni_->FindClass(kAffectedVarResultsClassName);
-    auto affected_vars_field_id = jni_->GetFieldID(clazz, "affectedVars", "[I");
-    jintArray affected_vars =
-        (jintArray)jni_->GetObjectField(result, affected_vars_field_id);
-
-    const auto affected_vars_length = jni_->GetArrayLength(affected_vars);
-    auto affected_vars_cpy = jni_->GetIntArrayElements(affected_vars, NULL);
-
+                                                   int depth, jobject result,
+                                                   jboolean is_throw_insn,
+                                                   jstring location_string) {
     jvmtiLocalVariableEntry *table_ptr;
     jint table_size;
     if (!CheckJvmTIError(
@@ -126,11 +131,47 @@ void ExceptionProcessor::ProcessAffectedVarResults(jvmtiFrameInfo frame,
         return;
     }
 
+
+    auto clazz = jni_->FindClass(kAffectedVarResultsClassName);
     auto runtime_clazz = jni_->FindClass(kRuntimeClassName);
-    auto method_id = jni_->GetStaticMethodID(
+
+    if (is_throw_insn) {
+        PLOG_INFO << "Start processing throw instructions!";
+        auto analyze_source_method_id = jni_->GetStaticMethodID(
+            runtime_clazz, kAnalyzeSourceMethodName, kAnalyzeSourceMethodDescriptor);
+        auto source_vars_field_id = jni_->GetFieldID(clazz, "sourceVars", "[I");
+        PLOG_INFO << "Source var ID: " << source_vars_field_id;
+        jintArray source_vars =
+            (jintArray)jni_->GetObjectField(result, source_vars_field_id);
+
+        const auto source_vars_length = jni_->GetArrayLength(source_vars);
+        auto source_vars_cpy = jni_->GetIntArrayElements(source_vars, NULL);
+        for (int i = 0; i < source_vars_length; i++) {
+            const auto slot = source_vars_cpy[i];
+            jint taint_slot = GetCorrespondingTaintObjectSlot(frame, depth, slot, table_ptr, table_size);
+            if (taint_slot == -1) continue;
+            jobject taint;
+            jvmti_->GetLocalObject(thread_, depth, taint_slot, &taint);
+            if (taint == NULL) continue;
+            jni_->CallStaticVoidMethod(runtime_clazz, analyze_source_method_id,
+                                       taint, exception_, location_string);
+        }
+        jni_->ReleaseIntArrayElements(source_vars, source_vars_cpy, NULL);
+    }
+
+    PLOG_INFO << "Start processing throw instructions!";
+    auto affected_vars_field_id = jni_->GetFieldID(clazz, "affectedVars", "[I");
+    jintArray affected_vars =
+        (jintArray)jni_->GetObjectField(result, affected_vars_field_id);
+
+    const auto affected_vars_length = jni_->GetArrayLength(affected_vars);
+    auto affected_vars_cpy = jni_->GetIntArrayElements(affected_vars, NULL);
+
+
+    auto taint_object_method_id = jni_->GetStaticMethodID(
         runtime_clazz, kTaintObjectMethodName, kTaintObjectMethodDescriptor);
 
-    LOG_INFO << "Taint method ID: " << method_id;
+    LOG_INFO << "Taint method ID: " << taint_object_method_id;
     for (int i = 0; i < affected_vars_length; i++) {
         const auto slot = affected_vars_cpy[i];
         // jobject obj;
@@ -144,7 +185,7 @@ void ExceptionProcessor::ProcessAffectedVarResults(jvmtiFrameInfo frame,
         jvmti_->GetLocalObject(thread_, depth, taint_slot, &taint);
         if (taint == NULL) continue;
         jobject result = jni_->CallStaticObjectMethod(
-            runtime_clazz, method_id, taint, slot, thread_, depth, exception_);
+            runtime_clazz, taint_object_method_id, taint, slot, thread_, depth, exception_);
         if (result != NULL) {
             jvmti_->SetLocalObject(thread_, depth, taint_slot, result);
         }

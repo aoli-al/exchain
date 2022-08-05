@@ -25,10 +25,12 @@ class ExceptionProcessor {
         "al/aoli/exchain/instrumentation/analyzers/AffectedVarResults";
     const char *kExceptionStackInfoMethodName = "onExceptionStackInfo";
     const char *kExceptionStackInfoDescriptor =
-        "(Ljava/lang/String;Ljava/lang/String;JJ)Lal/aoli/exchain/"
+        "(Ljava/lang/String;Ljava/lang/String;JJZ)Lal/aoli/exchain/"
         "instrumentation/analyzers/AffectedVarResults;";
     const char *kTaintObjectMethodName = "taintObject";
     const char *kTaintObjectMethodDescriptor = "(Ljava/lang/Object;ILjava/lang/Thread;ILjava/lang/Object;)Ledu/columbia/cs/psl/phosphor/runtime/Taint;";
+    const char *kAnalyzeSourceMethodName = "analyzeSource";
+    const char *kAnalyzeSourceMethodDescriptor = "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V";
 
    public:
     ExceptionProcessor(jvmtiEnv *jvmti, JNIEnv *jni, jthread thread,
@@ -53,7 +55,7 @@ class ExceptionProcessor {
     bool CheckJvmTIError(jvmtiError error, std::string msg);
     bool ShouldIgnoreClass(std::string signature);
     void ProcessAffectedVarResults(jvmtiFrameInfo frame, int depth,
-                                   jobject result);
+                                   jobject result, jboolean is_throw_insn, jstring location_string);
     jint GetCorrespondingTaintObjectSlot(jvmtiFrameInfo frame, int depth, int slot, jvmtiLocalVariableEntry *table, int table_size);
     int ComputeExceptionId(jobject obj);
 

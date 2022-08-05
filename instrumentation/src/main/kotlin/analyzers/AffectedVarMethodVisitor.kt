@@ -14,7 +14,9 @@ import org.objectweb.asm.tree.analysis.SourceValue
 
 
 private val logger = KotlinLogging.logger {}
-class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val owner: String, access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array<out String>?):
+class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val isThrowInsn: Boolean, val owner: String,
+                               access: Int, name: String?, descriptor: String?, signature: String?,
+                               exceptions: Array<out String>?):
     MethodNode(ASM8, access, name, descriptor, signature, exceptions) {
     var byteCodeOffset = 0L
     var throwInsn: AbstractInsnNode? = null
@@ -153,6 +155,8 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
 
     val affectedVars = mutableSetOf<Int>()
     val affectedFields = mutableSetOf<String>()
+    val sourceVars = mutableSetOf<Int>()
+    val sourceFields = mutableSetOf<String>()
 
     private fun processAffectedInsns(affectedInsns: Set<AbstractInsnNode>, frames: Array<Frame<SourceValue>>) {
         val throwInsnFrame = frames[instructions.indexOf(throwInsn)]
@@ -186,6 +190,9 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
                                 try {
                                     if (throwInsnFrame.getLocal(src.`var`) == srcFrame.getLocal(src.`var`)) {
                                         affectedVars.add(src.`var`)
+                                        if (insn == throwInsn && isThrowInsn) {
+                                            sourceVars.add(src.`var`)
+                                        }
                                     }
                                 } catch (e: IndexOutOfBoundsException) {
                                     logger.info { "Local object is not on the stack!" }
@@ -254,8 +261,8 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val o
                         affectedInsns.remove(insn)
                     }
                 }
-                affectedInsns.remove(throwInsn)
             }
+            affectedInsns.add(throwInsn!!)
             processAffectedInsns(affectedInsns, analyzer.frames)
         } else {
             logger.error { "Error finding throwInsn/catchInsn at index $throwIndex in class $owner:$name" }
