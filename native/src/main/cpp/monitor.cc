@@ -5,6 +5,7 @@
 #include <vector>
 #include <set>
 #include <thread>
+#include <mutex>
 
 #include "runtime.hpp"
 #include "processor.hpp"
@@ -32,7 +33,14 @@
 // }
 
 
-static std::set<jthread> processing_threads;
+static std::mutex processing_threads_mutex;
+static std::set<jlong> processing_threads;
+
+jlong GetThreadId(jthread thread, JNIEnv *env) {
+    auto clazz = env->FindClass("java/lang/Thread");
+    auto method_id = env->GetMethodID(clazz, "getId", "()J");
+    return env->CallLongMethod(thread, method_id);
+}
 
 
 void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
@@ -40,12 +48,10 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
                                jobject exception, jmethodID catch_method,
                                jlocation catch_location) {
     PLOG_INFO << "Start processing: " << thread;
-    for (auto stored: processing_threads) {
-        if (env->IsSameObject(stored, thread)) {
-            return;
-        }
+    jlong exception_thread_id = GetThreadId(thread, env);
+    if (processing_threads.find(exception_thread_id) != processing_threads.end()) {
+        return;
     }
-    // We need to create a new thread to avoid internal exceptions.
     std::thread new_thread([=]() {
         JavaVM *jvm;
         auto result = env->GetJavaVM(&jvm);
@@ -57,12 +63,22 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
         auto cls = env->FindClass("java/lang/Thread");
         auto mid = env->GetStaticMethodID(cls, "currentThread", "()Ljava/lang/Thread;");
         jthread current_thread = env->CallStaticObjectMethod(cls, mid);
-        processing_threads.insert(current_thread);
+        jlong current_thread_id = GetThreadId(current_thread, env);
+
+        processing_threads_mutex.lock();
+        processing_threads.insert(current_thread_id);
+        processing_threads_mutex.unlock();
+
+
         exchain::ExceptionProcessor processor(jvmti, env, thread, method,
                                               location, catch_method,
                                               catch_location, exception);
         processor.Process();
-        processing_threads.erase(current_thread);
+
+        processing_threads_mutex.lock();
+        processing_threads.erase(current_thread_id);
+        processing_threads_mutex.unlock();
+
         jvm->DetachCurrentThread();
     });
     new_thread.join();

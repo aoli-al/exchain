@@ -46,6 +46,7 @@ shadowJar {
     archiveVersion.set('')
 
     relocate 'org.objectweb.asm', 'shadow.asm'
+    relocate 'org.slf4j', 'shadow.slf4j'
     dependsOn ':native:linkDebug'
 }
 

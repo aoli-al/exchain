@@ -10,16 +10,21 @@ import edu.columbia.cs.psl.phosphor.struct.Tainted
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
 import mu.KotlinLogging
 import org.objectweb.asm.*
+import java.io.IOException
 
 private val logger = KotlinLogging.logger {}
 object AffectedVarDriver {
-    fun analyzeAffectedVar(clazz: String, method: String, throwIndex: Long, catchIndex: Long, isThrowInsn: Boolean) : AffectedVarResults {
+    fun analyzeAffectedVar(clazz: String, method: String, throwIndex: Long, catchIndex: Long, isThrowInsn: Boolean) : AffectedVarResults? {
         val className = clazz.replace("/", ".").substring(1 until clazz.length-1)
         logger.info { "Start processing ${className}, method: $method, throwIndex: $throwIndex, catchIndex: $catchIndex" }
         val classReader = if (className in TransformedCodeStore.store) {
             ClassReader(TransformedCodeStore.store[className])
         } else {
-            ClassReader(className)
+            try {
+                ClassReader(className)
+            } catch (e: IOException) {
+                return null
+            }
         }
         val visitor = AffectedVarClassVisitor(throwIndex, catchIndex, isThrowInsn, className, method)
         classReader.accept(visitor, 0)
@@ -27,11 +32,7 @@ object AffectedVarDriver {
         val affectedFields = visitor.methodVisitor?.affectedFields?.toTypedArray() ?: emptyArray()
         val affectedVars = visitor.methodVisitor?.affectedVars?.toIntArray() ?: intArrayOf()
         val sourceVars = visitor.methodVisitor?.sourceVars?.toIntArray() ?: intArrayOf()
-        val a = (AffectedVarResults(affectedVars, affectedFields, sourceVars))
-        println(a.affectedVars)
-        println(a.affectedFields)
-        println(a.sourceVars)
-        return a
+        return AffectedVarResults(affectedVars, affectedFields, sourceVars)
     }
 
     private val exceptionStore = mutableMapOf<Int, Any>()
