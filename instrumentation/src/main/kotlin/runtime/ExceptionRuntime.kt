@@ -1,7 +1,7 @@
 package al.aoli.exchain.instrumentation.runtime
 
 import al.aoli.exchain.instrumentation.analyzers.AffectedVarDriver
-import al.aoli.exchain.instrumentation.analyzers.AffectedVarResults
+import al.aoli.exchain.instrumentation.analyzers.AffectedVarResult
 import al.aoli.exchain.instrumentation.runtime.exceptions.ExceptionInjector
 import al.aoli.exchain.instrumentation.server.ExceptionServiceImpl
 import edu.columbia.cs.psl.phosphor.runtime.Taint
@@ -37,7 +37,7 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
-    fun onExceptionStackInfo(clazz: String, method: String, throwLocation: Long, catchLocation: Long, isThrowInsn: Boolean): AffectedVarResults? {
+    fun onExceptionStackInfo(clazz: String, method: String, throwLocation: Long, catchLocation: Long, isThrowInsn: Boolean): AffectedVarResult? {
         return AffectedVarDriver.analyzeAffectedVar(clazz, method, throwLocation, catchLocation, isThrowInsn)
     }
 

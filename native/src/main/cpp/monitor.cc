@@ -102,7 +102,7 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
     jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_EXCEPTION, NULL);
 
     static plog::ColorConsoleAppender<plog::FuncMessageFormatter> console_appender;
-    plog::init(plog::info, &console_appender);
+    plog::init(plog::warning, &console_appender);
 
     return 0;
 }

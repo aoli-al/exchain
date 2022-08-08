@@ -47,8 +47,8 @@ task runInstrumentedJar(type: JavaExec) {
     dependsOn ":instrumentation:shadowJar"
     dependsOn ":native:build"
     var instrumentation = project(":instrumentation")
-    jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
     jvmArgs "-javaagent:/home/aoli/repos/phosphor/phosphor-jigsaw-javaagent/target/phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
+    jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
     var nat= project(":native")
     jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.so"
 
