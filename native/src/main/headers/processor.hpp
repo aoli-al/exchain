@@ -21,12 +21,12 @@ class ExceptionProcessor {
     static const int kMaxStackDepth = 100;
     const char *kRuntimeClassName =
         "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime";
-    const char *kAffectedVarResultsClassName =
-        "al/aoli/exchain/instrumentation/analyzers/AffectedVarResults";
+    const char *kAffectedVarResultClassName =
+        "al/aoli/exchain/instrumentation/analyzers/AffectedVarResult";
     const char *kExceptionStackInfoMethodName = "onExceptionStackInfo";
     const char *kExceptionStackInfoDescriptor =
         "(Ljava/lang/String;Ljava/lang/String;JJZ)Lal/aoli/exchain/"
-        "instrumentation/analyzers/AffectedVarResults;";
+        "instrumentation/analyzers/AffectedVarResult;";
     const char *kTaintObjectMethodName = "taintObject";
     const char *kTaintObjectMethodDescriptor = "(Ljava/lang/Object;ILjava/lang/Thread;ILjava/lang/Object;)Ledu/columbia/cs/psl/phosphor/runtime/Taint;";
     const char *kAnalyzeSourceMethodName = "analyzeSource";
@@ -54,13 +54,14 @@ class ExceptionProcessor {
     std::string GetClassSignature(jmethodID clazz);
     bool CheckJvmTIError(jvmtiError error, std::string msg);
     bool ShouldIgnoreClass(std::string signature);
-    void ProcessAffectedVarResults(jvmtiFrameInfo frame, int depth,
+    bool ShouldTerminateEarly(std::string signature);
+    void ProcessAffectedVarResult(jvmtiFrameInfo frame, int depth,
                                    jobject result, jboolean is_throw_insn, jstring location_string);
     jint GetCorrespondingTaintObjectSlot(jvmtiFrameInfo frame, int depth, int slot, jvmtiLocalVariableEntry *table, int table_size);
     int ComputeExceptionId(jobject obj);
 
    public:
-    jintArray Process();
+    void Process();
 };
 
 }  // namespace exchain

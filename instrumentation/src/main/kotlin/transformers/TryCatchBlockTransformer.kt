@@ -19,11 +19,11 @@ class TryCatchBlockTransformer(private val typeName: String): AsmVisitorWrapper.
         val access = instrumentedMethod.modifiers
         val name = instrumentedMethod.name
         val descriptor = instrumentedMethod.descriptor
-        return CatchBlockTransformer(typeName,
-//            methodVisitor,
-            TryBlockTransformer(typeName, methodVisitor, access, name, descriptor),
-            access, name, descriptor, null,
-            instrumentedMethod.exceptionTypes.asErasures().toInternalNames()
-        )
+        return methodVisitor
+//        return CatchBlockTransformer(typeName,
+//            TryBlockTransformer(typeName, methodVisitor, access, name, descriptor),
+//            access, name, descriptor, null,
+//            instrumentedMethod.exceptionTypes.asErasures().toInternalNames()
+//        )
     }
 }

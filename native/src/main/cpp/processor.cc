@@ -9,8 +9,7 @@
 
 namespace exchain {
 
-jintArray ExceptionProcessor::Process() {
-
+void ExceptionProcessor::Process() {
     jvmtiFrameInfo frames[kMaxStackDepth];
     int count;
     if (CheckJvmTIError(
@@ -18,14 +17,20 @@ jintArray ExceptionProcessor::Process() {
             "failed to get stack trace.")) {
         PLOG_INFO << "Stack count: " << count;
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
+            auto class_signature = GetClassSignature(frames[stack_idx].method);
+            if (ShouldIgnoreClass(class_signature)) {
+                continue;
+            }
+            if (ShouldTerminateEarly(class_signature)) {
+                return;
+            }
             ProcessStackFrameInfo(frames[stack_idx], stack_idx);
             if (frames[stack_idx].method == catch_method_) {
                 break;
             }
         }
     }
-
-    return NULL;
+    return;
 }
 
 bool ExceptionProcessor::ShouldIgnoreClass(std::string method_name) {
@@ -35,32 +40,37 @@ bool ExceptionProcessor::ShouldIgnoreClass(std::string method_name) {
            method_name.rfind("Lch/qos/", 0) != std::string::npos ||
            method_name.rfind("Lshadow/asm", 0) != std::string::npos ||
            method_name.rfind("Lnet/bytebuddy", 0) != std::string::npos ||
-           method_name.rfind("Lorg/springframework/boot", 0) != std::string::npos ||
+           method_name.rfind("Lorg/apache/catalina/loader", 0) !=
+               std::string::npos ||
            method_name.rfind("Lal/aoli/exchain/instrumentation", 0) !=
                std::string::npos ||
            method_name.rfind("Lorg/slf4j", 0) != std::string::npos ||
            method_name.rfind("Lorg/apache/logging/log4j", 0) !=
                std::string::npos ||
            method_name.rfind("Lsun", 0) != std::string::npos ||
+           method_name.rfind("Lcom/sun", 0) != std::string::npos ||
            method_name.rfind("Lkotlin", 0) != std::string::npos ||
-           method_name.rfind("Ledu/columbia/cs/psl/phosphor", 0) !=
+           method_name.rfind("Ledu/columbia/cs/psl/", 0) !=
                std::string::npos;
+}
+
+bool ExceptionProcessor::ShouldTerminateEarly(std::string method_name) {
+    return method_name.rfind("Lorg/springframework/boot", 0) !=
+               std::string::npos ||
+           method_name.rfind("Lorg/springframework/util/ClassUtils", 0) !=
+               std::string::npos ||
+           method_name.rfind("Lorg.springframework.asm.ClassReader", 0) !=
+               std::string::npos ||
+           method_name.rfind("Lorg/springframework/cglib/core/ClassNameReader",
+                             0) != std::string::npos ||
+           method_name.rfind("Lorg/springframework/core/io/ClassPathResource",
+                             0) != std::string::npos;
 }
 
 void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
                                                int depth) {
-    jint modifiers;
-    jvmti_->GetMethodModifiers(frame.method, &modifiers);
-    // We ignore static methods for now.
     auto class_signature = GetClassSignature(frame.method);
     auto method = GetMethodSignature(frame.method);
-
-    // Ignore JDK classes.
-    if (ShouldIgnoreClass(class_signature)) {
-        LOG_INFO << "System class ignored: " << class_signature
-                 << ", method: " << method << ", location: " << frame.location;
-        return;
-    }
 
     PLOG_INFO << "Throw class: " << class_signature << ", method: " << method
               << ", location: " << frame.location;
@@ -95,20 +105,24 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
         (class_signature + ":" + method + ":" + std::to_string(frame.location))
             .c_str());
 
-    ProcessAffectedVarResults(frame, depth, result, is_throw_insn, location_string);
+    ProcessAffectedVarResult(frame, depth, result, is_throw_insn,
+                             location_string);
 
     PLOG_INFO << "JAVA returns object: " << result;
 }
 
-
-jint ExceptionProcessor::GetCorrespondingTaintObjectSlot(jvmtiFrameInfo frame, int depth, int slot, jvmtiLocalVariableEntry *table, int table_size) {
+jint ExceptionProcessor::GetCorrespondingTaintObjectSlot(
+    jvmtiFrameInfo frame, int depth, int slot, jvmtiLocalVariableEntry *table,
+    int table_size) {
     jobject object;
     for (int i = 0; i < table_size; i++) {
         auto entry = table[i];
-        if (std::string(entry.name).rfind("phosphorShadowLVFor" + std::to_string(slot)) != 0) {
+        if (std::string(entry.name)
+                .rfind("phosphorShadowLVFor" + std::to_string(slot)) != 0) {
             continue;
         }
-        if (entry.start_location > frame.location || entry.start_location + entry.length < frame.location) {
+        if (entry.start_location > frame.location ||
+            entry.start_location + entry.length < frame.location) {
             continue;
         }
         return entry.slot;
@@ -118,27 +132,26 @@ jint ExceptionProcessor::GetCorrespondingTaintObjectSlot(jvmtiFrameInfo frame, i
     return -1;
 }
 
-
-void ExceptionProcessor::ProcessAffectedVarResults(jvmtiFrameInfo frame,
-                                                   int depth, jobject result,
-                                                   jboolean is_throw_insn,
-                                                   jstring location_string) {
+void ExceptionProcessor::ProcessAffectedVarResult(jvmtiFrameInfo frame,
+                                                  int depth, jobject result,
+                                                  jboolean is_throw_insn,
+                                                  jstring location_string) {
     jvmtiLocalVariableEntry *table_ptr;
     jint table_size;
-    if (!CheckJvmTIError(
-            jvmti_->GetLocalVariableTable(frame.method, &table_size, &table_ptr),
-            "get local variable table failed.")) {
+    if (!CheckJvmTIError(jvmti_->GetLocalVariableTable(frame.method,
+                                                       &table_size, &table_ptr),
+                         "get local variable table failed.")) {
         return;
     }
 
-
-    auto clazz = jni_->FindClass(kAffectedVarResultsClassName);
+    auto clazz = jni_->FindClass(kAffectedVarResultClassName);
     auto runtime_clazz = jni_->FindClass(kRuntimeClassName);
 
     if (is_throw_insn) {
         PLOG_INFO << "Start processing throw instructions!";
-        auto analyze_source_method_id = jni_->GetStaticMethodID(
-            runtime_clazz, kAnalyzeSourceMethodName, kAnalyzeSourceMethodDescriptor);
+        auto analyze_source_method_id =
+            jni_->GetStaticMethodID(runtime_clazz, kAnalyzeSourceMethodName,
+                                    kAnalyzeSourceMethodDescriptor);
         auto source_vars_field_id = jni_->GetFieldID(clazz, "sourceVars", "[I");
         PLOG_INFO << "Source var ID: " << source_vars_field_id;
         jintArray source_vars =
@@ -148,7 +161,8 @@ void ExceptionProcessor::ProcessAffectedVarResults(jvmtiFrameInfo frame,
         auto source_vars_cpy = jni_->GetIntArrayElements(source_vars, NULL);
         for (int i = 0; i < source_vars_length; i++) {
             const auto slot = source_vars_cpy[i];
-            jint taint_slot = GetCorrespondingTaintObjectSlot(frame, depth, slot, table_ptr, table_size);
+            jint taint_slot = GetCorrespondingTaintObjectSlot(
+                frame, depth, slot, table_ptr, table_size);
             if (taint_slot == -1) continue;
             jobject taint;
             jvmti_->GetLocalObject(thread_, depth, taint_slot, &taint);
@@ -167,7 +181,6 @@ void ExceptionProcessor::ProcessAffectedVarResults(jvmtiFrameInfo frame,
     const auto affected_vars_length = jni_->GetArrayLength(affected_vars);
     auto affected_vars_cpy = jni_->GetIntArrayElements(affected_vars, NULL);
 
-
     auto taint_object_method_id = jni_->GetStaticMethodID(
         runtime_clazz, kTaintObjectMethodName, kTaintObjectMethodDescriptor);
 
@@ -179,13 +192,15 @@ void ExceptionProcessor::ProcessAffectedVarResults(jvmtiFrameInfo frame,
         //         jvmti_->GetLocalObject(thread_, depth, slot, &obj),
         //         "get local object failed, depth: " + std::to_string(depth) +
         //             ", slot: " + std::to_string(slot))) {
-        jint taint_slot = GetCorrespondingTaintObjectSlot(frame, depth, slot, table_ptr, table_size);
+        jint taint_slot = GetCorrespondingTaintObjectSlot(
+            frame, depth, slot, table_ptr, table_size);
         if (taint_slot == -1) continue;
         jobject taint;
         jvmti_->GetLocalObject(thread_, depth, taint_slot, &taint);
         if (taint == NULL) continue;
         jobject result = jni_->CallStaticObjectMethod(
-            runtime_clazz, taint_object_method_id, taint, slot, thread_, depth, exception_);
+            runtime_clazz, taint_object_method_id, taint, slot, thread_, depth,
+            exception_);
         if (result != NULL) {
             jvmti_->SetLocalObject(thread_, depth, taint_slot, result);
         }
