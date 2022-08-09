@@ -46,3 +46,4 @@ scripts/data
 bin/
 _codebraid/
 *.pdf
+*sourceSink.txt
