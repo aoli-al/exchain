@@ -1,0 +1,898 @@
+// class version 52.0 (52)
+// access flags 0x31
+public final class al/aoli/exchain/instrumentation/MainKt$premain$1 extends net/bytebuddy/agent/builder/AgentBuilder$Listener$Adapter {
+
+  // compiled from: Main.kt
+  OUTERCLASS al/aoli/exchain/instrumentation/MainKt premain (Ljava/lang/String;Ljava/lang/instrument/Instrumentation;)V
+
+  @Lkotlin/Metadata;(mv={1, 7, 1}, k=1, xi=48, d1={"\u0000/\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000b\n\u0000\n\u0002\u0018\u0002\n\u0000*\u0001\u0000\u0008\n\u0018\u00002\u00020\u0001J4\u0010\u0002\u001a\u00020\u00032\u0006\u0010\u0004\u001a\u00020\u00052\u0008\u0010\u0006\u001a\u0004\u0018\u00010\u00072\u0008\u0010\u0008\u001a\u0004\u0018\u00010\u00092\u0006\u0010\n\u001a\u00020\u000b2\u0006\u0010\u000c\u001a\u00020\rH\u0016\u00a8\u0006\u000e"}, d2={"al/aoli/exchain/instrumentation/MainKt$premain$1", "Lnet/bytebuddy/agent/builder/AgentBuilder$Listener$Adapter;", "onTransformation", "", "typeDescription", "Lnet/bytebuddy/description/type/TypeDescription;", "classLoader", "Ljava/lang/ClassLoader;", "module", "Lnet/bytebuddy/utility/JavaModule;", "loaded", "", "dynamicType", "Lnet/bytebuddy/dynamic/DynamicType;", "instrumentation"})
+
+  @Ledu/columbia/cs/psl/phosphor/runtime/TaintInstrumented;() // invisible
+  // access flags 0x19
+  public final static INNERCLASS al/aoli/exchain/instrumentation/MainKt$premain$1 null null
+
+  // access flags 0x18
+  final static J serialVersionUID = 3434544524629048502
+
+  // access flags 0x1A
+  private final static Ljava/lang/Object; $$PHOSPHOR_REMOVE_SVUID
+
+  // access flags 0x9
+  public static Ledu/columbia/cs/psl/phosphor/runtime/Taint; serialVersionUIDPHOSPHOR_TAG
+
+  // access flags 0x9
+  public static Ledu/columbia/cs/psl/phosphor/runtime/Taint; $$PHOSPHOR_REMOVE_SVUIDPHOSPHOR_TAG
+
+  // access flags 0x0
+  <init>()V
+    LDC -857263373
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.forMethod (I)Ledu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame;
+    DUP
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getAndClearCleanupFlag ()Z
+    ISTORE 2
+    ASTORE 1
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 3
+    ALOAD 1
+    DUP
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L0
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 4
+    ASTORE 4
+    NOP
+    LDC "PhosphorArgTaintIndices=4,"
+    POP
+    POP
+   L1
+    LINENUMBER 24 L1
+    ALOAD 0
+    ALOAD 4
+    ASTORE 3
+    ALOAD 1
+    ALOAD 3
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 1
+    LDC -857263373
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESPECIAL net/bytebuddy/agent/builder/AgentBuilder$Listener$Adapter.<init> ()V
+    ALOAD 1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+    ALOAD 1
+    ILOAD 2
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.popStackFrameIfNeeded (Z)V
+    RETURN
+   L2
+    LOCALVARIABLE this Lal/aoli/exchain/instrumentation/MainKt$premain$1; L1 L2 0
+    LOCALVARIABLE this$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L0 L2 4
+    LOCALVARIABLE phosphorStackFrame Ledu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame; L1 L2 1
+    LOCALVARIABLE phosphorStackFrameShouldBeClearedAtEnd Z L1 L2 2
+    LOCALVARIABLE phosphorStackTaint0 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L1 L2 3
+    MAXSTACK = 4
+    MAXLOCALS = 5
+
+  // access flags 0x1
+  public onTransformation(Lnet/bytebuddy/description/type/TypeDescription;Ljava/lang/ClassLoader;Lnet/bytebuddy/utility/JavaModule;ZLnet/bytebuddy/dynamic/DynamicType;)V
+    // annotable parameter count: 5 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 1
+    @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 2
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 4
+    LDC 979028259
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.forMethod (I)Ledu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame;
+    DUP
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getAndClearCleanupFlag ()Z
+    ISTORE 7
+    ASTORE 6
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 9
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 10
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 11
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 12
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 13
+    ALOAD 6
+    DUP
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L0
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 14
+    ASTORE 14
+    NOP
+    DUP
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L1
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 15
+    ASTORE 15
+    DUP
+    ICONST_2
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L2
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 16
+    ASTORE 16
+    DUP
+    ICONST_3
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L3
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 17
+    ASTORE 17
+    DUP
+    ICONST_4
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L4
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 18
+    ASTORE 18
+    DUP
+    ICONST_5
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L5
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 19
+    ASTORE 19
+    LDC "PhosphorArgTaintIndices=14,15,16,17,18,19,"
+    POP
+    POP
+   L6
+    ALOAD 1
+    ALOAD 15
+    ASTORE 8
+    LDC "typeDescription"
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 9
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 9
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 1737020882
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+    ALOAD 5
+    ALOAD 19
+    ASTORE 8
+    LDC "dynamicType"
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 9
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 9
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 1737020882
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+   L7
+    LINENUMBER 32 L7
+    ALOAD 0
+    ALOAD 14
+    ASTORE 8
+    ALOAD 1
+    ALOAD 15
+    ASTORE 9
+    ALOAD 2
+    ALOAD 16
+    ASTORE 10
+    ALOAD 3
+    ALOAD 17
+    ASTORE 11
+    ILOAD 4
+    ALOAD 18
+    ASTORE 12
+    ALOAD 5
+    ALOAD 19
+    ASTORE 13
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 9
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 10
+    ICONST_2
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 11
+    ICONST_3
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 12
+    ICONST_4
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 13
+    ICONST_5
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 979028259
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESPECIAL net/bytebuddy/agent/builder/AgentBuilder$Listener$Adapter.onTransformation (Lnet/bytebuddy/description/type/TypeDescription;Ljava/lang/ClassLoader;Lnet/bytebuddy/utility/JavaModule;ZLnet/bytebuddy/dynamic/DynamicType;)V
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+   L8
+    LINENUMBER 33 L8
+    GETSTATIC al/aoli/exchain/instrumentation/store/TransformedCodeStore.INSTANCE : Lal/aoli/exchain/instrumentation/store/TransformedCodeStore;
+    GETSTATIC al/aoli/exchain/instrumentation/store/TransformedCodeStore.INSTANCEPHOSPHOR_TAG : Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC -847411860
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKEVIRTUAL al/aoli/exchain/instrumentation/store/TransformedCodeStore.getStore ()Ljava/util/Map;
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+   L9
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 21
+    ALOAD 8
+    ASTORE 21
+    ASTORE 20
+    ALOAD 5
+    ALOAD 19
+    ASTORE 8
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 1008840749
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKEINTERFACE net/bytebuddy/dynamic/DynamicType.getTypeDescription ()Lnet/bytebuddy/description/type/TypeDescription; (itf)
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC -1881315172
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKEINTERFACE net/bytebuddy/description/type/TypeDescription.getTypeName ()Ljava/lang/String; (itf)
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    DUP
+    ALOAD 8
+    ASTORE 9
+    LDC "dynamicType.typeDescription.typeName"
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 10
+    ALOAD 6
+    ALOAD 9
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 10
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC -1413959326
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullExpressionValue (Ljava/lang/Object;Ljava/lang/String;)V
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+   L10
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 23
+    ALOAD 8
+    ASTORE 23
+    ASTORE 22
+    ALOAD 5
+    ALOAD 19
+    ASTORE 8
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 1392284278
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKEINTERFACE net/bytebuddy/dynamic/DynamicType.getBytes ()[B (itf)
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    ALOAD 6
+    SWAP
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnWrapper ([B)Ledu/columbia/cs/psl/phosphor/struct/TaggedByteArray;
+    CHECKCAST edu/columbia/cs/psl/phosphor/struct/TaggedByteArray
+    DUP
+    ALOAD 8
+    ASTORE 9
+    LDC "dynamicType.bytes"
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 10
+    ALOAD 6
+    ALOAD 9
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 10
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC -1413959326
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullExpressionValue (Ljava/lang/Object;Ljava/lang/String;)V
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+   L11
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 25
+    ALOAD 8
+    ASTORE 25
+    ASTORE 24
+    ALOAD 20
+    ALOAD 21
+    ASTORE 8
+    ALOAD 22
+    ALOAD 23
+    ASTORE 9
+    ALOAD 24
+    ALOAD 25
+    ASTORE 10
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 9
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 10
+    ICONST_2
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 573277080
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKEINTERFACE java/util/Map.put (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; (itf)
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    POP
+   L12
+    LINENUMBER 34 L12
+    ALOAD 6
+    ILOAD 7
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.popStackFrameIfNeeded (Z)V
+    RETURN
+   L13
+    LOCALVARIABLE this Lal/aoli/exchain/instrumentation/MainKt$premain$1; L6 L13 0
+    LOCALVARIABLE module$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L3 L13 17
+    LOCALVARIABLE phosphorShadowLVFor22XX7 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L10 L13 23
+    LOCALVARIABLE classLoader$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L2 L13 16
+    LOCALVARIABLE loaded$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L4 L13 18
+    LOCALVARIABLE phosphorShadowLVFor20XX6 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L9 L13 21
+    LOCALVARIABLE dynamicType$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L5 L13 19
+    LOCALVARIABLE typeDescription$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L1 L13 15
+    LOCALVARIABLE this$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L0 L13 14
+    LOCALVARIABLE phosphorShadowLVFor24XX8 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L11 L13 25
+    LOCALVARIABLE typeDescription Lnet/bytebuddy/description/type/TypeDescription; L6 L13 1
+    LOCALVARIABLE classLoader Ljava/lang/ClassLoader; L6 L13 2
+    LOCALVARIABLE module Lnet/bytebuddy/utility/JavaModule; L6 L13 3
+    LOCALVARIABLE loaded Z L6 L13 4
+    LOCALVARIABLE dynamicType Lnet/bytebuddy/dynamic/DynamicType; L6 L13 5
+    LOCALVARIABLE phosphorStackFrame Ledu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame; L6 L13 6
+    LOCALVARIABLE phosphorStackFrameShouldBeClearedAtEnd Z L6 L13 7
+    LOCALVARIABLE phosphorStackTaint0 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 8
+    LOCALVARIABLE phosphorStackTaint1 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 9
+    LOCALVARIABLE phosphorStackTaint2 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 10
+    LOCALVARIABLE phosphorStackTaint3 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 11
+    LOCALVARIABLE phosphorStackTaint4 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 12
+    LOCALVARIABLE phosphorStackTaint5 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 13
+    MAXSTACK = 9
+    MAXLOCALS = 26
+
+  // access flags 0x1001
+  public synthetic getPHOSPHOR_TAG()Ljava/lang/Object;
+    ALOAD 0
+    GETFIELD al/aoli/exchain/instrumentation/MainKt$premain$1.PHOSPHOR_TAG : Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ARETURN
+    MAXSTACK = 1
+    MAXLOCALS = 1
+
+  // access flags 0x1001
+  public synthetic setPHOSPHOR_TAG(Ljava/lang/Object;)V
+    ALOAD 0
+    ALOAD 1
+    CHECKCAST edu/columbia/cs/psl/phosphor/runtime/Taint
+    PUTFIELD al/aoli/exchain/instrumentation/MainKt$premain$1.PHOSPHOR_TAG : Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    RETURN
+    MAXSTACK = 2
+    MAXLOCALS = 2
+
+  // access flags 0x8
+  static <clinit>()V
+    LDC Lal/aoli/exchain/instrumentation/MainKt$premain$1;.class
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/SourceSinkTransformer.retransform (Ljava/lang/Class;)V
+    RETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+}
+// class version 52.0 (52)
+// access flags 0x31
+public final class al/aoli/exchain/instrumentation/MainKt$premain$1 extends net/bytebuddy/agent/builder/AgentBuilder$Listener$Adapter {
+
+  // compiled from: Main.kt
+  OUTERCLASS al/aoli/exchain/instrumentation/MainKt premain (Ljava/lang/String;Ljava/lang/instrument/Instrumentation;)V
+
+  @Lkotlin/Metadata;(mv={1, 7, 1}, k=1, xi=48, d1={"\u0000/\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0018\u0002\n\u0000\n\u0002\u0010\u000b\n\u0000\n\u0002\u0018\u0002\n\u0000*\u0001\u0000\u0008\n\u0018\u00002\u00020\u0001J4\u0010\u0002\u001a\u00020\u00032\u0006\u0010\u0004\u001a\u00020\u00052\u0008\u0010\u0006\u001a\u0004\u0018\u00010\u00072\u0008\u0010\u0008\u001a\u0004\u0018\u00010\u00092\u0006\u0010\n\u001a\u00020\u000b2\u0006\u0010\u000c\u001a\u00020\rH\u0016\u00a8\u0006\u000e"}, d2={"al/aoli/exchain/instrumentation/MainKt$premain$1", "Lnet/bytebuddy/agent/builder/AgentBuilder$Listener$Adapter;", "onTransformation", "", "typeDescription", "Lnet/bytebuddy/description/type/TypeDescription;", "classLoader", "Ljava/lang/ClassLoader;", "module", "Lnet/bytebuddy/utility/JavaModule;", "loaded", "", "dynamicType", "Lnet/bytebuddy/dynamic/DynamicType;", "instrumentation"})
+
+  @Ledu/columbia/cs/psl/phosphor/runtime/TaintInstrumented;() // invisible
+  // access flags 0x19
+  public final static INNERCLASS al/aoli/exchain/instrumentation/MainKt$premain$1 null null
+
+  // access flags 0x18
+  final static J serialVersionUID = 3434544524629048502
+
+  // access flags 0x1A
+  private final static Ljava/lang/Object; $$PHOSPHOR_REMOVE_SVUID
+
+  // access flags 0x9
+  public static Ledu/columbia/cs/psl/phosphor/runtime/Taint; serialVersionUIDPHOSPHOR_TAG
+
+  // access flags 0x9
+  public static Ledu/columbia/cs/psl/phosphor/runtime/Taint; $$PHOSPHOR_REMOVE_SVUIDPHOSPHOR_TAG
+
+  // access flags 0x0
+  <init>()V
+    LDC -857263373
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.forMethod (I)Ledu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame;
+    DUP
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getAndClearCleanupFlag ()Z
+    ISTORE 2
+    ASTORE 1
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 3
+    ALOAD 1
+    DUP
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L0
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 4
+    ASTORE 4
+    NOP
+    LDC "PhosphorArgTaintIndices=4,"
+    POP
+    POP
+   L1
+    LINENUMBER 24 L1
+    ALOAD 0
+    ALOAD 4
+    ASTORE 3
+    ALOAD 1
+    ALOAD 3
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 1
+    LDC -857263373
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESPECIAL net/bytebuddy/agent/builder/AgentBuilder$Listener$Adapter.<init> ()V
+    ALOAD 1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+    ALOAD 1
+    ILOAD 2
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.popStackFrameIfNeeded (Z)V
+    RETURN
+   L2
+    LOCALVARIABLE this Lal/aoli/exchain/instrumentation/MainKt$premain$1; L1 L2 0
+    LOCALVARIABLE this$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L0 L2 4
+    LOCALVARIABLE phosphorStackFrame Ledu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame; L1 L2 1
+    LOCALVARIABLE phosphorStackFrameShouldBeClearedAtEnd Z L1 L2 2
+    LOCALVARIABLE phosphorStackTaint0 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L1 L2 3
+    MAXSTACK = 4
+    MAXLOCALS = 5
+
+  // access flags 0x1
+  public onTransformation(Lnet/bytebuddy/description/type/TypeDescription;Ljava/lang/ClassLoader;Lnet/bytebuddy/utility/JavaModule;ZLnet/bytebuddy/dynamic/DynamicType;)V
+    // annotable parameter count: 5 (invisible)
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 0
+    @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 1
+    @Lorg/jetbrains/annotations/Nullable;() // invisible, parameter 2
+    @Lorg/jetbrains/annotations/NotNull;() // invisible, parameter 4
+    LDC 979028259
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.forMethod (I)Ledu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame;
+    DUP
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getAndClearCleanupFlag ()Z
+    ISTORE 7
+    ASTORE 6
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 9
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 10
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 11
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 12
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 13
+    ALOAD 6
+    DUP
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L0
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 14
+    ASTORE 14
+    NOP
+    DUP
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L1
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 15
+    ASTORE 15
+    DUP
+    ICONST_2
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L2
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 16
+    ASTORE 16
+    DUP
+    ICONST_3
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L3
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 17
+    ASTORE 17
+    DUP
+    ICONST_4
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L4
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 18
+    ASTORE 18
+    DUP
+    ICONST_5
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getArgTaint (I)Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+   L5
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 19
+    ASTORE 19
+    LDC "PhosphorArgTaintIndices=14,15,16,17,18,19,"
+    POP
+    POP
+   L6
+    ALOAD 1
+    ALOAD 15
+    ASTORE 8
+    LDC "typeDescription"
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 9
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 9
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 1737020882
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+    ALOAD 5
+    ALOAD 19
+    ASTORE 8
+    LDC "dynamicType"
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 9
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 9
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 1737020882
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullParameter (Ljava/lang/Object;Ljava/lang/String;)V
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+   L7
+    LINENUMBER 32 L7
+    ALOAD 0
+    ALOAD 14
+    ASTORE 8
+    ALOAD 1
+    ALOAD 15
+    ASTORE 9
+    ALOAD 2
+    ALOAD 16
+    ASTORE 10
+    ALOAD 3
+    ALOAD 17
+    ASTORE 11
+    ILOAD 4
+    ALOAD 18
+    ASTORE 12
+    ALOAD 5
+    ALOAD 19
+    ASTORE 13
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 9
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 10
+    ICONST_2
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 11
+    ICONST_3
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 12
+    ICONST_4
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 13
+    ICONST_5
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 979028259
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESPECIAL net/bytebuddy/agent/builder/AgentBuilder$Listener$Adapter.onTransformation (Lnet/bytebuddy/description/type/TypeDescription;Ljava/lang/ClassLoader;Lnet/bytebuddy/utility/JavaModule;ZLnet/bytebuddy/dynamic/DynamicType;)V
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+   L8
+    LINENUMBER 33 L8
+    GETSTATIC al/aoli/exchain/instrumentation/store/TransformedCodeStore.INSTANCE : Lal/aoli/exchain/instrumentation/store/TransformedCodeStore;
+    GETSTATIC al/aoli/exchain/instrumentation/store/TransformedCodeStore.INSTANCEPHOSPHOR_TAG : Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC -847411860
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKEVIRTUAL al/aoli/exchain/instrumentation/store/TransformedCodeStore.getStore ()Ljava/util/Map;
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+   L9
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 21
+    ALOAD 8
+    ASTORE 21
+    ASTORE 20
+    ALOAD 5
+    ALOAD 19
+    ASTORE 8
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 1008840749
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKEINTERFACE net/bytebuddy/dynamic/DynamicType.getTypeDescription ()Lnet/bytebuddy/description/type/TypeDescription; (itf)
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC -1881315172
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKEINTERFACE net/bytebuddy/description/type/TypeDescription.getTypeName ()Ljava/lang/String; (itf)
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    DUP
+    ALOAD 8
+    ASTORE 9
+    LDC "dynamicType.typeDescription.typeName"
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 10
+    ALOAD 6
+    ALOAD 9
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 10
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC -1413959326
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullExpressionValue (Ljava/lang/Object;Ljava/lang/String;)V
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+   L10
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 23
+    ALOAD 8
+    ASTORE 23
+    ASTORE 22
+    ALOAD 5
+    ALOAD 19
+    ASTORE 8
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 1392284278
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKEINTERFACE net/bytebuddy/dynamic/DynamicType.getBytes ()[B (itf)
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    ALOAD 6
+    SWAP
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnWrapper ([B)Ledu/columbia/cs/psl/phosphor/struct/TaggedByteArray;
+    CHECKCAST edu/columbia/cs/psl/phosphor/struct/TaggedByteArray
+    DUP
+    ALOAD 8
+    ASTORE 9
+    LDC "dynamicType.bytes"
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 10
+    ALOAD 6
+    ALOAD 9
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 10
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC -1413959326
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKESTATIC kotlin/jvm/internal/Intrinsics.checkNotNullExpressionValue (Ljava/lang/Object;Ljava/lang/String;)V
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    POP
+   L11
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/runtime/Taint.emptyTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 25
+    ALOAD 8
+    ASTORE 25
+    ASTORE 24
+    ALOAD 20
+    ALOAD 21
+    ASTORE 8
+    ALOAD 22
+    ALOAD 23
+    ASTORE 9
+    ALOAD 24
+    ALOAD 25
+    ASTORE 10
+    ALOAD 6
+    ALOAD 8
+    ICONST_0
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 9
+    ICONST_1
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    ALOAD 10
+    ICONST_2
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.setArgTaint (Ledu/columbia/cs/psl/phosphor/runtime/Taint;I)V
+    ALOAD 6
+    LDC 573277080
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.prepareForCall (I)V
+    INVOKEINTERFACE java/util/Map.put (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object; (itf)
+    ALOAD 6
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.getReturnTaint ()Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ASTORE 8
+    POP
+   L12
+    LINENUMBER 34 L12
+    ALOAD 6
+    ILOAD 7
+    INVOKEVIRTUAL edu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame.popStackFrameIfNeeded (Z)V
+    RETURN
+   L13
+    LOCALVARIABLE this Lal/aoli/exchain/instrumentation/MainKt$premain$1; L6 L13 0
+    LOCALVARIABLE module$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L3 L13 17
+    LOCALVARIABLE phosphorShadowLVFor22XX7 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L10 L13 23
+    LOCALVARIABLE classLoader$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L2 L13 16
+    LOCALVARIABLE loaded$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L4 L13 18
+    LOCALVARIABLE phosphorShadowLVFor20XX6 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L9 L13 21
+    LOCALVARIABLE dynamicType$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L5 L13 19
+    LOCALVARIABLE typeDescription$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L1 L13 15
+    LOCALVARIABLE this$$PHOSPHORTAG Ledu/columbia/cs/psl/phosphor/runtime/Taint; L0 L13 14
+    LOCALVARIABLE phosphorShadowLVFor24XX8 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L11 L13 25
+    LOCALVARIABLE typeDescription Lnet/bytebuddy/description/type/TypeDescription; L6 L13 1
+    LOCALVARIABLE classLoader Ljava/lang/ClassLoader; L6 L13 2
+    LOCALVARIABLE module Lnet/bytebuddy/utility/JavaModule; L6 L13 3
+    LOCALVARIABLE loaded Z L6 L13 4
+    LOCALVARIABLE dynamicType Lnet/bytebuddy/dynamic/DynamicType; L6 L13 5
+    LOCALVARIABLE phosphorStackFrame Ledu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame; L6 L13 6
+    LOCALVARIABLE phosphorStackFrameShouldBeClearedAtEnd Z L6 L13 7
+    LOCALVARIABLE phosphorStackTaint0 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 8
+    LOCALVARIABLE phosphorStackTaint1 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 9
+    LOCALVARIABLE phosphorStackTaint2 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 10
+    LOCALVARIABLE phosphorStackTaint3 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 11
+    LOCALVARIABLE phosphorStackTaint4 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 12
+    LOCALVARIABLE phosphorStackTaint5 Ledu/columbia/cs/psl/phosphor/runtime/Taint; L6 L13 13
+    MAXSTACK = 9
+    MAXLOCALS = 26
+
+  // access flags 0x1001
+  public synthetic getPHOSPHOR_TAG()Ljava/lang/Object;
+    ALOAD 0
+    GETFIELD al/aoli/exchain/instrumentation/MainKt$premain$1.PHOSPHOR_TAG : Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    ARETURN
+    MAXSTACK = 1
+    MAXLOCALS = 1
+
+  // access flags 0x1001
+  public synthetic setPHOSPHOR_TAG(Ljava/lang/Object;)V
+    ALOAD 0
+    ALOAD 1
+    CHECKCAST edu/columbia/cs/psl/phosphor/runtime/Taint
+    PUTFIELD al/aoli/exchain/instrumentation/MainKt$premain$1.PHOSPHOR_TAG : Ledu/columbia/cs/psl/phosphor/runtime/Taint;
+    RETURN
+    MAXSTACK = 2
+    MAXLOCALS = 2
+
+  // access flags 0x8
+  static <clinit>()V
+    LDC Lal/aoli/exchain/instrumentation/MainKt$premain$1;.class
+    INVOKESTATIC edu/columbia/cs/psl/phosphor/SourceSinkTransformer.retransform (Ljava/lang/Class;)V
+    RETURN
+    MAXSTACK = 1
+    MAXLOCALS = 0
+}
