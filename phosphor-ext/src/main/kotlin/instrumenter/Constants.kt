@@ -1,6 +1,6 @@
 package instrumenter
 
 object Constants {
-    val originMethodSuffix = "ExchainOrigin"
-    val instrumentedMethodSuffix = "ExchainInst"
+    const val originMethodSuffix = "ExchainOrigin"
+    const val instrumentedMethodSuffix = "ExchainInst"
 }
