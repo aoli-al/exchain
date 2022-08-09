@@ -1,0 +1,16 @@
+// class version 60.0 (60)
+// access flags 0x21
+public class al/aoli/exchain/demo/TaintTest implements edu/columbia/cs/psl/phosphor/struct/TaintedWithObjTag {
+
+
+  @Ledu/columbia/cs/psl/phosphor/runtime/TaintInstrumented;() // invisible
+  // compiled from: TaintTest.java
+  NESTMEMBER al/aoli/exchain/demo/TaintTest$Foo
+  // access flags 0x8
+  static INNERCLASS al/aoli/exchain/demo/TaintTest$Foo al/aoli/exchain/demo/TaintTest Foo
+
+  // access flags 0x1
+  public exchainConstructorExchainOrigin()V
+
+  // access flags 0x1
+  public <init>()V

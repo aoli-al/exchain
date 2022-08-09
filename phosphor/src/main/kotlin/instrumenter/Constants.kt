@@ -1,4 +1,4 @@
-package instrumenter
+package al.aoli.exchain.phosphor.instrumenter
 
 object Constants {
     const val originMethodSuffix = "ExchainOrigin"

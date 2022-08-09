@@ -31,23 +31,29 @@ run {
 
 task instrumentJar(type: JavaExec) {
     // This looks hacky...
-    main = "-jar"
-    var jarPath = "/home/aoli/repos/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
+    var phosphor = project(":phosphor")
+    classpath "$phosphor.buildDir/libs/${phosphor.name}.jar"
+    main = "edu.columbia.cs.psl.phosphor.Instrumenter"
+    var jarPath = "${project.gradle.gradleUserHomeDir.parent}/repos/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
+    classpath jarPath
     var src= jar.getArchiveFile().get().asFile.absolutePath
     var dst = "${buildDir}/libs/instrumented"
-    args jarPath, src, dst
+    args src, dst, "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchCV",
+            "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
     dependsOn jar
+    dependsOn ":phosphor:jar"
 }
 
 
 task runInstrumentedJar(type: JavaExec) {
-    executable = "/home/aoli/repos/jre-inst/bin/java"
+    executable = "${project.gradle.gradleUserHomeDir.parent}/repos/jre-inst/bin/java"
 
     main = "-jar"
     dependsOn ":instrumentation:shadowJar"
     dependsOn ":native:build"
     var instrumentation = project(":instrumentation")
-    jvmArgs "-javaagent:/home/aoli/repos/phosphor/phosphor-jigsaw-javaagent/target/phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
+    jvmArgs "-javaagent:${project.gradle.gradleUserHomeDir.parent}/repos/phosphor/phosphor-jigsaw-javaagent/target/phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT." +
+            "jar"
     jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
     var nat= project(":native")
     jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.so"
