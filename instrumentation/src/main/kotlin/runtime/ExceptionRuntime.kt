@@ -37,6 +37,11 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
+    fun taintEnabled(): Boolean {
+        return AffectedVarDriver.taintEnabled
+    }
+
+    @JvmStatic
     fun onExceptionStackInfo(clazz: String, method: String, throwLocation: Long, catchLocation: Long, isThrowInsn: Boolean): AffectedVarResult? {
         return AffectedVarDriver.analyzeAffectedVar(clazz, method, throwLocation, catchLocation, isThrowInsn)
     }

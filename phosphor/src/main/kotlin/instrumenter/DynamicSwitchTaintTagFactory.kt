@@ -11,4 +11,8 @@ class DynamicSwitchTaintTagFactory: DataAndControlFlowTagFactory() {
         return false
     }
 
+    override fun isIgnoredClass(className: String): Boolean {
+        return className.startsWith("al.aoli")
+    }
+
 }

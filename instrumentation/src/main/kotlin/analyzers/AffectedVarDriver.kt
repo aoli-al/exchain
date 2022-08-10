@@ -12,6 +12,7 @@ import java.io.IOException
 private val logger = KotlinLogging.logger {}
 object AffectedVarDriver {
     val store = InMemoryAffectedVarStore()
+    var taintEnabled: Boolean = false
     fun analyzeAffectedVar(clazz: String, method: String, throwIndex: Long, catchIndex: Long, isThrowInsn: Boolean) : AffectedVarResult? {
         if (method.contains("configureClient")) {
             println("?")
