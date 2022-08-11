@@ -7,6 +7,11 @@ use the `phosphor-0.1.0-dev` branch.
 
 Make sure both ExChain and Phosphor are placed in `~/repos` directory.
 
+# Build
+
+- To build JVMTI plugin `./gradlew :native:build`
+- To build javaagent `./gradlew shadowJar`
+
 # Run 
 
 ## Prerequest
