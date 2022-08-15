@@ -43,7 +43,7 @@ task createInstrumentedJDK(type: JavaExec) {
             "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
             "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV",
             "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
-    environment "CLASSPATH", jarPath
+    environment "CLASSPATH", "$phosphor.buildDir/libs/${phosphor.name}.jar"
     dependsOn ":phosphor:jar"
 }
 
