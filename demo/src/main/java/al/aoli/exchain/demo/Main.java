@@ -65,7 +65,8 @@ public class Main {
     boolean f = true;
     public static void main(String[] args) throws DataFormatException, InterruptedException, RemoteException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
         DataFlowTest test = new DataFlowTest();
-        test.callScene1();
+
+//        test.callScene1();
 //        Object a = MultiTainter.taintedReference(new Object(), "123");
 //
 //        Object b = a;
