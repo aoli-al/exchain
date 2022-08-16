@@ -5,6 +5,7 @@ import al.aoli.exchain.instrumentation.store.TransformedCodeStore
 import com.github.ajalt.mordant.rendering.TextColors
 import edu.columbia.cs.psl.phosphor.runtime.Taint
 import edu.columbia.cs.psl.phosphor.struct.PowerSetTree.SetNode
+import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
 import mu.KotlinLogging
 import org.objectweb.asm.*
 import java.io.IOException
@@ -46,6 +47,7 @@ object AffectedVarDriver {
         val affectedFields = visitor.methodVisitor?.affectedFields?.toTypedArray() ?: emptyArray()
         val affectedVars = visitor.methodVisitor?.affectedVars?.toIntArray() ?: intArrayOf()
         val sourceVars = visitor.methodVisitor?.sourceVars?.toIntArray() ?: intArrayOf()
+        val affectedParams = visitor.methodVisitor?.affectedParams?.toIntArray() ?: intArrayOf()
         val result = AffectedVarResult(affectedVars, affectedFields, sourceVars)
         store.putCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, result)
         return result
@@ -53,11 +55,23 @@ object AffectedVarDriver {
 
     private val exceptionStore = mutableMapOf<Int, Any>()
 
-    fun taintAffectedVar(obj: SetNode, idx: Int, thread: Thread, depth: Int, exception: Any): Taint<*> {
+    fun updateTaint(obj: SetNode, exception: Any): Taint<*> {
         val label = System.identityHashCode(exception)
         exceptionStore[label] = exception
         return obj.union(Taint.withLabel(label))
     }
+
+    fun taintObject(obj: TaintedWithObjTag, exception: Any) {
+        val label = System.identityHashCode(exception)
+        exceptionStore[label] = exception
+        if (obj.phosphoR_TAG != null) {
+            obj.phosphoR_TAG = (obj.phosphoR_TAG as Taint<Int>).union(Taint.withLabel(label))
+        } else {
+            obj.phosphoR_TAG = Taint.withLabel(label)
+        }
+    }
+
+
 
     fun analyzeSource(obj: Taint<*>, exception: Any, location: String) {
         for (label in obj.labels) {

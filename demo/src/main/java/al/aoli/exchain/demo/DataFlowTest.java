@@ -29,6 +29,7 @@ public class DataFlowTest {
     }
 
     public static class Dummy extends Base {
+        public String sub = null;
         void foo() {}
         @Override
         void test(Dummy d) throws DataFormatException {
@@ -37,6 +38,14 @@ public class DataFlowTest {
 
         void complex(Dummy d, String[][] a, String[][][] b, int c) throws DataFormatException {
             test(d);
+        }
+
+        void setSub() {
+            sub = ":12";
+        }
+
+        void test() {
+            System.out.println(sub.length());
         }
 
     }
@@ -129,7 +138,7 @@ public class DataFlowTest {
         }
     }
 
-    public String scene1() {
+    public String scene1(Dummy d) {
         Object o = null;
 
         try {
@@ -141,6 +150,7 @@ public class DataFlowTest {
         String s = null;
         try {
             s = o.toString();
+            d.setSub();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -148,8 +158,9 @@ public class DataFlowTest {
     }
 
     public void callScene1() {
-        String s = scene1();
-        System.out.println((s.length()));
+        Dummy d = new Dummy();
+        scene1(d);
+        d.test();
     }
 
 

@@ -6,6 +6,7 @@ import al.aoli.exchain.instrumentation.runtime.exceptions.ExceptionInjector
 import al.aoli.exchain.instrumentation.server.ExceptionServiceImpl
 import edu.columbia.cs.psl.phosphor.runtime.Taint
 import edu.columbia.cs.psl.phosphor.struct.PowerSetTree.SetNode
+import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
 
 object ExceptionRuntime {
 
@@ -47,10 +48,17 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
-    fun taintObject(obj: Any?, idx: Int, thread: Thread, depth: Int, exception: Any): Taint<*>? {
+    fun taintObject(obj: Any?, idx: Int, thread: Thread, depth: Int, exception: Any) {
+        if (obj == null) return
+        if (obj !is TaintedWithObjTag) return
+        AffectedVarDriver.taintObject(obj, exception)
+    }
+
+    @JvmStatic
+    fun updateTaint(obj: Any?, idx: Int, thread: Thread, depth: Int, exception: Any): Taint<*>? {
         if (obj == null) return null
         if (obj !is SetNode) return null
-        return AffectedVarDriver.taintAffectedVar(obj, idx, thread, depth, exception)
+        return AffectedVarDriver.updateTaint(obj, exception)
     }
 
     @JvmStatic

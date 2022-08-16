@@ -15,13 +15,20 @@ import org.objectweb.asm.tree.analysis.SourceValue
 
 private val logger = KotlinLogging.logger {}
 class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val isThrowInsn: Boolean, val owner: String,
-                               access: Int, name: String?, descriptor: String?, signature: String?,
+                               access: Int, name: String, descriptor: String, signature: String?,
                                exceptions: Array<out String>?):
     MethodNode(ASM8, access, name, descriptor, signature, exceptions) {
     var byteCodeOffset = 0L
     var throwInsn: AbstractInsnNode? = null
     var catchInsn: AbstractInsnNode? = null
     private val isStatic = access and ACC_STATIC != 0
+    private val paramSize: Int
+
+    init {
+        paramSize = Type.getArgumentTypes(descriptor).size + if (isStatic) 0 else 1
+    }
+
+
 
     private fun checkThrowInsn() {
         if (byteCodeOffset == throwIndex) {
@@ -156,6 +163,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
     val affectedVars = mutableSetOf<Int>()
     val affectedFields = mutableSetOf<String>()
     val sourceVars = mutableSetOf<Int>()
+    val affectedParams = mutableSetOf<Int>()
     val sourceFields = mutableSetOf<String>()
 
     private fun processAffectedInsns(affectedInsns: Set<AbstractInsnNode>, frames: Array<Frame<SourceValue>>) {
@@ -189,9 +197,13 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                             if (src is VarInsnNode && src.opcode == ALOAD) {
                                 try {
                                     if (throwInsnFrame.getLocal(src.`var`) == srcFrame.getLocal(src.`var`)) {
-                                        affectedVars.add(src.`var`)
-                                        if (insn == throwInsn && isThrowInsn) {
+                                        if (insn == throwInsn) {
                                             sourceVars.add(src.`var`)
+                                        }
+                                        if (src.`var` < paramSize) {
+                                            affectedParams.add(src.`var`)
+                                        } else {
+                                            affectedVars.add(src.`var`)
                                         }
                                     }
                                 } catch (e: IndexOutOfBoundsException) {
@@ -214,7 +226,11 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                             if (src is VarInsnNode) {
                                 if (src.`var` == 0 && !isStatic) {
                                     affectedFields.add(insn.name)
-                                } else {
+                                }
+                                else if (src.`var` <= paramSize) {
+                                    affectedParams.add(src.`var`)
+                                }
+                                else {
                                     affectedVars.add(src.`var`)
                                 }
                             }

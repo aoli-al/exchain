@@ -5,6 +5,9 @@ package al.aoli.exchain.demo;
 //import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
 
 import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
+import edu.columbia.cs.psl.phosphor.runtime.Taint;
+import edu.columbia.cs.psl.phosphor.struct.PowerSetTree;
+import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
 
 import javax.net.ssl.KeyManagerFactory;
 import java.io.FileInputStream;
@@ -62,9 +65,28 @@ public class Main {
 //        MultiTainter.setStringCharTaints(str, tags);
 //    }
 
+    void foo() {
+
+        if (bar()) {
+            try {
+                foo();
+            } catch (Exception e) {
+
+            }
+        } else {
+            throw new RuntimeException();
+        }
+    }
+
+    boolean bar() {
+        return false;
+    }
+
+
     boolean f = true;
     public static void main(String[] args) throws DataFormatException, InterruptedException, RemoteException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
         DataFlowTest test = new DataFlowTest();
+        test.callScene1();
 
 //        test.callScene1();
 //        Object a = MultiTainter.taintedReference(new Object(), "123");

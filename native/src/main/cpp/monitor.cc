@@ -8,7 +8,7 @@
 #include <mutex>
 
 #include "runtime.hpp"
-#include "processor.hpp"
+#include "exception_processor.hpp"
 #include "plog/Init.h"
 #include "plog/Log.h"
 #include "plog/Appenders/ColorConsoleAppender.h"
@@ -102,7 +102,7 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
     jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_EXCEPTION, NULL);
 
     static plog::ColorConsoleAppender<plog::FuncMessageFormatter> console_appender;
-    plog::init(plog::warning, &console_appender);
+    plog::init(plog::info, &console_appender);
 
     return 0;
 }
