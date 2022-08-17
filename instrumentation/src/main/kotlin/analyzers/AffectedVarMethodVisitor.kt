@@ -200,11 +200,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                                         if (insn == throwInsn) {
                                             sourceVars.add(src.`var`)
                                         }
-                                        if (src.`var` < paramSize) {
-                                            affectedParams.add(src.`var`)
-                                        } else {
-                                            affectedVars.add(src.`var`)
-                                        }
+                                        affectedVars.add(src.`var`)
                                     }
                                 } catch (e: IndexOutOfBoundsException) {
                                     logger.info { "Local object is not on the stack!" }
@@ -226,9 +222,6 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                             if (src is VarInsnNode) {
                                 if (src.`var` == 0 && !isStatic) {
                                     affectedFields.add(insn.name)
-                                }
-                                else if (src.`var` <= paramSize) {
-                                    affectedParams.add(src.`var`)
                                 }
                                 else {
                                     affectedVars.add(src.`var`)

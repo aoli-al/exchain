@@ -1,3 +1,5 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+
 plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.7.0'
     id "com.github.johnrengelman.shadow" version "7.1.2"
@@ -45,10 +47,17 @@ shadowJar {
     archiveClassifier.set('')
     archiveVersion.set('')
 
-    relocate 'org.objectweb.asm', 'shadow.asm'
-    relocate 'org.slf4j', 'shadow.slf4j'
+    relocate 'org.objectweb.asm', 'al.aoli.exchain.instrumentation.asm'
+    relocate 'org.slf4j', 'al.aoli.exchain.instrumentation.slf4j'
     dependsOn ':native:linkDebug'
 }
+
+//task relocateShadowJar(type: ConfigureShadowRelocation) {
+//    target = tasks.shadowJar
+//    prefix = "al.aoli.exchain.instrumentation" // Default value is "shadow"
+//}
+
+//tasks.shadowJar.dependsOn tasks.relocateShadowJar
 
 
 task startInstrumentation(dependsOn: 'classes', type: JavaExec) {

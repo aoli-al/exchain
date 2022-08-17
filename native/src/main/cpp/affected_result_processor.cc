@@ -1,18 +1,20 @@
 #include "affected_result_processor.hpp"
+
 #include "plog/Log.h"
 
 namespace exchain {
 
 void AffectedResultProcessor::Process() {
-    if (!CheckJvmTIError(
+    if (!ProcessorBase::CheckJvmTIError(
             jvmti_->GetLocalVariableTable(frame_.method, &table_size_, &table_),
             "get local variable table failed.")) {
         return;
     }
 
+    ProcessSourceVars();
     ProcessAffectedVars();
-    ProcessAffectedFields();
-    ProcessAffectedParams();
+    //    ProcessAffectedFields();
+    //    ProcessAffectedParams();
 
     jvmti_->Deallocate((unsigned char *)table_);
 }
@@ -22,7 +24,8 @@ void AffectedResultProcessor::ProcessSourceVars() {
     auto analyze_source_method_id =
         jni_->GetStaticMethodID(runtime_class_, kAnalyzeSourceMethodName,
                                 kAnalyzeSourceMethodDescriptor);
-    auto source_vars_field_id = jni_->GetFieldID(result_class_, "sourceVars", "[I");
+    auto source_vars_field_id =
+        jni_->GetFieldID(result_class_, "sourceVars", "[I");
     PLOG_INFO << "Source var ID: " << source_vars_field_id;
     jintArray source_vars =
         (jintArray)jni_->GetObjectField(result_, source_vars_field_id);
@@ -31,31 +34,54 @@ void AffectedResultProcessor::ProcessSourceVars() {
     auto source_vars_cpy = jni_->GetIntArrayElements(source_vars, NULL);
     for (int i = 0; i < source_vars_length; i++) {
         const auto slot = source_vars_cpy[i];
-        jint taint_slot = GetCorrespondingTaintObjectSlot(
-            frame_, depth_, slot, table_, table_size_);
-        if (taint_slot == -1) continue;
-        jobject taint;
-        jvmti_->GetLocalObject(thread_, depth_, taint_slot, &taint);
-        if (taint == NULL) continue;
-        jni_->CallStaticVoidMethod(runtime_class_, analyze_source_method_id,
-                                   taint, exception_, location_);
+        jint taint_slot = GetCorrespondingTaintObjectSlot(slot);
+        if (taint_slot != -1) {
+            jobject taint;
+            jvmti_->GetLocalObject(thread_, depth_, taint_slot, &taint);
+            if (taint != NULL) {
+                jni_->CallStaticVoidMethod(runtime_class_,
+                                           analyze_source_method_id, taint,
+                                           exception_, location_);
+            }
+        }
+
+        auto signature = GetLocalObjectSignature(slot);
+        if (signature.starts_with("L") || signature.starts_with("[")) {
+            jobject obj;
+            jvmti_->GetLocalObject(thread_, depth_, slot, &obj);
+            if (obj != NULL) {
+                jni_->CallStaticVoidMethod(runtime_class_,
+                                           analyze_source_method_id, obj,
+                                           exception_, location_);
+            }
+        }
     }
     jni_->ReleaseIntArrayElements(source_vars, source_vars_cpy, NULL);
 }
 
-jint AffectedResultProcessor::GetCorrespondingTaintObjectSlot(
-    jvmtiFrameInfo frame, int depth, int slot, jvmtiLocalVariableEntry *table,
-    int table_size) {
-    for (int i = 0; i < table_size; i++) {
-        auto entry = table[i];
+std::string AffectedResultProcessor::GetLocalObjectSignature(int slot) {
+    for (int i = 0; i < table_size_; i++) {
+        auto entry = table_[i];
+        if (entry.slot == slot && entry.start_location <= frame_.location &&
+            entry.start_location + entry.length >= frame_.location) {
+            return entry.signature;
+        }
+    }
+    return "";
+}
+
+jint AffectedResultProcessor::GetCorrespondingTaintObjectSlot(int slot) {
+    for (int i = 0; i < table_size_; i++) {
+        auto entry = table_[i];
         if (!std::string(entry.name)
-                .starts_with("phosphorShadowLVFor" + std::to_string(slot))) {
+                 .starts_with("phosphorShadowLVFor" + std::to_string(slot) + "XX")) {
             continue;
         }
-        if (entry.start_location > frame.location ||
-            entry.start_location + entry.length < frame.location) {
+        if (entry.start_location > frame_.location ||
+            entry.start_location + entry.length < frame_.location) {
             continue;
         }
+        LOG_INFO << "Found taint tag: " << entry.name << " for slot: " << slot;
         return entry.slot;
     }
     return -1;
@@ -63,7 +89,8 @@ jint AffectedResultProcessor::GetCorrespondingTaintObjectSlot(
 
 void AffectedResultProcessor::ProcessAffectedVars() {
     PLOG_INFO << "Start processing affected variables!";
-    auto affected_vars_field_id = jni_->GetFieldID(result_class_, "affectedVars", "[I");
+    auto affected_vars_field_id =
+        jni_->GetFieldID(result_class_, "affectedVars", "[I");
     jintArray affected_vars =
         (jintArray)jni_->GetObjectField(result_, affected_vars_field_id);
 
@@ -77,27 +104,21 @@ void AffectedResultProcessor::ProcessAffectedVars() {
 
     for (int i = 0; i < affected_vars_length; i++) {
         const auto slot = affected_vars_cpy[i];
-        std::string signature = GetLocalObjectSignature(
-            frame_, depth_, slot, table_, table_size_);
+        std::string signature =
+            GetLocalObjectSignature(slot);
 
-        if (signature == "" || signature.contains("Ledu.columbia.cs")) {
+        if (signature == "" || signature.contains("Ledu/columbia/cs")) {
             // Ignore taint objects.
             continue;
         }
 
-        if (signature.starts_with("L") || signature.starts_with("[")) {
-            jobject obj;
-            jvmti_->GetLocalObject(thread_, depth_, slot, &obj);
-            if (obj == NULL) continue;
-            jni_->CallStaticVoidMethod(runtime_class_, taint_object_method_id,
-                                       obj, slot, thread_, depth_, exception_);
-            jni_->DeleteLocalRef(obj);
-        } else if (is_caught_by_frame_) {
-            // We only taint primitive types if the exception is
-            // caught by the current frame.
-            jint taint_slot = GetCorrespondingTaintObjectSlot(
-                frame_, depth_, slot, table_, table_size_);
-            if (taint_slot == -1) continue;
+        // We only taint primitive types if the exception is
+        // caught by the current frame.
+        jint taint_slot = GetCorrespondingTaintObjectSlot(slot);
+
+        if (is_caught_by_frame_ && taint_slot != -1) {
+            PLOG_INFO << "Taint local variable with type: " << signature
+                        << " at slot: " << slot;
             jobject taint;
             jvmti_->GetLocalObject(thread_, depth_, taint_slot, &taint);
             if (taint == NULL) continue;
@@ -108,6 +129,15 @@ void AffectedResultProcessor::ProcessAffectedVars() {
                 jvmti_->SetLocalObject(thread_, depth_, taint_slot, result);
             }
             jni_->DeleteLocalRef(taint);
+        } else if (signature.starts_with("L") || signature.starts_with("[")) {
+            jobject obj;
+            jvmti_->GetLocalObject(thread_, depth_, slot, &obj);
+            if (obj == NULL) continue;
+            PLOG_INFO << "Taint object with type: " << signature
+                      << " at slot: " << slot;
+            jni_->CallStaticVoidMethod(runtime_class_, taint_object_method_id,
+                                       obj, slot, thread_, depth_, exception_);
+            jni_->DeleteLocalRef(obj);
         }
     }
     jni_->ReleaseIntArrayElements(affected_vars, affected_vars_cpy, NULL);

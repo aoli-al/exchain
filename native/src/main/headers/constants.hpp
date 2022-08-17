@@ -1,21 +1,23 @@
+#pragma once
+
 namespace exchain {
-const char *kRuntimeClassName =
+const static char *kRuntimeClassName =
     "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime";
-const char *kAffectedVarResultClassName =
+const static char *kAffectedVarResultClassName =
     "al/aoli/exchain/instrumentation/analyzers/AffectedVarResult";
-const char *kExceptionStackInfoMethodName = "onExceptionStackInfo";
-const char *kExceptionStackInfoDescriptor =
+const static char *kExceptionStackInfoMethodName = "onExceptionStackInfo";
+const static char *kExceptionStackInfoDescriptor =
     "(Ljava/lang/String;Ljava/lang/String;JJZ)Lal/aoli/exchain/"
     "instrumentation/analyzers/AffectedVarResult;";
-const char *kTaintObjectMethodName = "taintObject";
-const char *kUpdateTaintMethodName = "updateTaint";
-const char *kTaintObjectMethodDescriptor =
+const static char *kTaintObjectMethodName = "taintObject";
+const static char *kUpdateTaintMethodName = "updateTaint";
+const static char *kTaintObjectMethodDescriptor =
     "(Ljava/lang/Object;ILjava/lang/Thread;ILjava/lang/Object;)V";
-const char *kUpdateTaintMethodDescriptor =
+const static char *kUpdateTaintMethodDescriptor =
     "(Ljava/lang/Object;ILjava/lang/Thread;ILjava/lang/Object;)Ledu/columbia/"
     "cs/psl/phosphor/runtime/Taint;";
-const char *kAnalyzeSourceMethodName = "analyzeSource";
-const char *kAnalyzeSourceMethodDescriptor =
+const static char *kAnalyzeSourceMethodName = "analyzeSource";
+const static char *kAnalyzeSourceMethodDescriptor =
     "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V";
 
 }  // namespace exchain

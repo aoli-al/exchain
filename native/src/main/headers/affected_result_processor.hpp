@@ -24,13 +24,15 @@ class AffectedResultProcessor: ProcessorBase {
    public:
     AffectedResultProcessor(jvmtiEnv *jvmti, JNIEnv *jni, jvmtiFrameInfo frame,
                             int depth, jobject result, jboolean is_caught_by_frame,
-                            jstring location)
+                            jstring location, jobject exception, jthread thread)
         : ProcessorBase(jvmti, jni),
           frame_(frame),
           depth_(depth),
           result_(result),
           is_caught_by_frame_(is_caught_by_frame),
-          location_(location) {
+          location_(location),
+          exception_(exception),
+          thread_(thread) {
         result_class_ = jni_->FindClass(kAffectedVarResultClassName);
         runtime_class_ = jni_->FindClass(kRuntimeClassName);
     }
@@ -40,9 +42,9 @@ class AffectedResultProcessor: ProcessorBase {
    private:
     void ProcessAffectedVars();
     void ProcessSourceVars();
-    void ProcessAffectedParams();
-    void ProcessAffectedFields();
-    jint GetCorrespondingTaintObjectSlot(jvmtiFrameInfo frame, int depth, int slot, jvmtiLocalVariableEntry *table, int table_size);
-    std::string GetLocalObjectSignature(jvmtiFrameInfo frame, int depth, int slot, jvmtiLocalVariableEntry *table, int table_size);
+    // void ProcessAffectedParams();
+    // void ProcessAffectedFields();
+    jint GetCorrespondingTaintObjectSlot(int slot);
+    std::string GetLocalObjectSignature(int slot);
 };
 }  // namespace exchain

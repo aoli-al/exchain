@@ -73,8 +73,13 @@ object AffectedVarDriver {
 
 
 
-    fun analyzeSource(obj: Taint<*>, exception: Any, location: String) {
-        for (label in obj.labels) {
+    fun analyzeSource(obj: Any, exception: Any, location: String) {
+        val taint = when(obj) {
+            is Taint<*> -> obj
+            is TaintedWithObjTag -> obj.phosphoR_TAG as Taint<*>?
+            else -> null
+        } ?: return
+        for (label in taint.labels) {
             if (label is Int && label in exceptionStore) {
                 println(TextColors.cyan("Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"))
             }

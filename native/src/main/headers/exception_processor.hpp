@@ -15,6 +15,7 @@ class ExceptionProcessor: ProcessorBase {
     jthread thread_;
     int exception_id_;
     jobject exception_;
+    jstring location_string_;
 
     static const int kMaxStackDepth = 100;
 
@@ -29,9 +30,14 @@ class ExceptionProcessor: ProcessorBase {
           catch_method_(catch_method),
           catch_location_(catch_location),
           thread_(thread),
-          exception_(exception){
-              // exception_id_ = ComputeExceptionId(exception);
-          };
+          exception_(exception) {
+        // exception_id_ = ComputeExceptionId(exception);
+        location_string_ =
+            jni_->NewStringUTF((GetClassSignature(throw_method_) + ":" +
+                                GetMethodSignature(throw_method_) + ":" +
+                                std::to_string(throw_location_))
+                                   .c_str());
+    };
 
    private:
     void ProcessStackFrameInfo(jvmtiFrameInfo frameInfo, int depth);
@@ -40,12 +46,6 @@ class ExceptionProcessor: ProcessorBase {
     bool CheckJvmTIError(jvmtiError error, std::string msg);
     bool ShouldIgnoreClass(std::string signature);
     bool ShouldTerminateEarly(std::string signature);
-    void ProcessAffectedVarResult(jvmtiFrameInfo frame, int depth,
-                                   jobject result, jboolean is_throw_insn, jstring location_string);
-    // void UpdateTaintTags(jvmtiFrameInfo frame, int depth,
-    //                                jobject result, jboolean is_throw_insn, jstring location_string);
-
-    jint GetCorrespondingTaintObjectSlot(jvmtiFrameInfo frame, int depth, int slot, jvmtiLocalVariableEntry *table, int table_size);
     int ComputeExceptionId(jobject obj);
 
    public:

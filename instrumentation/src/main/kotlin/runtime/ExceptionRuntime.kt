@@ -64,7 +64,6 @@ object ExceptionRuntime {
     @JvmStatic
     fun analyzeSource(obj: Any?, exception: Any, location: String) {
         if (obj == null) return
-        if (obj !is Taint<*>) return
         AffectedVarDriver.analyzeSource(obj, exception, location)
     }
 }

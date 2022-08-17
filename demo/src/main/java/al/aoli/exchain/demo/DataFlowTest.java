@@ -168,7 +168,7 @@ public class DataFlowTest {
     public void functionWithException() {
         throw new RuntimeException("exception");
     }
-    public Object createObjectWithException() {
+    public static Object createObjectWithException() {
         throw new RuntimeException("exception");
     }
 

@@ -1,4 +1,4 @@
-#include "processor.hpp"
+#include "exception_processor.hpp"
 
 #include <classfile_constants.h>
 
@@ -15,7 +15,7 @@ namespace exchain {
 void ExceptionProcessor::Process() {
     jvmtiFrameInfo frames[kMaxStackDepth];
     int count;
-    if (CheckJvmTIError(
+    if (ProcessorBase::CheckJvmTIError(
             jvmti_->GetStackTrace(thread_, 0, kMaxStackDepth, frames, &count),
             "failed to get stack trace.")) {
         PLOG_INFO << "Stack count: " << count;
@@ -50,6 +50,8 @@ bool ExceptionProcessor::ShouldIgnoreClass(std::string method_name) {
            method_name.starts_with("Lsun") ||
            method_name.starts_with("Lcom/sun") ||
            method_name.starts_with("Lkotlin") ||
+           method_name.starts_with("Lal/aoli/exchain/instrumentation") ||
+           method_name.starts_with("Lal/aoli/exchain/phosphor") ||
            method_name.starts_with("Ledu/columbia/cs/psl/");
 }
 
@@ -63,8 +65,7 @@ bool ExceptionProcessor::ShouldTerminateEarly(std::string method_name) {
                "Lorg/springframework/core/io/ClassPathResource");
 }
 
-void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
-                                               int depth) {
+void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame, int depth) {
     auto class_signature = GetClassSignature(frame.method);
     auto method = GetMethodSignature(frame.method);
 
@@ -97,33 +98,19 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
         return;
     }
 
-    jstring location_string = jni_->NewStringUTF(
-        (class_signature + ":" + method + ":" + std::to_string(frame.location))
-            .c_str());
+    // jstring location_string = jni_->NewStringUTF(
+    //     (class_signature + ":" + method + ":" + std::to_string(frame.location))
+    //         .c_str());
 
     AffectedResultProcessor processor(jvmti_, jni_, frame, depth, result,
                                       frame.method == catch_method_,
-                                      location_string);
+                                      location_string_, exception_, thread_);
     processor.Process();
 }
 
-std::string ExceptionProcessor::GetLocalObjectSignature(
-    jvmtiFrameInfo frame, int depth, int slot, jvmtiLocalVariableEntry *table,
-    int table_size) {
-    for (int i = 0; i < table_size; i++) {
-        auto entry = table[i];
-        if (entry.slot == slot && entry.start_location <= frame.location &&
-            entry.start_location + entry.length >= frame.location) {
-            return entry.signature;
-        }
-    }
-    return "";
-}
-
-
 std::string ExceptionProcessor::GetMethodSignature(jmethodID method) {
     char *name, *signature;
-    CheckJvmTIError(jvmti_->GetMethodName(method, &name, &signature, NULL),
+    ProcessorBase::CheckJvmTIError(jvmti_->GetMethodName(method, &name, &signature, NULL),
                     "get method name failed.");
     std::string sig = std::string(name) + std::string(signature);
     jvmti_->Deallocate((unsigned char *)name);
@@ -135,7 +122,7 @@ std::string ExceptionProcessor::GetClassSignature(jmethodID method) {
     jclass clazz;
     jvmti_->GetMethodDeclaringClass(method, &clazz);
     char *signature;
-    CheckJvmTIError(jvmti_->GetClassSignature(clazz, &signature, NULL),
+    ProcessorBase::CheckJvmTIError(jvmti_->GetClassSignature(clazz, &signature, NULL),
                     "get class signature failed.");
     std::string sig = signature;
     jvmti_->Deallocate((unsigned char *)signature);

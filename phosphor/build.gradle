@@ -1,5 +1,7 @@
+//import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
+
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.7.0'
+    id 'java'
 }
 
 group 'al.aoli.exchain.phosphor'
@@ -11,9 +13,6 @@ repositories {
 }
 
 dependencies {
-    implementation group: 'io.github.microutils', name: 'kotlin-logging-jvm', version: '2.1.23'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
     compileOnly 'edu.gmu.swe.phosphor:Phosphor:0.1.0-SNAPSHOT'
 }
 
@@ -21,9 +20,15 @@ test {
     useJUnitPlatform()
 }
 
-jar {
-    duplicatesStrategy = DuplicatesStrategy.INCLUDE
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-}
+//shadowJar {
+//    archiveBaseName.set('phosphor')
+//    archiveClassifier.set('')
+//    archiveVersion.set('')
+//}
+//
+//task relocateShadowJar(type: ConfigureShadowRelocation) {
+//    target = tasks.shadowJar
+//    prefix = "al.aoli.exchain.phosphor" // Default value is "shadow"
+//}
+//
+//tasks.shadowJar.dependsOn tasks.relocateShadowJar

@@ -6,7 +6,7 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.*
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_STATIC
 import kotlin.math.sign
 
-class DynamicSwitchPostCV(cv: ClassVisitor, val skipFrames: Boolean, val bytes: ByteArray): ClassVisitor(Opcodes.ASM9,
+class DynamicSwitchPostCV2(cv: ClassVisitor, val skipFrames: Boolean, val bytes: ByteArray): ClassVisitor(Opcodes.ASM9,
     cv) {
     private var owner = ""
 
