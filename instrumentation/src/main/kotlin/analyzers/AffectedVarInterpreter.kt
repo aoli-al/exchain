@@ -36,7 +36,10 @@ class AffectedVarInterpreter(val insnList: InsnList, val throwInsnIndex: Int, va
 
     override fun copyOperation(insn: AbstractInsnNode, value: SourceValue): SourceValue? {
         checkExceptionInstructionStarts(insn)
-        return super.copyOperation(insn, value)
+        return when (insn.opcode) {
+            DUP, DUP_X1, DUP_X2, DUP2, DUP2_X1, DUP2_X2, SWAP -> value
+            else -> super.copyOperation(insn, value)
+        }
     }
 
 

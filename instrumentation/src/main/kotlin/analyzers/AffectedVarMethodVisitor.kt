@@ -16,7 +16,7 @@ import org.objectweb.asm.tree.analysis.SourceValue
 private val logger = KotlinLogging.logger {}
 class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val isThrowInsn: Boolean, val owner: String,
                                access: Int, name: String, descriptor: String, signature: String?,
-                               exceptions: Array<out String>?):
+                               exceptions: Array<out String>?, val classReader: AffectedVarClassReader):
     MethodNode(ASM8, access, name, descriptor, signature, exceptions) {
     var byteCodeOffset = 0L
     var throwInsn: AbstractInsnNode? = null
@@ -152,7 +152,8 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
         checkThrowInsn()
         byteCodeOffset += if (value is Long ||
             value is Double ||
-            value is ConstantDynamic && value.size == 2) {
+            value is ConstantDynamic && value.size == 2 ||
+            classReader.lastReadConstIndex > 255) {
             3
         } else {
             2
@@ -163,8 +164,8 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
     val affectedVars = mutableSetOf<Int>()
     val affectedFields = mutableSetOf<String>()
     val sourceVars = mutableSetOf<Int>()
-    val affectedParams = mutableSetOf<Int>()
     val sourceFields = mutableSetOf<String>()
+    val affectedParams = mutableSetOf<Int>()
 
     private fun processAffectedInsns(affectedInsns: Set<AbstractInsnNode>, frames: Array<Frame<SourceValue>>) {
         val throwInsnFrame = frames[instructions.indexOf(throwInsn)]
@@ -191,6 +192,9 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                                 val fieldSrc = fieldValue.insns.first()
                                 if (fieldSrc is VarInsnNode && fieldSrc.opcode == ALOAD && fieldSrc.`var` == 0) {
                                     affectedFields.add(src.name)
+                                    if (insn == throwInsn) {
+                                        sourceFields.add(src.name)
+                                    }
                                 }
                             }
                             // If a method call is from a local object, check if the object is on the stack.
@@ -215,16 +219,36 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                             frame.pop()
                             frame.pop()
                         } catch (e: IndexOutOfBoundsException) {
-                            logger.error { "Processing instruction $insn failed." }
+                            logger.error { "Processing instruction $insn failed. Error: $e" }
                             continue
                         }
                         for (src in objRef.insns) {
                             if (src is VarInsnNode) {
                                 if (src.`var` == 0 && !isStatic) {
                                     affectedFields.add(insn.name)
+                                    if (insn == throwInsn) {
+                                        sourceVars.add(src.`var`)
+                                    }
                                 }
                                 else {
                                     affectedVars.add(src.`var`)
+                                }
+                            }
+                        }
+                    }
+                    if (insn.opcode == GETFIELD) {
+                        val objRef = try {
+                            frame.pop()
+                        } catch (e: IndexOutOfBoundsException) {
+                            logger.error { "Processing instruction $insn failed. Error $e" }
+                            continue
+                        }
+                        for (src in objRef.insns) {
+                            if (src is VarInsnNode) {
+                                if (src.`var` == 0 && !isStatic) {
+                                    if (insn == throwInsn) {
+                                        sourceVars.add(src.`var`)
+                                    }
                                 }
                             }
                         }
@@ -256,6 +280,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
             }
         }
         if (throwInsn != null && (catchIndex == -1L || catchInsn != null)) {
+            logger.info { "Identified thrown instruction: $throwInsn" }
             val throwInsnIndex = instructions.indexOf(throwInsn)
             val interpreter = AffectedVarInterpreter(instructions, throwInsnIndex, tryCatchLocations)
             val analyzer = AffectedVarAnalyser(instructions, interpreter, throwInsn!!, catchInsn)

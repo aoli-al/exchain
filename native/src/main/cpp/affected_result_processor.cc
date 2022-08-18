@@ -13,17 +13,47 @@ void AffectedResultProcessor::Process() {
 
     ProcessSourceVars();
     ProcessAffectedVars();
-    //    ProcessAffectedFields();
-    //    ProcessAffectedParams();
+
+    jint modifier = 0;
+    jvmti_->GetMethodModifiers(frame_.method, &modifier);
+    if (!(modifier & 0x0008)) {
+        ProcessAffectedFields();
+        ProcessSourceFields();
+    }
 
     jvmti_->Deallocate((unsigned char *)table_);
+}
+
+void AffectedResultProcessor::ProcessAffectedFields() {
+    PLOG_INFO << "Start processing affected fields.";
+    auto taint_fields_method_id = jni_->GetStaticMethodID(
+        runtime_class_, kTaintFieldsMethodName, kTaintFieldsMethodDescriptor);
+    jobject obj = NULL;
+    jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
+    if (obj != NULL) {
+        jni_->CallStaticVoidMethod(runtime_class_, taint_fields_method_id, obj,
+                                   result_, exception_);
+    }
+}
+
+void AffectedResultProcessor::ProcessSourceFields() {
+    PLOG_INFO << "Start processing source fields.";
+    auto analyze_source_method_id =
+        jni_->GetStaticMethodID(runtime_class_, kAnalyzeSourceFieldsMethodName,
+                                kAnalyzeSourceFieldsMethodDescriptor);
+    jobject obj = NULL;
+    jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
+    if (obj != NULL) {
+        jni_->CallStaticVoidMethod(runtime_class_, analyze_source_method_id,
+                                   obj, result_, exception_, location_);
+    }
 }
 
 void AffectedResultProcessor::ProcessSourceVars() {
     PLOG_INFO << "Start analyzing exception sources!";
     auto analyze_source_method_id =
-        jni_->GetStaticMethodID(runtime_class_, kAnalyzeSourceMethodName,
-                                kAnalyzeSourceMethodDescriptor);
+        jni_->GetStaticMethodID(runtime_class_, kAnalyzeSourceVarsMethodName,
+                                kAnalyzeSourceVarsMethodDescriptor);
     auto source_vars_field_id =
         jni_->GetFieldID(result_class_, "sourceVars", "[I");
     PLOG_INFO << "Source var ID: " << source_vars_field_id;
@@ -74,7 +104,8 @@ jint AffectedResultProcessor::GetCorrespondingTaintObjectSlot(int slot) {
     for (int i = 0; i < table_size_; i++) {
         auto entry = table_[i];
         if (!std::string(entry.name)
-                 .starts_with("phosphorShadowLVFor" + std::to_string(slot) + "XX")) {
+                 .starts_with("phosphorShadowLVFor" + std::to_string(slot) +
+                              "XX")) {
             continue;
         }
         if (entry.start_location > frame_.location ||
@@ -104,8 +135,7 @@ void AffectedResultProcessor::ProcessAffectedVars() {
 
     for (int i = 0; i < affected_vars_length; i++) {
         const auto slot = affected_vars_cpy[i];
-        std::string signature =
-            GetLocalObjectSignature(slot);
+        std::string signature = GetLocalObjectSignature(slot);
 
         if (signature == "" || signature.contains("Ledu/columbia/cs")) {
             // Ignore taint objects.
@@ -118,7 +148,7 @@ void AffectedResultProcessor::ProcessAffectedVars() {
 
         if (is_caught_by_frame_ && taint_slot != -1) {
             PLOG_INFO << "Taint local variable with type: " << signature
-                        << " at slot: " << slot;
+                      << " at slot: " << slot;
             jobject taint;
             jvmti_->GetLocalObject(thread_, depth_, taint_slot, &taint);
             if (taint == NULL) continue;

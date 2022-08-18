@@ -16,8 +16,17 @@ const static char *kTaintObjectMethodDescriptor =
 const static char *kUpdateTaintMethodDescriptor =
     "(Ljava/lang/Object;ILjava/lang/Thread;ILjava/lang/Object;)Ledu/columbia/"
     "cs/psl/phosphor/runtime/Taint;";
-const static char *kAnalyzeSourceMethodName = "analyzeSource";
-const static char *kAnalyzeSourceMethodDescriptor =
+const static char *kTaintFieldsMethodName = "taintFields";
+const static char *kTaintFieldsMethodDescriptor =
+    "(Ljava/lang/Object;Lal/aoli/exchain/"
+    "instrumentation/analyzers/AffectedVarResult;Ljava/lang/"
+    "Object;)V";
+const static char *kAnalyzeSourceVarsMethodName = "analyzeSourceVars";
+const static char *kAnalyzeSourceVarsMethodDescriptor =
     "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V";
+const static char *kAnalyzeSourceFieldsMethodName = "analyzeSourceFields";
+const static char *kAnalyzeSourceFieldsMethodDescriptor =
+    "(Ljava/lang/Object;Lal/aoli/exchain/instrumentation/analyzers/"
+    "AffectedVarResult;Ljava/lang/Object;Ljava/lang/String;)V";
 
 }  // namespace exchain

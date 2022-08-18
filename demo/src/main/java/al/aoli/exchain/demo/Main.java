@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.CharBuffer;
 import java.rmi.RemoteException;
@@ -84,18 +85,20 @@ public class Main {
 
 
     boolean f = true;
-    public static void main(String[] args) throws DataFormatException, InterruptedException, RemoteException, NoSuchMethodException, InvocationTargetException, IllegalAccessException, InstantiationException, KeyStoreException, NoSuchAlgorithmException, UnrecoverableKeyException {
+
+    public static class Test {
+        public int a = 123;
+        public int[] b1 = null;
+        public int[] b2 = new int[]{1, 2, 3};
+        public DataFlowTest.Dummy c1 = null;
+        public DataFlowTest.Dummy c2 = new DataFlowTest.Dummy();
+    }
+
+    public static void main(String[] args)
+            throws DataFormatException, InterruptedException, RemoteException, NoSuchMethodException,
+            InvocationTargetException, IllegalAccessException, InstantiationException, KeyStoreException,
+            NoSuchAlgorithmException, UnrecoverableKeyException, NoSuchFieldException {
         DataFlowTest test = new DataFlowTest();
         test.callScene1();
-
-//        test.callScene1();
-//        Object a = MultiTainter.taintedReference(new Object(), "123");
-//
-//        Object b = a;
-//        Object c = b;
-//
-//        if (c == null) {
-//            System.out.println(MultiTainter.getTaint(c));
-//        }
     }
 }

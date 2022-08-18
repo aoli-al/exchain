@@ -22,6 +22,9 @@ void ExceptionProcessor::Process() {
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
             auto class_signature = GetClassSignature(frames[stack_idx].method);
             if (ShouldIgnoreClass(class_signature)) {
+                if (frames[stack_idx].method == catch_method_) {
+                    break;
+                }
                 continue;
             }
             if (ShouldTerminateEarly(class_signature)) {

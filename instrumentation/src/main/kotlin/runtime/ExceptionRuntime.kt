@@ -55,6 +55,12 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
+    fun taintFields(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
+        if (obj == null) return
+        AffectedVarDriver.updateAffectedFields(obj, affectedVarResult, exception)
+    }
+
+    @JvmStatic
     fun updateTaint(obj: Any?, idx: Int, thread: Thread, depth: Int, exception: Any): Taint<*>? {
         if (obj == null) return null
         if (obj !is SetNode) return null
@@ -62,8 +68,14 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
-    fun analyzeSource(obj: Any?, exception: Any, location: String) {
+    fun analyzeSourceVars(obj: Any?, exception: Any, location: String) {
         if (obj == null) return
-        AffectedVarDriver.analyzeSource(obj, exception, location)
+        AffectedVarDriver.analyzeSourceVars(obj, exception, location)
+    }
+
+    @JvmStatic
+    fun analyzeSourceFields(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any, location: String) {
+        if (obj == null) return
+        AffectedVarDriver.analyzeSourceFields(obj, affectedVarResult, exception, location)
     }
 }

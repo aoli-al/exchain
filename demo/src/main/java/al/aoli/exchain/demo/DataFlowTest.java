@@ -7,6 +7,7 @@ import java.util.zip.DataFormatException;
 
 public class DataFlowTest {
     public Dummy dummy = new Dummy();
+    public boolean state = false;
 
     public void scene7() throws DataFormatException {
         Dummy dummy = new Dummy();
@@ -30,6 +31,7 @@ public class DataFlowTest {
 
     public static class Dummy extends Base {
         public String sub = null;
+        public Base b = new Base();
         void foo() {}
         @Override
         void test(Dummy d) throws DataFormatException {
@@ -138,8 +140,9 @@ public class DataFlowTest {
         }
     }
 
+    Object o = null;
+
     public String scene1(Dummy d) {
-        Object o = null;
 
         try {
             o = createObjectWithException();
@@ -147,10 +150,13 @@ public class DataFlowTest {
             System.out.println(e.getMessage());
         }
 
+        d.sub = (String) o;
+
         String s = null;
         try {
-            s = o.toString();
-            d.setSub();
+            d.test();
+//            s = o.toString();
+//            d.setSub();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

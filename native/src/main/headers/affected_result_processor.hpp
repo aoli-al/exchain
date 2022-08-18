@@ -42,8 +42,8 @@ class AffectedResultProcessor: ProcessorBase {
    private:
     void ProcessAffectedVars();
     void ProcessSourceVars();
-    // void ProcessAffectedParams();
-    // void ProcessAffectedFields();
+    void ProcessAffectedFields();
+    void ProcessSourceFields();
     jint GetCorrespondingTaintObjectSlot(int slot);
     std::string GetLocalObjectSignature(int slot);
 };
