@@ -40,9 +40,9 @@ task createInstrumentedJDK(type: JavaExec) {
     var src = Jvm.current().javaHome
     var dst = "$buildDir/jre-inst"
     args src, dst, "--jvmModules", "ALL-MODULE-PATH",
-            "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
-//            "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
-//            "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV",
+            "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
+            "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
+            "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV"
     environment "CLASSPATH", "$phosphor.buildDir/libs/${phosphor.name}.jar"
     dependsOn ":phosphor:jar"
 }
@@ -75,9 +75,9 @@ task instrumentJar(type: JavaExec) {
     var src= jar.getArchiveFile().get().asFile.absolutePath
     var dst = "${buildDir}/libs/instrumented"
     args src, dst,
-        "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
-//            "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
-//            "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV",
+            "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
+            "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
+            "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV"
     dependsOn jar
     dependsOn ":phosphor:jar"
 }

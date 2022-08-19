@@ -29,7 +29,7 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.RETURN;
 public class DynamicSwitchPostCV extends ClassVisitor {
     private String owner = null;
     public DynamicSwitchPostCV(ClassVisitor cv, boolean skipFrames, byte[] bytes) {
-        super(ASM9);
+        super(ASM9, cv);
     }
 
     @Override
