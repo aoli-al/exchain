@@ -6,8 +6,12 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
 import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashSet;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.List;
 
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_ABSTRACT;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_NATIVE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
 
 public class DynamicSwitchPreCV extends ClassVisitor {
@@ -52,10 +56,13 @@ public class DynamicSwitchPreCV extends ClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
                                      String[] exceptions) {
         String newName = methodNameMapping(name);
+        MethodVisitor mv2 = super.visitMethod(access, name, descriptor, signature, exceptions);
+        if ((access & ACC_ABSTRACT) != 0 || (access & ACC_NATIVE) != 0) {
+            return mv2;
+        }
         MethodVisitor mv1 = super.visitMethod(access, newName + Constants.originMethodSuffix, descriptor, signature,
                 exceptions);
-        MethodVisitor mv2 = super.visitMethod(access, name, descriptor, signature, exceptions);
-
-        return new ReplayMethodVisitor(mv1, mv2);
+        return new ReplayMethodVisitor(access, name, descriptor,
+                List.of(mv2), Collections.emptyList(), List.of(mv1));
     }
 }

@@ -7,8 +7,12 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
 
 import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.List;
 
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_ABSTRACT;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_NATIVE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_STATIC;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ALOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ARETURN;
@@ -41,15 +45,22 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
                                      String[] exceptions) {
-        if (name.endsWith(Constants.originMethodSuffix) || name.endsWith("PHOSPHOR_TAG")) {
+        if (name.endsWith(Constants.originMethodSuffix)
+                || name.endsWith("PHOSPHOR_TAG")
+                || (access & ACC_ABSTRACT) != 0
+                || (access & ACC_NATIVE) != 0) {
             return super.visitMethod(access, name, descriptor, signature, exceptions);
         }
+
         String newName = methodNameMapping(name);
         MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
         addSwitch(mv, newName, descriptor, (access & ACC_STATIC) != 0);
-
-        return super.visitMethod(access, newName + Constants.instrumentedMethodSuffix,
-                descriptor, signature, exceptions);
+        return new ReplayMethodVisitor(
+                access, name, descriptor,
+                Collections.emptyList(),
+                List.of(mv),
+                List.of(super.visitMethod(access, newName + Constants.instrumentedMethodSuffix, descriptor, signature
+                        , exceptions)));
     }
 
     void addBranch(MethodVisitor mv, Label label, String name, String descriptor, boolean isStatic) {
@@ -70,12 +81,16 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 case Type.BOOLEAN, Type.BYTE, Type.CHAR,
                         Type.INT, Type.SHORT ->
                         mv.visitVarInsn(ILOAD, i + offset);
-                case Type.LONG ->
-                        mv.visitVarInsn(LLOAD, i + offset);
+                case Type.LONG -> {
+                    mv.visitVarInsn(LLOAD, i + offset);
+                    offset += 1;
+                }
                 case Type.FLOAT ->
-                        mv.visitVarInsn(FLOAD, i + offset);
-                case Type.DOUBLE ->
-                        mv.visitVarInsn(DLOAD, i + offset);
+                    mv.visitVarInsn(FLOAD, i + offset);
+                case Type.DOUBLE -> {
+                    mv.visitVarInsn(DLOAD, i + offset);
+                    offset += 1;
+                }
                 default -> mv.visitVarInsn(ALOAD, i + offset);
 
             }
@@ -99,13 +114,12 @@ public class DynamicSwitchPostCV extends ClassVisitor {
             default -> mv.visitInsn(ARETURN);
 
         }
-        mv.visitInsn(Opcodes.RETURN);
     }
 
     void addSwitch(MethodVisitor mv, String name, String descriptor, boolean isStatic) {
         mv.visitMethodInsn(
                 Opcodes.INVOKESTATIC,
-                "al.aoli.exchain.instrumentation.runtime.ExceptionRuntime",
+                "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime",
                 "taintEnabled",
                 "()Z",
                 false
