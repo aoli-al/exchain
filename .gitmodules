@@ -1,3 +1,6 @@
 [submodule "native/dependencies/plog"]
 	path = native/dependencies/plog
 	url = https://github.com/SergiusTheBest/plog
+[submodule "dependencies/phosphor"]
+	path = dependencies/phosphor
+	url = git@github.com:aoli-al/phosphor.git
