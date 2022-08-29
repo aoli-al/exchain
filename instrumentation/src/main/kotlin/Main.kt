@@ -1,22 +1,7 @@
 package al.aoli.exchain.instrumentation
 
-import al.aoli.exchain.instrumentation.runtime.ExceptionAdvices
-import al.aoli.exchain.instrumentation.runtime.NativeRuntime
-import al.aoli.exchain.instrumentation.store.TransformedCodeStore
-import al.aoli.exchain.instrumentation.transformers.TryCatchBlockTransformer
-import net.bytebuddy.agent.builder.AgentBuilder
-import net.bytebuddy.asm.Advice
-import net.bytebuddy.asm.AsmVisitorWrapper
-import net.bytebuddy.description.type.TypeDescription
-import net.bytebuddy.dynamic.DynamicType
-import net.bytebuddy.dynamic.loading.ClassInjector
-import net.bytebuddy.matcher.ElementMatchers.*
-import net.bytebuddy.utility.JavaModule
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassWriter
-import java.io.File
+import al.aoli.exchain.runtime.NativeRuntime
 import java.lang.instrument.Instrumentation
-import java.lang.reflect.AccessibleObject
 
 fun premain(arguments: String?, instrumentation: Instrumentation) {
     // We cannot enable bytebuddy for now because

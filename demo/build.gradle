@@ -1,4 +1,3 @@
-import org.gradle.internal.jvm.Jvm
 
 plugins {
     id 'java'
@@ -29,22 +28,6 @@ application {
 }
 
 run {
-}
-
-task createInstrumentedJDK(type: JavaExec) {
-    var jarPath = "${project.gradle.gradleUserHomeDir.parent}/repos/phosphor/phosphor-instrument-jigsaw/target/phosphor-instrument-jigsaw-0.1.0-SNAPSHOT.jar"
-    var phosphor = project(":phosphor")
-    classpath "$phosphor.buildDir/libs/${phosphor.name}.jar"
-    classpath jarPath
-    main = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
-    var src = Jvm.current().javaHome
-    var dst = "$buildDir/jre-inst"
-    args src, dst, "--jvmModules", "ALL-MODULE-PATH",
-            "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
-            "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
-            "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV"
-    environment "CLASSPATH", "$phosphor.buildDir/libs/${phosphor.name}.jar"
-    dependsOn ":phosphor:jar"
 }
 
 task instrumentJarCustom(type: JavaExec) {
@@ -100,7 +83,7 @@ task runInstrumentedJar(type: JavaExec) {
 }
 
 runInstrumentedJar.dependsOn instrumentJar
-runInstrumentedJar.dependsOn createInstrumentedJDK
+runInstrumentedJar.dependsOn ":instrumentation:createInstrumentedJDK"
 
 jar {
     manifest {

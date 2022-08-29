@@ -1,7 +1,6 @@
 package al.aoli.exchain.instrumentation.transformers
 
-import al.aoli.exchain.instrumentation.analyzers.DataFlowAnalyzer
-import al.aoli.exchain.instrumentation.analyzers.ExceptionFlowAnalyzer
+import al.aoli.exchain.runtime.analyzers.ExceptionFlowAnalyzer
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.*
 import org.objectweb.asm.tree.*
@@ -31,7 +30,7 @@ class CatchBlockTransformer(private val owner: String,
                 if (inst.opcode != ATHROW) {
                     instructions.insertBefore(inst, MethodInsnNode(
                         INVOKESTATIC,
-                        "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime",
+                        "al/aoli/exchain/runtime/objects/ExceptionRuntime",
                         "onCatch",
                         "()V"
                     ))
@@ -49,7 +48,7 @@ class CatchBlockTransformer(private val owner: String,
                                 insnList.add(
                                     MethodInsnNode(
                                         INVOKESTATIC,
-                                        "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime",
+                                        "al/aoli/exchain/runtime/objects/ExceptionRuntime",
                                         "onCatch",
                                         "()V"
                                     )
@@ -61,7 +60,7 @@ class CatchBlockTransformer(private val owner: String,
                                 instructions.insert(
                                     inst, MethodInsnNode(
                                         INVOKESTATIC,
-                                        "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime",
+                                        "al/aoli/exchain/runtime/objects/ExceptionRuntime",
                                         "onCatch",
                                         "()V"
                                     )
@@ -71,7 +70,7 @@ class CatchBlockTransformer(private val owner: String,
                             instructions.insert(
                                 inst, MethodInsnNode(
                                     INVOKESTATIC,
-                                    "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime",
+                                    "al/aoli/exchain/runtime/objects/ExceptionRuntime",
                                     "onCatch",
                                     "()V"
                                 )
@@ -86,7 +85,7 @@ class CatchBlockTransformer(private val owner: String,
         callCatch.add(InsnNode(DUP))
         callCatch.add(MethodInsnNode(
             INVOKESTATIC,
-            "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime",
+            "al/aoli/exchain/runtime/objects/ExceptionRuntime",
             "onCatchBegin",
             "(Ljava/lang/Throwable;)V",
         ))
@@ -102,7 +101,7 @@ class CatchBlockTransformer(private val owner: String,
         insnList.add(LdcInsnNode("$owner:$name"))
         insnList.add(MethodInsnNode(
             INVOKESTATIC,
-            "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime",
+            "al/aoli/exchain/runtime/objects/ExceptionRuntime",
             "onCatchWithException",
             "(Ljava/lang/Throwable;Ljava/lang/String;)V",
         ))

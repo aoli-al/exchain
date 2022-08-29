@@ -1,6 +1,6 @@
 package al.aoli.exchain.instrumentation.transformers
 
-import al.aoli.exchain.instrumentation.runtime.ExceptionRuntime
+import al.aoli.exchain.runtime.ExceptionRuntime
 import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes.ASM8

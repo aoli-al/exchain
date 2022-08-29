@@ -119,8 +119,8 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     void addSwitch(MethodVisitor mv, String name, String descriptor, boolean isStatic) {
         mv.visitMethodInsn(
                 Opcodes.INVOKESTATIC,
-                "al/aoli/exchain/instrumentation/runtime/ExceptionRuntime",
-                "taintEnabled",
+                "al/aoli/exchain/runtime/ExceptionJavaRuntime",
+                "exchainEnabled",
                 "()Z",
                 false
         );
