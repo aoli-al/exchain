@@ -10,4 +10,14 @@ public final class Constants {
             default -> name;
         };
     }
+
+    public static String methodNameReMapping(String name) {
+        if (name.contains("exchainStaticConstructor")) {
+            return "<clinit>";
+        }
+        if (name.contains("exchainConstructor")) {
+            return "<init>";
+        }
+        return name;
+    }
 }

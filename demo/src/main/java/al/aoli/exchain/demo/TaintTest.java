@@ -44,4 +44,13 @@ public class TaintTest {
 //        leak();
         wrongOutput();
     }
+
+    static {
+        foo();
+    }
+
+    static void foo() {
+    }
+
+
 }

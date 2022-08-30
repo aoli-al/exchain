@@ -39,6 +39,7 @@ task createShadow(type: ShadowJar) {
     relocate 'org.slf4j', 'al.aoli.exchain.instrumentation.slf4j'
     dependsOn ':native:linkDebug'
     exclude "module-info.class"
+    from sourceSets.main.output
     from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     manifest {
         attributes "Main-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
@@ -79,7 +80,7 @@ task createInstrumentedJDK(type: JavaExec) {
             "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV"
     environment "CLASSPATH", "$phosphor.buildDir/libs/${phosphor.name}.jar"
     dependsOn ":phosphor:jar"
-    dependsOn shadowJar
-    dependsOn buildPhosphor
+    dependsOn mergedJar
+//    dependsOn buildPhosphor
 }
 

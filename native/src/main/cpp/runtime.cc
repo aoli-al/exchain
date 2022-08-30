@@ -9,17 +9,17 @@
 bool initialized = false;
 std::set<jthread> working_threads;
 
-JNIEXPORT void JNICALL Java_al_aoli_exchain_instrumentation_runtime_NativeRuntime_initializedCallback(JNIEnv *env, jclass clazz) {
+JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_initializedCallback(JNIEnv *env, jclass clazz) {
     PLOG_INFO << "Native runtime started.";
     initialized = true;
 }
 
-JNIEXPORT void JNICALL Java_al_aoli_exchain_instrumentation_runtime_NativeRuntime_registerWorkingThread(JNIEnv *env, jthread thread) {
+JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_registerWorkingThread(JNIEnv *env, jthread thread) {
     PLOG_INFO << "Worker thread: " << thread << " registered!";
     working_threads.insert(thread);
 }
 
-JNIEXPORT void JNICALL Java_al_aoli_exchain_instrumentation_runtime_NativeRuntime_unregisterWorkingThread(JNIEnv *env, jthread thread) {
+JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_unregisterWorkingThread(JNIEnv *env, jthread thread) {
     PLOG_INFO << "Worker thread: " << thread << " unregistered!";
     working_threads.erase(thread);
 }

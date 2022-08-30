@@ -5,12 +5,14 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Label;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashMap;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.Map;
 
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
+import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameReMapping;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_ABSTRACT;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_NATIVE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -32,6 +34,7 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.RETURN;
 
 public class DynamicSwitchPostCV extends ClassVisitor {
     private String owner = null;
+    private Map<String, ConstructorMethodVisitor> constructorVisitors = new HashMap<>();
     public DynamicSwitchPostCV(ClassVisitor cv, boolean skipFrames, byte[] bytes) {
         super(ASM9, cv);
     }
@@ -43,24 +46,50 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     }
 
     @Override
+    public void visitEnd() {
+        for (ConstructorMethodVisitor visitor: constructorVisitors.values()) {
+            visitor.checkFinished();
+        }
+        constructorVisitors.clear();
+        super.visitEnd();
+    }
+
+    @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
                                      String[] exceptions) {
-        if (name.endsWith(Constants.originMethodSuffix)
-                || name.endsWith("PHOSPHOR_TAG")
+        if (name.endsWith("PHOSPHOR_TAG")
                 || (access & ACC_ABSTRACT) != 0
                 || (access & ACC_NATIVE) != 0) {
             return super.visitMethod(access, name, descriptor, signature, exceptions);
         }
 
         String newName = methodNameMapping(name);
-        MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
-        addSwitch(mv, newName, descriptor, (access & ACC_STATIC) != 0);
-        return new ReplayMethodVisitor(
-                access, name, descriptor,
-                Collections.emptyList(),
-                List.of(mv),
-                List.of(super.visitMethod(access, newName + Constants.instrumentedMethodSuffix, descriptor, signature
-                        , exceptions)));
+        if (newName.contains("exchainConstructor") || newName.contains("exchainStaticConstructor")) {
+            String key = owner + methodNameReMapping(newName) + descriptor;
+            if (!constructorVisitors.containsKey(key)) {
+                constructorVisitors.put(key, new ConstructorMethodVisitor(super.visitMethod(access, name, descriptor,
+                        signature, exceptions), key));
+            }
+            ConstructorMethodVisitor mv = constructorVisitors.get(key);
+            if (name.contains(Constants.originMethodSuffix)) {
+                return mv.originNode;
+            } else {
+                return mv.instrumentedNode;
+            }
+        } else {
+            if (name.endsWith(Constants.originMethodSuffix))  {
+                return super.visitMethod(access, name, descriptor, signature, exceptions);
+            }
+            MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+            addSwitch(mv, newName, descriptor, (access & ACC_STATIC) != 0);
+            return new ReplayMethodVisitor(
+                    access, name, descriptor,
+                    Collections.emptyList(),
+                    List.of(mv),
+                    List.of(super.visitMethod(access, newName + Constants.instrumentedMethodSuffix, descriptor, signature
+                            , exceptions)));
+
+        }
     }
 
     void addBranch(MethodVisitor mv, Label label, String name, String descriptor, boolean isStatic) {
@@ -117,14 +146,12 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     }
 
     void addSwitch(MethodVisitor mv, String name, String descriptor, boolean isStatic) {
-        mv.visitMethodInsn(
-                Opcodes.INVOKESTATIC,
+        mv.visitFieldInsn(
+                Opcodes.GETSTATIC,
                 "al/aoli/exchain/runtime/ExceptionJavaRuntime",
-                "exchainEnabled",
-                "()Z",
-                false
+                "enabled",
+                "Z"
         );
-
         Label trueLabel = new Label();
         Label falseLabel = new Label();
 
