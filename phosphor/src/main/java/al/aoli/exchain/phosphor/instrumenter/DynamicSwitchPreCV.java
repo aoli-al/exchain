@@ -38,8 +38,8 @@ public class DynamicSwitchPreCV extends ClassVisitor {
 
                 if (methodList != null) {
                     for (String s : methodList) {
-                        newMethodList.add(s.replace(Constants.instrumentedMethodSuffix, "")
-                                .replace(Constants.originMethodSuffix, "")
+                        newMethodList.add(s.replaceAll(Constants.instrumentedMethodSuffix + "\\d+", "")
+                                .replaceAll(Constants.originMethodSuffix + "\\d+", "")
                                 .replace("exchainConstructor", "<init>")
                                 .replace("exchainStaticConstructor", "<clinit>"));
                     }

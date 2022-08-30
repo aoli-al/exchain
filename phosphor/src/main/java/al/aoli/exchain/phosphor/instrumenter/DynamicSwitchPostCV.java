@@ -36,6 +36,8 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LRETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.RETURN;
 
 public class DynamicSwitchPostCV extends ClassVisitor {
+
+    private static int index;
     private String owner = null;
     private boolean isInterface;
     private Map<String, InlineSwitchMethodVisitor> constructorVisitors = new HashMap<>();
@@ -65,8 +67,9 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 visitor.isSecondPass = true;
                 visitor.instrumentedNode.accept(visitor);
             } else {
+                String instrumentedMethodName = visitor.instrumentedNode.name + index++;
                 MethodVisitor instrumentedMv = super.visitMethod(visitor.access,
-                        visitor.instrumentedNode.name, visitor.descriptor, visitor.signature, visitor.exceptions);
+                        instrumentedMethodName, visitor.descriptor, visitor.signature, visitor.exceptions);
                 visitor.instrumentedNode.accept(new ReplayMethodVisitor(
                         visitor.access, visitor.instrumentedNode.name, visitor.descriptor,
                         Collections.emptyList(), Collections.emptyList(),
@@ -74,13 +77,14 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 MethodVisitor originMv = super.visitMethod(visitor.access, visitor.originNode.name,
                         visitor.descriptor, visitor.signature, visitor.exceptions);
 
+                String originMethodName = visitor.originNode.name + index++;
                 visitor.originNode.accept(new ReplayMethodVisitor(
-                        visitor.access, visitor.originNode.name, visitor.descriptor,
+                        visitor.access, originMethodName, visitor.descriptor,
                         Collections.emptyList(), List.of(),
                         List.of(originMv)));
                 visitor.getMv().visitCode();
-                addSwitch(visitor.getMv(), methodNameMapping(visitor.name), visitor.descriptor,
-                        (visitor.access & ACC_STATIC) != 0);
+                addSwitch(visitor.getMv(), instrumentedMethodName, originMethodName,
+                        visitor.descriptor, (visitor.access & ACC_STATIC) != 0);
                 visitor.getMv().visitEnd();
             }
         }
@@ -145,7 +149,8 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         }
     }
 
-    void addSwitch(MethodVisitor mv, String name, String descriptor, boolean isStatic) {
+    void addSwitch(MethodVisitor mv, String instrumentedMethodName, String originMethodName,
+                   String descriptor, boolean isStatic) {
         Label enter = new Label();
         mv.visitLabel(enter);
         mv.visitLineNumber(111, enter);
@@ -159,9 +164,9 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         Label falseLabel = new Label();
 
         mv.visitJumpInsn(IFEQ, falseLabel);
-        addBranch(mv, trueLabel, name + Constants.instrumentedMethodSuffix, descriptor, isStatic);
+        addBranch(mv, trueLabel, instrumentedMethodName, descriptor, isStatic);
         mv.visitLineNumber(222, trueLabel);
-        addBranch(mv, falseLabel, name + Constants.originMethodSuffix, descriptor, isStatic);
+        addBranch(mv, falseLabel, originMethodName, descriptor, isStatic);
         mv.visitLineNumber(333, falseLabel);
         int locals = 0;
         if (isStatic) {

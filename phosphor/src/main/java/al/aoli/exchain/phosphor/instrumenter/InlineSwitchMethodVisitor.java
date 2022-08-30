@@ -128,4 +128,22 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
             super.visitMaxs(maxStack, maxLocals);
         }
     }
+
+    @Override
+    public void visitAttribute(Attribute attribute) {
+        super.visitAttribute(attribute);
+    }
+
+    @Override
+    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+        if (descriptor.contains("CallerSensitive")) {
+            shouldInline = true;
+        }
+        return super.visitAnnotation(descriptor, visible);
+    }
+
+    @Override
+    public AnnotationVisitor visitAnnotationDefault() {
+        return super.visitAnnotationDefault();
+    }
 }

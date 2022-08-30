@@ -5,7 +5,7 @@ import edu.columbia.cs.psl.phosphor.instrumenter.DataAndControlFlowTagFactory;
 public class DynamicSwitchTaintTagFactory extends DataAndControlFlowTagFactory {
     @Override
     public boolean isIgnoredMethod(String owner, String name, String desc) {
-        if (name.endsWith(Constants.originMethodSuffix)) {
+        if (name.contains(Constants.originMethodSuffix)) {
             return true;
         }
         return super.isIgnoredMethod(owner, name, desc);
