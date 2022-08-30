@@ -354,18 +354,7 @@ public class ReplayMethodVisitor extends MethodVisitor {
             mv.visitMaxs(maxStack, maxLocals);
         }
         for (MethodVisitor mv: annotationOnlyMvs) {
-            int locals = 0;
-            if ((this.access & ACC_STATIC) != 0) {
-                locals += 1;
-            }
-            for (Type type: Type.getArgumentTypes(descriptor)) {
-                switch (type.getSort()) {
-                    case Type.DOUBLE, Type.LONG ->
-                        locals += 2;
-                    default -> locals += 1;
-                }
-            }
-            mv.visitMaxs(locals, locals);
+            mv.visitMaxs(maxStack, maxLocals);
         }
     }
 

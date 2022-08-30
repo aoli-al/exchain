@@ -62,13 +62,7 @@ public class DynamicSwitchPreCV extends ClassVisitor {
         }
         MethodVisitor mv1 = super.visitMethod(access, newName + Constants.originMethodSuffix, descriptor, signature,
                 exceptions);
-        if (newName.contains("exchainStaticConstructor") ||
-                newName.contains("exchainConstructor")) {
-            return new ReplayMethodVisitor(access, name, descriptor,
-                    List.of(mv1, mv2), Collections.emptyList(), List.of());
-        } else {
-            return new ReplayMethodVisitor(access, name, descriptor,
-                    List.of(mv2), Collections.emptyList(), List.of(mv1));
-        }
+        return new ReplayMethodVisitor(access, name, descriptor,
+                List.of(mv2), Collections.emptyList(), List.of(mv1));
     }
 }

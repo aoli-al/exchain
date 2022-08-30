@@ -2,7 +2,7 @@ package al.aoli.exchain.demo;
 
 public class TaintTest {
 
-    static class Foo {
+    static class Foo extends TaintTest {
         public int a = 23;
     }
 
@@ -26,7 +26,7 @@ public class TaintTest {
     /*
     output: edu.columbia.cs.psl.phosphor.struct.TaggedReferenceArray@467aecef
      */
-    public void wrongOutput() {
+    public synchronized void wrongOutput() {
         byte[] obj = new byte[] {46};
         call(obj);
         call(null);
@@ -38,11 +38,13 @@ public class TaintTest {
 //        call(null, (String[]) null);
 //    }
 
-    public void test() {
+    public synchronized void test() {
+        if (Main.foo == 32) {
+            wrongOutput();
+        }
 //        called2( null, null);
 //        crash();
 //        leak();
-        wrongOutput();
     }
 
     static {

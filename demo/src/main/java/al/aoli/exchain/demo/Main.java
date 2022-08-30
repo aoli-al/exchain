@@ -26,6 +26,7 @@ import java.security.cert.CertificateException;
 import java.util.zip.DataFormatException;
 
 public class Main {
+    public static int foo = 3;
 
     static class Dummy<T> {
         T f;

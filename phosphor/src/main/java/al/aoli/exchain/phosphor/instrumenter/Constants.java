@@ -18,6 +18,6 @@ public final class Constants {
         if (name.contains("exchainConstructor")) {
             return "<init>";
         }
-        return name;
+        return name.replace(originMethodSuffix, "").replace(instrumentedMethodSuffix, "");
     }
 }

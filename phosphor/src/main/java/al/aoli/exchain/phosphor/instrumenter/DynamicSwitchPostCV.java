@@ -11,9 +11,11 @@ import edu.columbia.cs.psl.phosphor.struct.harmony.util.Map;
 import java.util.Collections;
 import java.util.List;
 
+import static al.aoli.exchain.phosphor.instrumenter.Constants.instrumentedMethodSuffix;
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameReMapping;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_ABSTRACT;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_INTERFACE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_NATIVE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_STATIC;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ALOAD;
@@ -27,6 +29,7 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IFEQ;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ILOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IRETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LLOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LRETURN;
@@ -34,7 +37,8 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.RETURN;
 
 public class DynamicSwitchPostCV extends ClassVisitor {
     private String owner = null;
-    private Map<String, ConstructorMethodVisitor> constructorVisitors = new HashMap<>();
+    private boolean isInterface;
+    private Map<String, InlineSwitchMethodVisitor> constructorVisitors = new HashMap<>();
     public DynamicSwitchPostCV(ClassVisitor cv, boolean skipFrames, byte[] bytes) {
         super(ASM9, cv);
     }
@@ -42,54 +46,46 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         owner = name;
+        isInterface = (access & ACC_INTERFACE) != 0;
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
     public void visitEnd() {
-        for (ConstructorMethodVisitor visitor: constructorVisitors.values()) {
-            visitor.checkFinished();
+        for (InlineSwitchMethodVisitor visitor: constructorVisitors.values()) {
+            if (!visitor.instrumentedNode.finished || !visitor.originNode.finished) {
+                if (visitor.instrumentedNode.finished) {
+                    visitor.instrumentedNode.accept(visitor.getMv());
+                } else {
+                    visitor.originNode.accept(visitor.getMv());
+                }
+            } else if (visitor.shouldInline) {
+                visitor.originNode.accept(visitor);
+                visitor.isInstrumentedCode = true;
+                visitor.isSecondPass = true;
+                visitor.instrumentedNode.accept(visitor);
+            } else {
+                MethodVisitor instrumentedMv = super.visitMethod(visitor.access,
+                        visitor.instrumentedNode.name, visitor.descriptor, visitor.signature, visitor.exceptions);
+                visitor.instrumentedNode.accept(new ReplayMethodVisitor(
+                        visitor.access, visitor.instrumentedNode.name, visitor.descriptor,
+                        Collections.emptyList(), Collections.emptyList(),
+                        List.of(instrumentedMv)));
+                MethodVisitor originMv = super.visitMethod(visitor.access, visitor.originNode.name,
+                        visitor.descriptor, visitor.signature, visitor.exceptions);
+
+                visitor.originNode.accept(new ReplayMethodVisitor(
+                        visitor.access, visitor.originNode.name, visitor.descriptor,
+                        Collections.emptyList(), List.of(),
+                        List.of(originMv)));
+                visitor.getMv().visitCode();
+                addSwitch(visitor.getMv(), methodNameMapping(visitor.name), visitor.descriptor,
+                        (visitor.access & ACC_STATIC) != 0);
+                visitor.getMv().visitEnd();
+            }
         }
         constructorVisitors.clear();
         super.visitEnd();
-    }
-
-    @Override
-    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
-                                     String[] exceptions) {
-        if (name.endsWith("PHOSPHOR_TAG")
-                || (access & ACC_ABSTRACT) != 0
-                || (access & ACC_NATIVE) != 0) {
-            return super.visitMethod(access, name, descriptor, signature, exceptions);
-        }
-
-        String newName = methodNameMapping(name);
-        if (newName.contains("exchainConstructor") || newName.contains("exchainStaticConstructor")) {
-            String key = owner + methodNameReMapping(newName) + descriptor;
-            if (!constructorVisitors.containsKey(key)) {
-                constructorVisitors.put(key, new ConstructorMethodVisitor(super.visitMethod(access, name, descriptor,
-                        signature, exceptions), key));
-            }
-            ConstructorMethodVisitor mv = constructorVisitors.get(key);
-            if (name.contains(Constants.originMethodSuffix)) {
-                return mv.originNode;
-            } else {
-                return mv.instrumentedNode;
-            }
-        } else {
-            if (name.endsWith(Constants.originMethodSuffix))  {
-                return super.visitMethod(access, name, descriptor, signature, exceptions);
-            }
-            MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
-            addSwitch(mv, newName, descriptor, (access & ACC_STATIC) != 0);
-            return new ReplayMethodVisitor(
-                    access, name, descriptor,
-                    Collections.emptyList(),
-                    List.of(mv),
-                    List.of(super.visitMethod(access, newName + Constants.instrumentedMethodSuffix, descriptor, signature
-                            , exceptions)));
-
-        }
     }
 
     void addBranch(MethodVisitor mv, Label label, String name, String descriptor, boolean isStatic) {
@@ -99,7 +95,11 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         if (!isStatic) {
             mv.visitVarInsn(ALOAD, 0);
             offset = 1;
-            insn = INVOKEINTERFACE;
+            if (isInterface) {
+                insn = INVOKEINTERFACE;
+            } else {
+                insn = INVOKEVIRTUAL;
+            }
         } else {
             offset = 0;
             insn = INVOKESTATIC;
@@ -115,7 +115,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                     offset += 1;
                 }
                 case Type.FLOAT ->
-                    mv.visitVarInsn(FLOAD, i + offset);
+                        mv.visitVarInsn(FLOAD, i + offset);
                 case Type.DOUBLE -> {
                     mv.visitVarInsn(DLOAD, i + offset);
                     offset += 1;
@@ -124,7 +124,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
 
             }
         }
-        mv.visitMethodInsn(insn, owner, name, descriptor, true);
+        mv.visitMethodInsn(insn, owner, name, descriptor, isInterface);
 
         Type returnType = Type.getReturnType(descriptor);
 
@@ -146,6 +146,9 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     }
 
     void addSwitch(MethodVisitor mv, String name, String descriptor, boolean isStatic) {
+        Label enter = new Label();
+        mv.visitLabel(enter);
+        mv.visitLineNumber(111, enter);
         mv.visitFieldInsn(
                 Opcodes.GETSTATIC,
                 "al/aoli/exchain/runtime/ExceptionJavaRuntime",
@@ -157,6 +160,53 @@ public class DynamicSwitchPostCV extends ClassVisitor {
 
         mv.visitJumpInsn(IFEQ, falseLabel);
         addBranch(mv, trueLabel, name + Constants.instrumentedMethodSuffix, descriptor, isStatic);
+        mv.visitLineNumber(222, trueLabel);
         addBranch(mv, falseLabel, name + Constants.originMethodSuffix, descriptor, isStatic);
+        mv.visitLineNumber(333, falseLabel);
+        int locals = 0;
+        if (isStatic) {
+            locals += 1;
+        }
+        for (Type type: Type.getArgumentTypes(descriptor)) {
+            switch (type.getSort()) {
+                case Type.DOUBLE, Type.LONG ->
+                        locals += 2;
+                default -> locals += 1;
+            }
+        }
+        mv.visitMaxs(Integer.max(locals, 1), locals);
     }
+
+
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
+                                     String[] exceptions) {
+        if (name.endsWith("PHOSPHOR_TAG")
+                || (access & ACC_ABSTRACT) != 0
+                || (access & ACC_NATIVE) != 0) {
+            return super.visitMethod(access, name, descriptor, signature, exceptions);
+        }
+
+        String newName = methodNameMapping(name);
+
+        String key = owner + methodNameReMapping(newName) + descriptor;
+        if (!constructorVisitors.containsKey(key)) {
+            constructorVisitors.put(key,
+                    new InlineSwitchMethodVisitor(
+                            super.visitMethod(access, methodNameReMapping(newName), descriptor, signature, exceptions),
+                            owner, isInterface,
+                            access, methodNameReMapping(newName), descriptor, signature, exceptions));
+        }
+        InlineSwitchMethodVisitor mv = constructorVisitors.get(key);
+        if (name.contains(Constants.originMethodSuffix)) {
+            return new ReplayMethodVisitor(access, name, descriptor, Collections.emptyList(),
+                    List.of(),
+                    List.of(mv.originNode));
+        } else {
+            return new ReplayMethodVisitor(access, name, descriptor, Collections.emptyList(),
+                    List.of(mv),
+                    List.of(mv.instrumentedNode));
+        }
+    }
+
 }
