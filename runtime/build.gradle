@@ -57,6 +57,7 @@ task mergedJar(type: Jar) {
         attributes "Main-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
         attributes "Premain-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.JLinkRegistrationAgent"
     }
+//    dependsOn buildPhosphor
     dependsOn createShadow
 }
 
@@ -71,16 +72,17 @@ task createInstrumentedJDK(type: JavaExec) {
     var phosphor = project(":phosphor")
     classpath "$phosphor.buildDir/libs/${phosphor.name}.jar"
     classpath jarPath
-    main = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
-    var src = Jvm.current().javaHome
-    var dst = "$buildDir/jre-inst"
+    mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
+//    var src = Jvm.current().javaHome
+    var src = "/Users/aoli/repos/jdk/build/macosx-x86_64-server-release/images/jdk"
+    var dst = "$buildDir/jre-inst2"
     args src, dst, "--jvmModules", "ALL-MODULE-PATH",
             "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
             "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
-            "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV"
+            "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV",
+            "-addExports", "al/aoli/exchain/runtime,kotlin/jvm/internal"
     environment "CLASSPATH", "$phosphor.buildDir/libs/${phosphor.name}.jar"
     dependsOn ":phosphor:jar"
     dependsOn mergedJar
-//    dependsOn buildPhosphor
 }
 

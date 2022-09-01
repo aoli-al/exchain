@@ -4,29 +4,25 @@ package al.aoli.exchain.demo;
 //import edu.columbia.cs.psl.phosphor.runtime.Taint;
 //import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
 
-import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
-import edu.columbia.cs.psl.phosphor.runtime.Taint;
-import edu.columbia.cs.psl.phosphor.struct.PowerSetTree;
-import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
+import al.aoli.exchain.runtime.ExceptionJavaRuntime;
 
-import javax.net.ssl.KeyManagerFactory;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.CharBuffer;
 import java.rmi.RemoteException;
-import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
-import java.security.cert.CertificateException;
 import java.util.zip.DataFormatException;
 
 public class Main {
     public static int foo = 3;
+
+    public Main() {
+        if (ExceptionJavaRuntime.enabled) {
+            f = true;
+        } else {
+            f = false;
+        }
+    }
 
     static class Dummy<T> {
         T f;
@@ -81,8 +77,12 @@ public class Main {
     }
 
     boolean bar() {
+        test();
         return false;
     }
+
+    private void test() {}
+
 
 
     boolean f = true;
@@ -98,8 +98,15 @@ public class Main {
     public static void main(String[] args)
             throws DataFormatException, InterruptedException, RemoteException, NoSuchMethodException,
             InvocationTargetException, IllegalAccessException, InstantiationException, KeyStoreException,
-            NoSuchAlgorithmException, UnrecoverableKeyException, NoSuchFieldException {
-        DataFlowTest test = new DataFlowTest();
-        test.callScene1();
+            NoSuchAlgorithmException, UnrecoverableKeyException, NoSuchFieldException, ClassNotFoundException {
+//        Properties p;
+//        p.put("1", "2");
+//        p.size();
+        SimpleTest t = new SimpleTest();
+        System.out.println(t.getFoo().getS());
+        System.out.println(t.getFoo().getS2());
+        t.getFoo().setS("789");
+        System.out.println(t.getFoo().getS());
+        System.out.println(t.getFoo().getS2());
     }
 }

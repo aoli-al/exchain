@@ -7,7 +7,9 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
 import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashMap;
 import edu.columbia.cs.psl.phosphor.struct.harmony.util.Map;
+import jdk.jshell.execution.Util;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,6 +27,8 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.DLOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.DRETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.FLOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.FRETURN;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.F_FULL;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.F_NEW;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IFEQ;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ILOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.INVOKEINTERFACE;
@@ -62,6 +66,8 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                     visitor.originNode.accept(visitor.getMv());
                 }
             } else if (visitor.shouldInline) {
+//                visitor.isSecondPass = false;
+//                visitor.isInstrumentedCode = true;
                 visitor.originNode.accept(visitor);
                 visitor.isInstrumentedCode = true;
                 visitor.isSecondPass = true;
@@ -71,13 +77,13 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 MethodVisitor instrumentedMv = super.visitMethod(visitor.access,
                         instrumentedMethodName, visitor.descriptor, visitor.signature, visitor.exceptions);
                 visitor.instrumentedNode.accept(new ReplayMethodVisitor(
-                        visitor.access, visitor.instrumentedNode.name, visitor.descriptor,
+                        visitor.access, instrumentedMethodName, visitor.descriptor,
                         Collections.emptyList(), Collections.emptyList(),
                         List.of(instrumentedMv)));
-                MethodVisitor originMv = super.visitMethod(visitor.access, visitor.originNode.name,
-                        visitor.descriptor, visitor.signature, visitor.exceptions);
 
                 String originMethodName = visitor.originNode.name + index++;
+                MethodVisitor originMv = super.visitMethod(visitor.access, originMethodName,
+                        visitor.descriptor, visitor.signature, visitor.exceptions);
                 visitor.originNode.accept(new ReplayMethodVisitor(
                         visitor.access, originMethodName, visitor.descriptor,
                         Collections.emptyList(), List.of(),
@@ -94,6 +100,12 @@ public class DynamicSwitchPostCV extends ClassVisitor {
 
     void addBranch(MethodVisitor mv, Label label, String name, String descriptor, boolean isStatic) {
         mv.visitLabel(label);
+        Type[] argumentTypes = Type.getArgumentTypes(descriptor);
+        List<Object> locals = Utils.descriptorToLocals(descriptor);
+        if (!isStatic) {
+            locals.add(0, owner);
+        }
+        mv.visitFrame(F_NEW, locals.size(), locals.toArray(), 0, new String[]{});
         int offset;
         int insn;
         if (!isStatic) {
@@ -108,7 +120,6 @@ public class DynamicSwitchPostCV extends ClassVisitor {
             offset = 0;
             insn = INVOKESTATIC;
         }
-        Type[] argumentTypes = Type.getArgumentTypes(descriptor);
         for (int i = 0; i < argumentTypes.length; i++) {
             switch (argumentTypes[i].getSort()) {
                 case Type.BOOLEAN, Type.BYTE, Type.CHAR,

@@ -9,6 +9,8 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.TypePath;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +24,8 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.DLOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.DRETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.FLOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.FRETURN;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.F_FULL;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.F_NEW;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IFEQ;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IFNE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ILOAD;
@@ -32,6 +36,7 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IRETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LLOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LRETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.RETURN;
+import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.UNINITIALIZED_THIS;
 
 public class InlineSwitchMethodVisitor extends MethodVisitor {
 
@@ -101,14 +106,23 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
                     "Z"
             );
             if (isInstrumentedCode) {
-                super.visitJumpInsn(IFNE, originCodeSection);
+                super.visitJumpInsn(IFNE, instrumentedCodeSection);
             } else {
-                super.visitJumpInsn(IFEQ, instrumentedCodeSection);
+                super.visitJumpInsn(IFEQ, originCodeSection);
             }
         }
 
         if (isInstrumentedCode) {
             super.visitLabel(instrumentedCodeSection);
+            List<Object> locals = Utils.descriptorToLocals(descriptor);
+            if ((access & ACC_STATIC) == 0) {
+                if (name.equals("<init>")) {
+                    locals.add(0, UNINITIALIZED_THIS);
+                } else {
+                    locals.add(0, owner);
+                }
+            }
+            super.visitFrame(F_NEW, locals.size(), locals.toArray(), 0, null);
         } else {
             super.visitLabel(originCodeSection);
         }
@@ -143,7 +157,17 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
     }
 
     @Override
+    public void visitLineNumber(int line, Label start) {
+        if (isInstrumentedCode) {
+            super.visitLineNumber(line + 50000, start);
+        } else {
+            super.visitLineNumber(line, start);
+        }
+    }
+
+    @Override
     public AnnotationVisitor visitAnnotationDefault() {
         return super.visitAnnotationDefault();
     }
+
 }

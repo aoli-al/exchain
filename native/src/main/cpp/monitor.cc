@@ -8,6 +8,7 @@
 #include <mutex>
 
 #include "runtime.hpp"
+#include "utils.hpp"
 #include "exception_processor.hpp"
 #include "plog/Init.h"
 #include "plog/Log.h"
@@ -47,6 +48,9 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
                                jmethodID method, jlocation location,
                                jobject exception, jmethodID catch_method,
                                jlocation catch_location) {
+    exchain::PrintObject(env, exception);
+
+    if (!initialized) return;
     PLOG_INFO << "Start processing: " << thread;
     jlong exception_thread_id = GetThreadId(thread, env);
     if (processing_threads.find(exception_thread_id) != processing_threads.end()) {

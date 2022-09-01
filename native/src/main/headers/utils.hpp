@@ -1,9 +1,9 @@
 #pragma once
 
-#include <jvmti.h>
+#include <jni.h>
 
 #include <string>
 
 namespace exchain {
-
-}  // namespace
+void PrintObject(JNIEnv *env, jobject object);
+}  // namespace exchain
