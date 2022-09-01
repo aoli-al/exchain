@@ -102,11 +102,9 @@ public class Main {
 //        Properties p;
 //        p.put("1", "2");
 //        p.size();
-        SimpleTest t = new SimpleTest();
-        System.out.println(t.getFoo().getS());
-        System.out.println(t.getFoo().getS2());
-        t.getFoo().setS("789");
-        System.out.println(t.getFoo().getS());
-        System.out.println(t.getFoo().getS2());
+        DataFlowTest t = null;
+        t.callScene1();
+//        DataFlowTest t = new DataFlowTest();
+//        t.callScene1();
     }
 }

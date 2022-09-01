@@ -47,7 +47,12 @@ public class DataFlowTest {
         }
 
         void test() {
-            System.out.println(sub.length());
+            try {
+                System.out.println(sub.length());
+            }
+            catch (RuntimeException e) {
+                System.out.println(e.getMessage());
+            }
         }
 
     }

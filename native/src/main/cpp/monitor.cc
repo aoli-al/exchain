@@ -36,6 +36,7 @@
 
 static std::mutex processing_threads_mutex;
 static std::set<jlong> processing_threads;
+static JavaVM *jvm = nullptr;
 
 jlong GetThreadId(jthread thread, JNIEnv *env) {
     auto clazz = env->FindClass("java/lang/Thread");
@@ -48,33 +49,42 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
                                jmethodID method, jlocation location,
                                jobject exception, jmethodID catch_method,
                                jlocation catch_location) {
-    exchain::PrintObject(env, exception);
-
     if (!initialized) return;
-    PLOG_INFO << "Start processing: " << thread;
+    if (thread == NULL) return;
+    PLOG_INFO << "Get thread id: ";
     jlong exception_thread_id = GetThreadId(thread, env);
-    if (processing_threads.find(exception_thread_id) != processing_threads.end()) {
-        return;
-    }
+    PLOG_INFO << "thread id found";
     std::thread new_thread([=]() {
-        JavaVM *jvm;
-        auto result = env->GetJavaVM(&jvm);
-        if (result != 0) {
-            LOG_ERROR << "Failed to get JavaVM: " << result;
+        if (jvm == nullptr) {
+            LOG_ERROR << "JavaVM is null!";
+            return;
         }
-        jvm->AttachCurrentThread((void **)&env, NULL);
+        JNIEnv *jni;
+        if (auto result = jvm->AttachCurrentThread((void **)&jni, NULL) != 0) {
+            LOG_ERROR << "Failed to attach current thread: " << result;
+            return;
+        }
 
-        auto cls = env->FindClass("java/lang/Thread");
-        auto mid = env->GetStaticMethodID(cls, "currentThread", "()Ljava/lang/Thread;");
-        jthread current_thread = env->CallStaticObjectMethod(cls, mid);
-        jlong current_thread_id = GetThreadId(current_thread, env);
+        if (processing_threads.find(exception_thread_id) !=
+            processing_threads.end()) {
+            jvm->DetachCurrentThread();
+            return;
+        }
+
+        PLOG_INFO << "Start processing: " << thread;
+
+        auto cls = jni->FindClass("java/lang/Thread");
+        auto mid = jni->GetStaticMethodID(cls, "currentThread", "()Ljava/lang/Thread;");
+        jthread current_thread = jni->CallStaticObjectMethod(cls, mid);
+        jlong current_thread_id = GetThreadId(current_thread, jni);
+        jni->DeleteLocalRef(current_thread);
 
         processing_threads_mutex.lock();
         processing_threads.insert(current_thread_id);
         processing_threads_mutex.unlock();
 
 
-        exchain::ExceptionProcessor processor(jvmti, env, thread, method,
+        exchain::ExceptionProcessor processor(jvmti, jni, thread, method,
                                               location, catch_method,
                                               catch_location, exception);
         processor.Process();
@@ -91,6 +101,7 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
     jvmtiEnv *jvmti;
+    jvm = vm;
     vm->GetEnv((void **)&jvmti, JVMTI_VERSION_1_0);
 
     jvmtiCapabilities capabilities = {0};

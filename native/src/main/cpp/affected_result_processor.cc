@@ -10,6 +10,8 @@ void AffectedResultProcessor::Process() {
             "get local variable table failed.")) {
         return;
     }
+    PLOG_INFO << "Start processing affected result!";
+
 
     ProcessSourceVars();
     ProcessAffectedVars();
@@ -30,7 +32,7 @@ void AffectedResultProcessor::ProcessAffectedFields() {
         runtime_class_, kTaintFieldsMethodName, kTaintFieldsMethodDescriptor);
     jobject obj = NULL;
     jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
-    if (obj != NULL) {
+    if (obj != NULL && taint_fields_method_id != NULL) {
         jni_->CallStaticVoidMethod(runtime_class_, taint_fields_method_id, obj,
                                    result_, exception_);
     }
@@ -56,12 +58,12 @@ void AffectedResultProcessor::ProcessSourceVars() {
                                 kAnalyzeSourceVarsMethodDescriptor);
     auto source_vars_field_id =
         jni_->GetFieldID(result_class_, "sourceVars", "[I");
-    PLOG_INFO << "Source var ID: " << source_vars_field_id;
     jintArray source_vars =
         (jintArray)jni_->GetObjectField(result_, source_vars_field_id);
 
     const auto source_vars_length = jni_->GetArrayLength(source_vars);
     auto source_vars_cpy = jni_->GetIntArrayElements(source_vars, NULL);
+    PLOG_INFO << "Source var size: " << source_vars_length;
     for (int i = 0; i < source_vars_length; i++) {
         const auto slot = source_vars_cpy[i];
         jint taint_slot = GetCorrespondingTaintObjectSlot(slot);
@@ -73,6 +75,7 @@ void AffectedResultProcessor::ProcessSourceVars() {
                                            analyze_source_method_id, taint,
                                            exception_, location_);
             }
+            jni_->DeleteLocalRef(taint);
         }
 
         auto signature = GetLocalObjectSignature(slot);
@@ -84,6 +87,7 @@ void AffectedResultProcessor::ProcessSourceVars() {
                                            analyze_source_method_id, obj,
                                            exception_, location_);
             }
+            jni_->DeleteLocalRef(obj);
         }
     }
     jni_->ReleaseIntArrayElements(source_vars, source_vars_cpy, NULL);
@@ -133,6 +137,7 @@ void AffectedResultProcessor::ProcessAffectedVars() {
     auto update_taint_method_id = jni_->GetStaticMethodID(
         runtime_class_, kUpdateTaintMethodName, kUpdateTaintMethodDescriptor);
 
+    PLOG_INFO << "Affected var size: " << affected_vars_length;
     for (int i = 0; i < affected_vars_length; i++) {
         const auto slot = affected_vars_cpy[i];
         std::string signature = GetLocalObjectSignature(slot);

@@ -96,14 +96,11 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame, int depth) 
     jobject result = (jintArray)jni_->CallStaticObjectMethod(
         clazz, method_id, class_jstring, method_jstring, frame.location,
         catch_current_method, is_throw_insn);
-
+    jni_->DeleteLocalRef(method_jstring);
+    jni_->DeleteLocalRef(class_jstring);
     if (result == NULL) {
         return;
     }
-
-    // jstring location_string = jni_->NewStringUTF(
-    //     (class_signature + ":" + method + ":" + std::to_string(frame.location))
-    //         .c_str());
 
     AffectedResultProcessor processor(jvmti_, jni_, frame, depth, result,
                                       frame.method == catch_method_,

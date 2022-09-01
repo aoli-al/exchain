@@ -6,36 +6,15 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.ClassVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Label;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.TypePath;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_STATIC;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ALOAD;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ARETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.DLOAD;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.DRETURN;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.FLOAD;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.FRETURN;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.F_FULL;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.F_NEW;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IFEQ;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IFNE;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ILOAD;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.INVOKEINTERFACE;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.INVOKESTATIC;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IRETURN;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LLOAD;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LRETURN;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.RETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.UNINITIALIZED_THIS;
 
 public class InlineSwitchMethodVisitor extends MethodVisitor {
@@ -78,7 +57,8 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
         this.descriptor = descriptor;
         this.signature = signature;
         this.exceptions = exceptions;
-        shouldInline = name.equals("<init>") || name.equals("<clinit>");
+        shouldInline = name.equals("<init>") || name.equals("<clinit>")
+                || name.equals("getStackTrace");
         String newName = methodNameMapping(name);
         originNode = new InlineSwitchMethodNode(access,
                 newName + Constants.originMethodSuffix,
@@ -113,20 +93,25 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
         }
 
         if (isInstrumentedCode) {
-            super.visitLabel(instrumentedCodeSection);
-            List<Object> locals = Utils.descriptorToLocals(descriptor);
-            if ((access & ACC_STATIC) == 0) {
-                if (name.equals("<init>")) {
-                    locals.add(0, UNINITIALIZED_THIS);
-                } else {
-                    locals.add(0, owner);
-                }
-            }
-            super.visitFrame(F_NEW, locals.size(), locals.toArray(), 0, null);
+            visitLabelAndFrame(instrumentedCodeSection);
         } else {
-            super.visitLabel(originCodeSection);
+            visitLabelAndFrame(originCodeSection);
         }
         super.visitCode();
+    }
+
+    public void visitLabelAndFrame(Label label) {
+        super.visitLabel(label);
+        List<Object> locals = Utils.descriptorToLocals(descriptor);
+        if ((access & ACC_STATIC) == 0) {
+            if (name.equals("<init>")) {
+                locals.add(0, UNINITIALIZED_THIS);
+            } else {
+                locals.add(0, owner);
+            }
+        }
+        super.visitFrame(F_NEW, locals.size(), locals.toArray(), 0, null);
+
     }
 
     @Override
