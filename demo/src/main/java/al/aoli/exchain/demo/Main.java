@@ -102,9 +102,7 @@ public class Main {
 //        Properties p;
 //        p.put("1", "2");
 //        p.size();
-        DataFlowTest t = null;
+        DataFlowTest t = new DataFlowTest();
         t.callScene1();
-//        DataFlowTest t = new DataFlowTest();
-//        t.callScene1();
     }
 }

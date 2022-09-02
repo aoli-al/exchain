@@ -51,9 +51,11 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
                                jlocation catch_location) {
     if (!initialized) return;
     if (thread == NULL) return;
-    PLOG_INFO << "Get thread id: ";
     jlong exception_thread_id = GetThreadId(thread, env);
-    PLOG_INFO << "thread id found";
+    if (processing_threads.find(exception_thread_id) !=
+        processing_threads.end()) {
+        return;
+    }
     std::thread new_thread([=]() {
         if (jvm == nullptr) {
             LOG_ERROR << "JavaVM is null!";
@@ -65,11 +67,6 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
             return;
         }
 
-        if (processing_threads.find(exception_thread_id) !=
-            processing_threads.end()) {
-            jvm->DetachCurrentThread();
-            return;
-        }
 
         PLOG_INFO << "Start processing: " << thread;
 

@@ -58,7 +58,7 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
         this.signature = signature;
         this.exceptions = exceptions;
         shouldInline = name.equals("<init>") || name.equals("<clinit>")
-                || name.equals("getStackTrace");
+                || name.equals("fillInStackTrace");
         String newName = methodNameMapping(name);
         originNode = new InlineSwitchMethodNode(access,
                 newName + Constants.originMethodSuffix,
