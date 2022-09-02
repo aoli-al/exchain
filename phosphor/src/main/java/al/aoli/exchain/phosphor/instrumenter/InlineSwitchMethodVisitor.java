@@ -86,9 +86,9 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
                     "Z"
             );
             if (isInstrumentedCode) {
-                super.visitJumpInsn(IFNE, instrumentedCodeSection);
+                super.visitJumpInsn(IFNE, originCodeSection);
             } else {
-                super.visitJumpInsn(IFEQ, originCodeSection);
+                super.visitJumpInsn(IFEQ, instrumentedCodeSection);
             }
         }
 
