@@ -10,6 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
+import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameReMapping;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_ABSTRACT;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_NATIVE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
@@ -38,10 +39,8 @@ public class DynamicSwitchPreCV extends ClassVisitor {
 
                 if (methodList != null) {
                     for (String s : methodList) {
-                        newMethodList.add(s.replaceAll(Constants.instrumentedMethodSuffix + "\\d+", "")
-                                .replaceAll(Constants.originMethodSuffix + "\\d+", "")
-                                .replace("exchainConstructor", "<init>")
-                                .replace("exchainStaticConstructor", "<clinit>"));
+                        String[] results = s.split("\\(");
+                        newMethodList.add(methodNameReMapping(results[0]) + "(" + results[1]);
                     }
                 }
 
@@ -50,6 +49,11 @@ public class DynamicSwitchPreCV extends ClassVisitor {
             catch (NoSuchFieldException | IllegalAccessException e) {
             }
         }
+    }
+
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override

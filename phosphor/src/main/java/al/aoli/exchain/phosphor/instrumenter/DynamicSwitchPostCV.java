@@ -7,13 +7,10 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
 import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashMap;
 import edu.columbia.cs.psl.phosphor.struct.harmony.util.Map;
-import jdk.jshell.execution.Util;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static al.aoli.exchain.phosphor.instrumenter.Constants.instrumentedMethodSuffix;
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameReMapping;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_ABSTRACT;
@@ -41,7 +38,7 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.RETURN;
 
 public class DynamicSwitchPostCV extends ClassVisitor {
 
-    private static int index;
+    private int index;
     private String owner = null;
     private boolean isInterface;
     private Map<String, InlineSwitchMethodVisitor> constructorVisitors = new HashMap<>();
@@ -53,6 +50,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         owner = name;
         isInterface = (access & ACC_INTERFACE) != 0;
+        index = (name.hashCode() % 100_000 + 100_000) % 100_000;
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
@@ -66,14 +64,14 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                     visitor.originNode.accept(visitor.getMv());
                 }
             } else if (visitor.shouldInline) {
-//                visitor.isSecondPass = false;
-//                visitor.isInstrumentedCode = true;
+                visitor.isSecondPass = false;
+                visitor.isInstrumentedCode = false;
                 visitor.originNode.accept(visitor);
                 visitor.isInstrumentedCode = true;
                 visitor.isSecondPass = true;
                 visitor.instrumentedNode.accept(visitor);
             } else {
-                String instrumentedMethodName = visitor.instrumentedNode.name + index++;
+                String instrumentedMethodName = visitor.instrumentedNode.name + index;
                 MethodVisitor instrumentedMv = super.visitMethod(visitor.access,
                         instrumentedMethodName, visitor.descriptor, visitor.signature, visitor.exceptions);
                 visitor.instrumentedNode.accept(new ReplayMethodVisitor(
@@ -81,7 +79,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                         Collections.emptyList(), Collections.emptyList(),
                         List.of(instrumentedMv)));
 
-                String originMethodName = visitor.originNode.name + index++;
+                String originMethodName = visitor.originNode.name + index;
                 MethodVisitor originMv = super.visitMethod(visitor.access, originMethodName,
                         visitor.descriptor, visitor.signature, visitor.exceptions);
                 visitor.originNode.accept(new ReplayMethodVisitor(
@@ -101,7 +99,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     void addBranch(MethodVisitor mv, Label label, String name, String descriptor, boolean isStatic) {
         mv.visitLabel(label);
         Type[] argumentTypes = Type.getArgumentTypes(descriptor);
-        List<Object> locals = Utils.descriptorToLocals(descriptor);
+        edu.columbia.cs.psl.phosphor.struct.harmony.util.List<Object> locals = Utils.descriptorToLocals(descriptor);
         if (!isStatic) {
             locals.add(0, owner);
         }
@@ -171,14 +169,14 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 "enabled",
                 "Z"
         );
-        Label trueLabel = new Label();
         Label falseLabel = new Label();
+        Label trueLabel = new Label();
 
-        mv.visitJumpInsn(IFEQ, falseLabel);
-        addBranch(mv, trueLabel, instrumentedMethodName, descriptor, isStatic);
-        mv.visitLineNumber(222, trueLabel);
-        addBranch(mv, falseLabel, originMethodName, descriptor, isStatic);
-        mv.visitLineNumber(333, falseLabel);
+        mv.visitJumpInsn(IFEQ, trueLabel);
+        addBranch(mv, falseLabel, instrumentedMethodName, descriptor, isStatic);
+        mv.visitLineNumber(222, falseLabel);
+        addBranch(mv, trueLabel, originMethodName, descriptor, isStatic);
+        mv.visitLineNumber(333, trueLabel);
         int locals = 0;
         if (isStatic) {
             locals += 1;

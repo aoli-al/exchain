@@ -50,6 +50,8 @@ task createShadow(type: ShadowJar) {
 task mergedJar(type: Jar) {
     archiveBaseName.set("runtime")
     archiveClassifier.set("")
+    var phosphor = project(":phosphor")
+    from zipTree("$phosphor.buildDir/libs/${phosphor.name}.jar")
     from zipTree("${project.rootProject.projectDir}/dependencies/phosphor/" +
             "phosphor-instrument-jigsaw/target/phosphor-instrument-jigsaw-0.1.0-SNAPSHOT.jar")
     from zipTree("${project.buildDir}/libs/out.jar")
@@ -58,6 +60,7 @@ task mergedJar(type: Jar) {
         attributes "Premain-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.JLinkRegistrationAgent"
     }
 //    dependsOn buildPhosphor
+    dependsOn ":phosphor:jar"
     dependsOn createShadow
 }
 
@@ -69,20 +72,15 @@ task buildPhosphor(type: Exec) {
 import org.gradle.internal.jvm.Jvm
 task createInstrumentedJDK(type: JavaExec) {
     var jarPath = "$buildDir/libs/${project.name}.jar"
-    var phosphor = project(":phosphor")
-    classpath "$phosphor.buildDir/libs/${phosphor.name}.jar"
     classpath jarPath
     mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
     var src = Jvm.current().javaHome
-//    var src = "/Users/aoli/repos/jdk/build/macosx-x86_64-server-release/images/jdk"
     var dst = "$buildDir/jre-inst"
     args src, dst, "--jvmModules", "ALL-MODULE-PATH",
             "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
             "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
             "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV",
             "-addExports", "al/aoli/exchain/runtime,kotlin/jvm/internal"
-    environment "CLASSPATH", "$phosphor.buildDir/libs/${phosphor.name}.jar"
-    dependsOn ":phosphor:jar"
     dependsOn mergedJar
 }
 

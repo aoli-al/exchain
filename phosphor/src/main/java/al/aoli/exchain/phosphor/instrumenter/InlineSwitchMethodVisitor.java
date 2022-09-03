@@ -6,8 +6,7 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.ClassVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Label;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
-
-import java.util.List;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.List;
 
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -86,9 +85,9 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
                     "Z"
             );
             if (isInstrumentedCode) {
-                super.visitJumpInsn(IFNE, originCodeSection);
+                super.visitJumpInsn(IFEQ, originCodeSection);
             } else {
-                super.visitJumpInsn(IFEQ, instrumentedCodeSection);
+                super.visitJumpInsn(IFNE, instrumentedCodeSection);
             }
         }
 
