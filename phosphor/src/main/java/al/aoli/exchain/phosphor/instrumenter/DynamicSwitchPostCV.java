@@ -1,5 +1,6 @@
 package al.aoli.exchain.phosphor.instrumenter;
 
+import edu.columbia.cs.psl.phosphor.instrumenter.ReflectionHidingMV;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.ClassVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Label;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
@@ -215,7 +216,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         if (name.contains(Constants.originMethodSuffix)) {
             return new ReplayMethodVisitor(access, name, descriptor, Collections.emptyList(),
                     List.of(),
-                    List.of(mv.originNode));
+                    List.of(new ReflectionHidingMV(mv.originNode, owner, name, )));
         } else {
             return new ReplayMethodVisitor(access, name, descriptor, Collections.emptyList(),
                     List.of(mv),

@@ -129,12 +129,17 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitAttribute(Attribute attribute) {
-        super.visitAttribute(attribute);
+        if (attribute.isCodeAttribute()) {
+            super.visitAttribute(attribute);
+        } else if (!isSecondPass) {
+            super.visitAttribute(attribute);
+        }
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-        if (descriptor.contains("CallerSensitive")) {
+        if (descriptor.contains("CallerSensitive") ||
+                descriptor.contains("ForceInline")) {
             shouldInline = true;
         }
         return super.visitAnnotation(descriptor, visible);
