@@ -216,7 +216,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         if (name.contains(Constants.originMethodSuffix)) {
             return new ReplayMethodVisitor(access, name, descriptor, Collections.emptyList(),
                     List.of(),
-                    List.of(new ReflectionHidingMV(mv.originNode, owner, name, )));
+                    List.of(new ReflectionFixingMethodVisitor(mv.originNode, owner)));
         } else {
             return new ReplayMethodVisitor(access, name, descriptor, Collections.emptyList(),
                     List.of(mv),
