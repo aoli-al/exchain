@@ -67,7 +67,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
             } else if (visitor.shouldInline) {
                 visitor.isSecondPass = false;
                 visitor.isInstrumentedCode = false;
-                visitor.originNode.accept(visitor);
+                visitor.originNode.accept(new ReflectionFixingMethodVisitor(visitor, owner));
                 visitor.isInstrumentedCode = true;
                 visitor.isSecondPass = true;
                 visitor.instrumentedNode.accept(visitor);
@@ -76,15 +76,16 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 MethodVisitor instrumentedMv = super.visitMethod(visitor.access,
                         instrumentedMethodName, visitor.descriptor, visitor.signature, visitor.exceptions);
                 visitor.instrumentedNode.accept(new ReplayMethodVisitor(
-                        visitor.access, instrumentedMethodName, visitor.descriptor,
+                        visitor.access, "post instrumented end" + instrumentedMethodName, visitor.descriptor,
                         Collections.emptyList(), Collections.emptyList(),
                         List.of(instrumentedMv)));
 
                 String originMethodName = visitor.originNode.name + index;
-                MethodVisitor originMv = super.visitMethod(visitor.access, originMethodName,
-                        visitor.descriptor, visitor.signature, visitor.exceptions);
+                MethodVisitor originMv = new ReflectionFixingMethodVisitor(
+                        super.visitMethod(visitor.access, originMethodName, visitor.descriptor, visitor.signature,
+                                visitor.exceptions), owner);
                 visitor.originNode.accept(new ReplayMethodVisitor(
-                        visitor.access, originMethodName, visitor.descriptor,
+                        visitor.access, "post origin end" + originMethodName, visitor.descriptor,
                         Collections.emptyList(), List.of(),
                         List.of(originMv)));
                 visitor.getMv().visitCode();
@@ -202,6 +203,10 @@ public class DynamicSwitchPostCV extends ClassVisitor {
             return super.visitMethod(access, name, descriptor, signature, exceptions);
         }
 
+        if (owner.contains("HttpEncodingAutoConfiguration") && name.contains("init")) {
+            System.out.println("!");
+        }
+
         String newName = methodNameMapping(name);
 
         String key = owner + methodNameReMapping(newName) + descriptor;
@@ -214,11 +219,11 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         }
         InlineSwitchMethodVisitor mv = constructorVisitors.get(key);
         if (name.contains(Constants.originMethodSuffix)) {
-            return new ReplayMethodVisitor(access, name, descriptor, Collections.emptyList(),
-                    List.of(),
-                    List.of(new ReflectionFixingMethodVisitor(mv.originNode, owner)));
+            return new ReplayMethodVisitor(access, "post origin" + name, descriptor, Collections.emptyList(),
+                            List.of(),
+                            List.of(mv.originNode));
         } else {
-            return new ReplayMethodVisitor(access, name, descriptor, Collections.emptyList(),
+            return new ReplayMethodVisitor(access, "post instrumented" + name, descriptor, Collections.emptyList(),
                     List.of(mv),
                     List.of(mv.instrumentedNode));
         }

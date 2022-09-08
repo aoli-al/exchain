@@ -36,12 +36,12 @@ task instrumentJarCustom(type: JavaExec) {
     var phosphor = project(":phosphor")
     classpath "$phosphor.buildDir/libs/${phosphor.name}.jar"
     mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
-    var jarPath = "${project.gradle.gradleUserHomeDir.parent}/repos/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
+    var jarPath = "${project.rootProject.projectDir}/dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
     classpath jarPath
-    var src= "/Users/aoli/repos/exchain/debug-preinst/test"
+    var src= "/Users/aoli/tests/classes"
     var dst = "${buildDir}/libs/instrumented"
-    args src, dst,
-            "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
+    args src, dst
+//            "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
 //            "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
 //            "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV"
     dependsOn jar

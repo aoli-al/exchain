@@ -18,7 +18,7 @@ public class Utils {
         List<Object> locals = new ArrayList<>();
         for (Type argumentType : argumentTypes) {
             switch (argumentType.getSort()) {
-                case Type.INT, Type.BYTE, Type.CHAR, Type.BOOLEAN -> {
+                case Type.INT, Type.BYTE, Type.CHAR, Type.BOOLEAN, Type.SHORT -> {
                     locals.add(INTEGER);
                 }
                 case Type.LONG -> {

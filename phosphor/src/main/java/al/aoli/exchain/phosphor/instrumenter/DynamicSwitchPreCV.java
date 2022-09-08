@@ -16,6 +16,7 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_NATIVE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
 
 public class DynamicSwitchPreCV extends ClassVisitor {
+    private String owner;
     public DynamicSwitchPreCV(ClassVisitor cv, boolean skipFrames) {
         super(ASM9, cv);
         ClassVisitor subCV = cv;
@@ -53,6 +54,7 @@ public class DynamicSwitchPreCV extends ClassVisitor {
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        owner = name;
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
@@ -64,9 +66,8 @@ public class DynamicSwitchPreCV extends ClassVisitor {
         if ((access & ACC_ABSTRACT) != 0 || (access & ACC_NATIVE) != 0) {
             return mv2;
         }
-        MethodVisitor mv1 = super.visitMethod(access, newName + Constants.originMethodSuffix, descriptor, signature,
-                exceptions);
-        return new ReplayMethodVisitor(access, name, descriptor,
+        MethodVisitor mv1 = super.visitMethod(access, newName + Constants.originMethodSuffix, descriptor, signature, exceptions);
+        return new ReplayMethodVisitor(access, "pre" + name, descriptor,
                 List.of(mv2), Collections.emptyList(), List.of(mv1));
     }
 }

@@ -94,7 +94,7 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
         if (isInstrumentedCode) {
             visitLabelAndFrame(instrumentedCodeSection);
         } else {
-            visitLabelAndFrame(originCodeSection);
+//            visitLabelAndFrame(originCodeSection);
         }
         super.visitCode();
     }
@@ -110,7 +110,11 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
             }
         }
         super.visitFrame(F_NEW, locals.size(), locals.toArray(), 0, null);
+    }
 
+    @Override
+    public void visitParameter(String name, int access) {
+        // We dont need to visit parameters anymore!
     }
 
     @Override

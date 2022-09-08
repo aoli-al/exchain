@@ -6,6 +6,7 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
 
 import java.lang.reflect.Method;
 
+import static edu.columbia.cs.psl.phosphor.instrumenter.TaintMethodRecord.REMOVE_TAINTED_FIELDS;
 import static edu.columbia.cs.psl.phosphor.instrumenter.TaintMethodRecord.REMOVE_TAINTED_INTERFACES;
 import static edu.columbia.cs.psl.phosphor.instrumenter.TaintMethodRecord.REMOVE_TAINTED_METHODS;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
@@ -26,6 +27,8 @@ public class ReflectionFixingMethodVisitor extends MethodVisitor {
             visit(REMOVE_TAINTED_METHODS);
         } else if (owner.equals("java/lang/Class") && name.equals("getInterfaces")) {
             visit(REMOVE_TAINTED_INTERFACES);
+        } else if (owner.equals("java/lang/Class") && name.endsWith("Fields") && !className.equals("java/lang/Class")) {
+            visit(REMOVE_TAINTED_FIELDS);
         }
     }
 
