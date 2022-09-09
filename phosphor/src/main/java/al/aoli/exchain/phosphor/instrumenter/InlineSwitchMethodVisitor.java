@@ -25,6 +25,7 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
     private Label originCodeSection = new Label();
     public boolean isInstrumentedCode = false;
     public boolean isSecondPass = false;
+    public boolean annotationOnly = true;
     int access;
     String owner;
     String descriptor;
@@ -114,7 +115,9 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitParameter(String name, int access) {
-        // We dont need to visit parameters anymore!
+        if (annotationOnly) {
+            super.visitParameter(name, access);
+        }
     }
 
     @Override

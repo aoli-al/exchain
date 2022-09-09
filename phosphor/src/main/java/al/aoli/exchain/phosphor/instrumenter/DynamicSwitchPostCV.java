@@ -58,6 +58,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     @Override
     public void visitEnd() {
         for (InlineSwitchMethodVisitor visitor: constructorVisitors.values()) {
+            visitor.annotationOnly = false;
             if (!visitor.instrumentedNode.finished || !visitor.originNode.finished) {
                 if (visitor.instrumentedNode.finished) {
                     visitor.instrumentedNode.accept(visitor.getMv());
@@ -201,10 +202,6 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 || (access & ACC_ABSTRACT) != 0
                 || (access & ACC_NATIVE) != 0) {
             return super.visitMethod(access, name, descriptor, signature, exceptions);
-        }
-
-        if (owner.contains("HttpEncodingAutoConfiguration") && name.contains("init")) {
-            System.out.println("!");
         }
 
         String newName = methodNameMapping(name);
