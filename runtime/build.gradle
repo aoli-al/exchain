@@ -74,7 +74,7 @@ task createInstrumentedJDK(type: JavaExec) {
     classpath jarPath
     mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
     var src = Jvm.current().javaHome
-    var dst = "$buildDir/jre-inst"
+    var dst = "$buildDir/jre-inst-enabled"
     args src, dst, "--jvmModules", "ALL-MODULE-PATH",
             "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
             "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",

@@ -6,7 +6,9 @@ package al.aoli.exchain.demo;
 
 import al.aoli.exchain.runtime.ExceptionJavaRuntime;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.rmi.RemoteException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -16,12 +18,23 @@ import java.util.zip.DataFormatException;
 public class Main {
     public static int foo = 3;
 
-    public Main() {
-        if (ExceptionJavaRuntime.enabled) {
-            f = true;
-        } else {
-            f = false;
+    @Attribute({"123"})
+    public static class Test2 {
+    }
+
+    public static void main(String[] args)
+            throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        Annotation a = Test2.class.getDeclaredAnnotations()[0];
+        Method m = a.getClass().getDeclaredMethod("value");
+        String[] result = (String[]) m.invoke(a);
+        for (String s : result) {
+            System.out.println(s);
         }
+//        if (ExceptionJavaRuntime.enabled) {
+//            f = true;
+//        } else {
+//            f = false;
+//        }
     }
 
     static class Dummy<T> {
@@ -95,14 +108,14 @@ public class Main {
         public DataFlowTest.Dummy c2 = new DataFlowTest.Dummy();
     }
 
-    public static void main(String[] args)
-            throws DataFormatException, InterruptedException, RemoteException, NoSuchMethodException,
-            InvocationTargetException, IllegalAccessException, InstantiationException, KeyStoreException,
-            NoSuchAlgorithmException, UnrecoverableKeyException, NoSuchFieldException, ClassNotFoundException {
-//        Properties p;
-//        p.put("1", "2");
-//        p.size();
-        DataFlowTest t = new DataFlowTest();
-        t.callScene1();
-    }
+//    public static void main(String[] args)
+//            throws DataFormatException, InterruptedException, RemoteException, NoSuchMethodException,
+//            InvocationTargetException, IllegalAccessException, InstantiationException, KeyStoreException,
+//            NoSuchAlgorithmException, UnrecoverableKeyException, NoSuchFieldException, ClassNotFoundException {
+////        Properties p;
+////        p.put("1", "2");
+////        p.size();
+////        DataFlowTest t = new DataFlowTest();
+////        t.callScene1();
+//    }
 }

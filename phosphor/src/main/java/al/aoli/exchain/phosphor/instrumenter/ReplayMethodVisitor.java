@@ -8,16 +8,13 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.TypePath;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.ArrayList;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashMap;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.List;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.Map;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_STATIC;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.DOUBLE;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LONG;
 
 public class ReplayMethodVisitor extends MethodVisitor {
 
@@ -29,6 +26,8 @@ public class ReplayMethodVisitor extends MethodVisitor {
     int access;
     String name;
     String descriptor;
+
+    static Map<Label, Label> labelMapping = new HashMap<>();
 
     public ReplayMethodVisitor(
             int access, String name, String descriptor,
@@ -58,29 +57,38 @@ public class ReplayMethodVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotationDefault() {
-        return new ReplayAnnotationVisitor(
-                Stream.concat(
-                        mvs.stream().map(MethodVisitor::visitAnnotationDefault),
-                        annotationOnlyMvs.stream().map(MethodVisitor::visitAnnotationDefault)
-                ).toList());
+        List<AnnotationVisitor> result = new ArrayList<>();
+        for (MethodVisitor mv: mvs) {
+            result.add(mv.visitAnnotationDefault());
+        }
+        for (MethodVisitor annotationOnlyMv : annotationOnlyMvs) {
+            result.add(annotationOnlyMv.visitAnnotationDefault());
+        }
+        return new ReplayAnnotationVisitor(result);
     }
 
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-        return new ReplayAnnotationVisitor(
-                Stream.concat(
-                        mvs.stream().map(it -> it.visitAnnotation(descriptor, visible)),
-                        annotationOnlyMvs.stream().map(it -> it.visitAnnotation(descriptor, visible))
-                ).toList());
+        List<AnnotationVisitor> result = new ArrayList<>();
+        for (MethodVisitor mv: mvs) {
+            result.add(mv.visitAnnotation(descriptor, visible));
+        }
+        for (MethodVisitor annotationOnlyMv : annotationOnlyMvs) {
+            result.add(annotationOnlyMv.visitAnnotation(descriptor, visible));
+        }
+        return new ReplayAnnotationVisitor(result);
     }
 
     @Override
     public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
-        return new ReplayAnnotationVisitor(
-                Stream.concat(
-                        mvs.stream().map(it -> it.visitTypeAnnotation(typeRef, typePath, descriptor, visible)),
-                        annotationOnlyMvs.stream().map(it -> it.visitTypeAnnotation(typeRef, typePath, descriptor, visible))
-                ).toList());
+        List<AnnotationVisitor> result = new ArrayList<>();
+        for (MethodVisitor mv: mvs) {
+            result.add(mv.visitTypeAnnotation(typeRef, typePath, descriptor, visible));
+        }
+        for (MethodVisitor annotationOnlyMv : annotationOnlyMvs) {
+            result.add(annotationOnlyMv.visitTypeAnnotation(typeRef, typePath, descriptor, visible));
+        }
+        return new ReplayAnnotationVisitor(result);
     }
 
     @Override
@@ -95,11 +103,14 @@ public class ReplayMethodVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitParameterAnnotation(int parameter, String descriptor, boolean visible) {
-        return new ReplayAnnotationVisitor(
-                Stream.concat(
-                        mvs.stream().map(it -> it.visitParameterAnnotation(parameter, descriptor, visible)),
-                        annotationOnlyMvs.stream().map(it -> it.visitParameterAnnotation(parameter, descriptor, visible))
-                ).toList());
+        List<AnnotationVisitor> result = new ArrayList<>();
+        for (MethodVisitor mv: mvs) {
+            result.add(mv.visitParameterAnnotation(parameter, descriptor, visible));
+        }
+        for (MethodVisitor annotationOnlyMv : annotationOnlyMvs) {
+            result.add(annotationOnlyMv.visitParameterAnnotation(parameter, descriptor, visible));
+        }
+        return new ReplayAnnotationVisitor(result);
     }
 
     @Override
@@ -213,13 +224,31 @@ public class ReplayMethodVisitor extends MethodVisitor {
         }
     }
 
+    private Label[] checkLabel(Label... labels) {
+        if (mvs.isEmpty() || codeOnlyMvs.isEmpty()) return labels;
+        List<Label> result = new ArrayList<>();
+        for (Label label : labels) {
+            result.add(checkLabel(label));
+        }
+        return result.toArray(new Label[labels.length]);
+    }
+
+    private Label checkLabel(Label label) {
+        if (mvs.isEmpty() || codeOnlyMvs.isEmpty()) return label;
+        return label;
+//        if (!labelMapping.containsKey(label)) {
+//            labelMapping.put(label, new Label());
+//        }
+//        return labelMapping.get(label);
+    }
+
     @Override
     public void visitJumpInsn(int opcode, Label label) {
         for (MethodVisitor mv : mvs) {
             mv.visitJumpInsn(opcode, label);
         }
         for (MethodVisitor mv : codeOnlyMvs) {
-            mv.visitJumpInsn(opcode, label);
+            mv.visitJumpInsn(opcode, checkLabel(label));
         }
     }
 
@@ -229,7 +258,7 @@ public class ReplayMethodVisitor extends MethodVisitor {
             mv.visitLabel(label);
         }
         for (MethodVisitor mv : codeOnlyMvs) {
-            mv.visitLabel(label);
+            mv.visitLabel(checkLabel(label));
         }
     }
 
@@ -259,7 +288,7 @@ public class ReplayMethodVisitor extends MethodVisitor {
             mv.visitTableSwitchInsn(min, max, dflt, labels);
         }
         for (MethodVisitor mv: codeOnlyMvs) {
-            mv.visitTableSwitchInsn(min, max, dflt, labels);
+            mv.visitTableSwitchInsn(min, max, checkLabel(dflt), checkLabel(labels));
         }
     }
 
@@ -269,7 +298,7 @@ public class ReplayMethodVisitor extends MethodVisitor {
             mv.visitLookupSwitchInsn(dflt, keys, labels);
         }
         for (MethodVisitor mv : codeOnlyMvs) {
-            mv.visitLookupSwitchInsn(dflt, keys, labels);
+            mv.visitLookupSwitchInsn(checkLabel(dflt), keys, checkLabel(labels));
         }
     }
 
@@ -285,11 +314,14 @@ public class ReplayMethodVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitInsnAnnotation(int typeRef, TypePath typePath, String descriptor, boolean visible) {
-        return new ReplayAnnotationVisitor(
-                Stream.concat(
-                        mvs.stream().map(it -> it.visitInsnAnnotation(typeRef, typePath, descriptor, visible)),
-                        codeOnlyMvs.stream().map(it -> it.visitInsnAnnotation(typeRef, typePath, descriptor, visible))
-                ).toList());
+        List<AnnotationVisitor> result = new ArrayList<>();
+        for (MethodVisitor mv: mvs) {
+            result.add(mv.visitInsnAnnotation(typeRef, typePath, descriptor, visible));
+        }
+        for (MethodVisitor annotationOnlyMv : codeOnlyMvs) {
+            result.add(annotationOnlyMv.visitInsnAnnotation(typeRef, typePath, descriptor, visible));
+        }
+        return new ReplayAnnotationVisitor(result);
     }
 
     @Override
@@ -298,30 +330,35 @@ public class ReplayMethodVisitor extends MethodVisitor {
             mv.visitTryCatchBlock(start, end, handler, type);
         }
         for (MethodVisitor mv : codeOnlyMvs) {
-            mv.visitTryCatchBlock(start, end, handler, type);
+            mv.visitTryCatchBlock(checkLabel(start), checkLabel(end), checkLabel(handler), type);
         }
     }
 
     @Override
     public AnnotationVisitor visitTryCatchAnnotation(int typeRef, TypePath typePath, String descriptor,
                                                      boolean visible) {
-        return new ReplayAnnotationVisitor(
-                Stream.concat(
-                        mvs.stream().map(it -> it.visitTryCatchAnnotation(typeRef, typePath, descriptor, visible)),
-                        codeOnlyMvs.stream().map(it -> it.visitTryCatchAnnotation(typeRef, typePath, descriptor, visible))
-                ).toList());
+        List<AnnotationVisitor> result = new ArrayList<>();
+        for (MethodVisitor mv: mvs) {
+            result.add(mv.visitTryCatchAnnotation(typeRef, typePath, descriptor, visible));
+        }
+        for (MethodVisitor annotationOnlyMv : codeOnlyMvs) {
+            result.add(annotationOnlyMv.visitTryCatchAnnotation(typeRef, typePath, descriptor, visible));
+        }
+        return new ReplayAnnotationVisitor(result);
     }
 
     @Override
     public AnnotationVisitor visitLocalVariableAnnotation(int typeRef, TypePath typePath, Label[] start, Label[] end,
                                                           int[] index, String descriptor, boolean visible) {
-        return new ReplayAnnotationVisitor(
-                Stream.concat(
-                        mvs.stream().map(it -> it.visitLocalVariableAnnotation(typeRef, typePath, start, end, index,
-                                descriptor, visible)),
-                        codeOnlyMvs.stream().map(it -> it.visitLocalVariableAnnotation(typeRef, typePath, start, end, index,
-                                descriptor, visible))
-                ).toList());
+        List<AnnotationVisitor> result = new ArrayList<>();
+        for (MethodVisitor mv: mvs) {
+            result.add(mv.visitLocalVariableAnnotation(typeRef, typePath, start, end, index, descriptor, visible));
+        }
+        for (MethodVisitor annotationOnlyMv : codeOnlyMvs) {
+            result.add(annotationOnlyMv.visitLocalVariableAnnotation(typeRef, typePath, checkLabel(start),
+                    checkLabel(end), index, descriptor, visible));
+        }
+        return new ReplayAnnotationVisitor(result);
     }
 
     @Override
@@ -331,7 +368,7 @@ public class ReplayMethodVisitor extends MethodVisitor {
             mv.visitLocalVariable(name, descriptor, signature, start, end, index);
         }
         for (MethodVisitor mv : codeOnlyMvs) {
-            mv.visitLocalVariable(name, descriptor, signature, start, end, index);
+            mv.visitLocalVariable(name, descriptor, signature, checkLabel(start), checkLabel(end), index);
         }
     }
 
@@ -341,7 +378,7 @@ public class ReplayMethodVisitor extends MethodVisitor {
             mv.visitLineNumber(line, start);
         }
         for (MethodVisitor mv : codeOnlyMvs) {
-            mv.visitLineNumber(line, start);
+            mv.visitLineNumber(line, checkLabel(start));
         }
     }
 

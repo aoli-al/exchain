@@ -1,9 +1,9 @@
 package al.aoli.exchain.phosphor.instrumenter;
 
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.AnnotationVisitor;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.ArrayList;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.List;
 
-import java.util.List;
-import java.util.Objects;
 
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
 
@@ -31,16 +31,26 @@ public class ReplayAnnotationVisitor extends AnnotationVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(String name, String descriptor) {
-        return new ReplayAnnotationVisitor(avs.stream().map(
-                it -> it.visitAnnotation(name, descriptor)
-        ).filter(Objects::nonNull).toList());
+        List<AnnotationVisitor> result = new ArrayList<>();
+        for (AnnotationVisitor av: avs) {
+            AnnotationVisitor visitor = av.visitAnnotation(name, descriptor);
+            if (visitor != null) {
+                result.add(visitor);
+            }
+        }
+        return new ReplayAnnotationVisitor(result);
     }
 
     @Override
     public AnnotationVisitor visitArray(String name) {
-        return new ReplayAnnotationVisitor(avs.stream().map(
-                it -> it.visitArray(name)
-        ).filter(Objects::nonNull).toList());
+        List<AnnotationVisitor> result = new ArrayList<>();
+        for (AnnotationVisitor av: avs) {
+            AnnotationVisitor visitor = av.visitArray(name);
+            if (visitor != null) {
+                result.add(visitor);
+            }
+        }
+        return new ReplayAnnotationVisitor(result);
     }
 
     @Override

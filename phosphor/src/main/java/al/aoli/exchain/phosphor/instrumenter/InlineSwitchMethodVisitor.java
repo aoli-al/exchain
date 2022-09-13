@@ -37,7 +37,6 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
 
     boolean isInterface;
 
-    boolean shouldInline;
 
     public MethodVisitor getMv() {
         return super.mv;
@@ -57,8 +56,6 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
         this.descriptor = descriptor;
         this.signature = signature;
         this.exceptions = exceptions;
-        shouldInline = name.equals("<init>") || name.equals("<clinit>")
-                || name.equals("fillInStackTrace");
         String newName = methodNameMapping(name);
         originNode = new InlineSwitchMethodNode(access,
                 newName + Constants.originMethodSuffix,
@@ -144,21 +141,8 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-        if (descriptor.contains("CallerSensitive") ||
-                descriptor.contains("ForceInline")) {
-            shouldInline = true;
-        }
-        return super.visitAnnotation(descriptor, visible);
-    }
-
-    @Override
     public void visitLineNumber(int line, Label start) {
-        if (isInstrumentedCode) {
-            super.visitLineNumber(line + 50000, start);
-        } else {
-            super.visitLineNumber(line, start);
-        }
+        super.visitLineNumber(line, start);
     }
 
     @Override

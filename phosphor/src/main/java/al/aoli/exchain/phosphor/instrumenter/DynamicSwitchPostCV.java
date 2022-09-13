@@ -1,16 +1,16 @@
 package al.aoli.exchain.phosphor.instrumenter;
 
-import edu.columbia.cs.psl.phosphor.instrumenter.ReflectionHidingMV;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.ClassVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Label;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
 import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashMap;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashSet;
 import edu.columbia.cs.psl.phosphor.struct.harmony.util.Map;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.Set;
 
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.Field;
 
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameReMapping;
@@ -43,8 +43,15 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     private String owner = null;
     private boolean isInterface;
     private Map<String, InlineSwitchMethodVisitor> constructorVisitors = new HashMap<>();
+    private Set<String> aggressivelyReduceMethodSize = new HashSet<>();
     public DynamicSwitchPostCV(ClassVisitor cv, boolean skipFrames, byte[] bytes) {
         super(ASM9, cv);
+        ClassVisitor subCV = cv;
+    }
+
+    public void setAggressivelyReduceMethodSize(
+            Set<String> aggressivelyReduceMethodSize) {
+        this.aggressivelyReduceMethodSize = aggressivelyReduceMethodSize;
     }
 
     @Override
@@ -65,7 +72,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 } else {
                     visitor.originNode.accept(visitor.getMv());
                 }
-            } else if (visitor.shouldInline) {
+            } else if (!aggressivelyReduceMethodSize.contains(visitor.name + visitor.descriptor)) {
                 visitor.isSecondPass = false;
                 visitor.isInstrumentedCode = false;
                 visitor.originNode.accept(new ReflectionFixingMethodVisitor(visitor, owner));
@@ -78,7 +85,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                         instrumentedMethodName, visitor.descriptor, visitor.signature, visitor.exceptions);
                 visitor.instrumentedNode.accept(new ReplayMethodVisitor(
                         visitor.access, "post instrumented end" + instrumentedMethodName, visitor.descriptor,
-                        Collections.emptyList(), Collections.emptyList(),
+                        List.of(), List.of(),
                         List.of(instrumentedMv)));
 
                 String originMethodName = visitor.originNode.name + index;
@@ -87,7 +94,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                                 visitor.exceptions), owner);
                 visitor.originNode.accept(new ReplayMethodVisitor(
                         visitor.access, "post origin end" + originMethodName, visitor.descriptor,
-                        Collections.emptyList(), List.of(),
+                        List.of(), List.of(),
                         List.of(originMv)));
                 visitor.getMv().visitCode();
                 addSwitch(visitor.getMv(), instrumentedMethodName, originMethodName,
@@ -165,7 +172,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                    String descriptor, boolean isStatic) {
         Label enter = new Label();
         mv.visitLabel(enter);
-        mv.visitLineNumber(111, enter);
+        mv.visitLineNumber(50111, enter);
         mv.visitFieldInsn(
                 Opcodes.GETSTATIC,
                 "al/aoli/exchain/runtime/ExceptionJavaRuntime",
@@ -177,9 +184,9 @@ public class DynamicSwitchPostCV extends ClassVisitor {
 
         mv.visitJumpInsn(IFEQ, trueLabel);
         addBranch(mv, falseLabel, instrumentedMethodName, descriptor, isStatic);
-        mv.visitLineNumber(222, falseLabel);
+        mv.visitLineNumber(50222, falseLabel);
         addBranch(mv, trueLabel, originMethodName, descriptor, isStatic);
-        mv.visitLineNumber(333, trueLabel);
+        mv.visitLineNumber(50333, trueLabel);
         int locals = 0;
         if (isStatic) {
             locals += 1;
@@ -216,11 +223,11 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         }
         InlineSwitchMethodVisitor mv = constructorVisitors.get(key);
         if (name.contains(Constants.originMethodSuffix)) {
-            return new ReplayMethodVisitor(access, "post origin" + name, descriptor, Collections.emptyList(),
+            return new ReplayMethodVisitor(access, "post origin" + name, descriptor, List.of(),
                             List.of(),
                             List.of(mv.originNode));
         } else {
-            return new ReplayMethodVisitor(access, "post instrumented" + name, descriptor, Collections.emptyList(),
+            return new ReplayMethodVisitor(access, "post instrumented" + name, descriptor, List.of(),
                     List.of(mv),
                     List.of(mv.instrumentedNode));
         }
