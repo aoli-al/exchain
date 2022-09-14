@@ -39,9 +39,6 @@ public class TaintTest {
 //    }
 
     public synchronized void test() {
-        if (Main.foo == 32) {
-            wrongOutput();
-        }
 //        called2( null, null);
 //        crash();
 //        leak();

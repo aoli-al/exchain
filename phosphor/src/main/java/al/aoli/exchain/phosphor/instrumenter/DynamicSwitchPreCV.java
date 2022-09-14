@@ -43,7 +43,7 @@ public class DynamicSwitchPreCV extends ClassVisitor {
                     for (String s : methodList) {
                         String[] results = s.split("\\(");
                         if (s.contains(Constants.instrumentedMethodSuffix)) {
-                            newMethodList.add(methodNameReMapping(results[0]) + "(" + results[1]);
+                            newMethodList.add(StringHelper.concat(methodNameReMapping(results[0]), "(", results[1]));
                         }
                     }
                 }
@@ -90,8 +90,9 @@ public class DynamicSwitchPreCV extends ClassVisitor {
         if ((access & ACC_ABSTRACT) != 0 || (access & ACC_NATIVE) != 0) {
             return mv2;
         }
-        MethodVisitor mv1 = super.visitMethod(access, newName + Constants.originMethodSuffix, descriptor, signature, exceptions);
-        return new ReplayMethodVisitor(access, "pre" + name, descriptor,
+        MethodVisitor mv1 = super.visitMethod(access, StringHelper.concat(newName, Constants.originMethodSuffix),
+                descriptor, signature, exceptions);
+        return new ReplayMethodVisitor(access, name, descriptor,
                 List.of(mv2), List.of(), List.of(mv1));
     }
 }

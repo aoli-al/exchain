@@ -23,7 +23,7 @@ public class ReflectionFixingMethodVisitor extends MethodVisitor {
                                 boolean isInterface) {
         super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
         if (owner.equals("java/lang/Class") && name.endsWith("Methods") && !className.equals(owner) &&
-                descriptor.equals("()" + Type.getDescriptor(Method[].class))) {
+                descriptor.equals(StringHelper.concat("()", Type.getDescriptor(Method[].class)))) {
             visit(REMOVE_TAINTED_METHODS);
         } else if (owner.equals("java/lang/Class") && name.equals("getInterfaces")) {
             visit(REMOVE_TAINTED_INTERFACES);

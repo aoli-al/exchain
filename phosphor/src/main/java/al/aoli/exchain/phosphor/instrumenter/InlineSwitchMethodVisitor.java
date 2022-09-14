@@ -7,6 +7,7 @@ import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Label;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
 import edu.columbia.cs.psl.phosphor.struct.harmony.util.List;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.StringBuilder;
 
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_STATIC;
@@ -58,10 +59,10 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
         this.exceptions = exceptions;
         String newName = methodNameMapping(name);
         originNode = new InlineSwitchMethodNode(access,
-                newName + Constants.originMethodSuffix,
+                StringHelper.concat(newName, Constants.originMethodSuffix),
                 descriptor, signature, exceptions);
         instrumentedNode = new InlineSwitchMethodNode(
-                access, newName + Constants.instrumentedMethodSuffix,
+                access, StringHelper.concat(newName, Constants.instrumentedMethodSuffix),
                 descriptor, signature, exceptions);
     }
 

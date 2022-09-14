@@ -72,7 +72,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 } else {
                     visitor.originNode.accept(visitor.getMv());
                 }
-            } else if (!aggressivelyReduceMethodSize.contains(visitor.name + visitor.descriptor)) {
+            } else if (!aggressivelyReduceMethodSize.contains(StringHelper.concat(visitor.name, visitor.descriptor))) {
                 visitor.isSecondPass = false;
                 visitor.isInstrumentedCode = false;
                 visitor.originNode.accept(new ReflectionFixingMethodVisitor(visitor, owner));
@@ -80,20 +80,21 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 visitor.isSecondPass = true;
                 visitor.instrumentedNode.accept(visitor);
             } else {
-                String instrumentedMethodName = visitor.instrumentedNode.name + index;
+                String instrumentedMethodName = StringHelper.concat(visitor.instrumentedNode.name,
+                        Integer.toString(index));
                 MethodVisitor instrumentedMv = super.visitMethod(visitor.access,
                         instrumentedMethodName, visitor.descriptor, visitor.signature, visitor.exceptions);
                 visitor.instrumentedNode.accept(new ReplayMethodVisitor(
-                        visitor.access, "post instrumented end" + instrumentedMethodName, visitor.descriptor,
+                        visitor.access, instrumentedMethodName, visitor.descriptor,
                         List.of(), List.of(),
                         List.of(instrumentedMv)));
 
-                String originMethodName = visitor.originNode.name + index;
+                String originMethodName = StringHelper.concat(visitor.originNode.name, Integer.toString(index));
                 MethodVisitor originMv = new ReflectionFixingMethodVisitor(
                         super.visitMethod(visitor.access, originMethodName, visitor.descriptor, visitor.signature,
                                 visitor.exceptions), owner);
                 visitor.originNode.accept(new ReplayMethodVisitor(
-                        visitor.access, "post origin end" + originMethodName, visitor.descriptor,
+                        visitor.access, originMethodName, visitor.descriptor,
                         List.of(), List.of(),
                         List.of(originMv)));
                 visitor.getMv().visitCode();
@@ -213,7 +214,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
 
         String newName = methodNameMapping(name);
 
-        String key = owner + methodNameReMapping(newName) + descriptor;
+        String key = StringHelper.concat(methodNameReMapping(newName), descriptor);
         if (!constructorVisitors.containsKey(key)) {
             constructorVisitors.put(key,
                     new InlineSwitchMethodVisitor(
@@ -223,11 +224,11 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         }
         InlineSwitchMethodVisitor mv = constructorVisitors.get(key);
         if (name.contains(Constants.originMethodSuffix)) {
-            return new ReplayMethodVisitor(access, "post origin" + name, descriptor, List.of(),
+            return new ReplayMethodVisitor(access, name, descriptor, List.of(),
                             List.of(),
                             List.of(mv.originNode));
         } else {
-            return new ReplayMethodVisitor(access, "post instrumented" + name, descriptor, List.of(),
+            return new ReplayMethodVisitor(access, name, descriptor, List.of(),
                     List.of(mv),
                     List.of(mv.instrumentedNode));
         }
