@@ -3,6 +3,7 @@ package al.aoli.exchain.phosphor.instrumenter;
 import edu.columbia.cs.psl.phosphor.instrumenter.DataAndControlFlowTagFactory;
 
 public class DynamicSwitchTaintTagFactory extends DataAndControlFlowTagFactory {
+
     @Override
     public boolean isIgnoredMethod(String owner, String name, String desc) {
         if (name.contains(Constants.originMethodSuffix)) {

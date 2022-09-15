@@ -38,6 +38,7 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LRETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.RETURN;
 
 public class DynamicSwitchPostCV extends ClassVisitor {
+    public static boolean defaultInline = false;
 
     private int index;
     private String owner = null;
@@ -72,7 +73,9 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 } else {
                     visitor.originNode.accept(visitor.getMv());
                 }
-            } else if (!aggressivelyReduceMethodSize.contains(StringHelper.concat(visitor.name, visitor.descriptor))) {
+            }
+            else if (visitor.shouldInline ||
+                    (defaultInline && !aggressivelyReduceMethodSize.contains(StringHelper.concat(visitor.name, visitor.descriptor)))) {
                 visitor.isSecondPass = false;
                 visitor.isInstrumentedCode = false;
                 visitor.originNode.accept(new ReflectionFixingMethodVisitor(visitor, owner));

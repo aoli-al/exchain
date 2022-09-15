@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameReMapping;
+import static al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV.defaultInline;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_ABSTRACT;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_NATIVE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
@@ -42,7 +43,7 @@ public class DynamicSwitchPreCV extends ClassVisitor {
                     aggressivelyReduceMethodSize = methodList;
                     for (String s : methodList) {
                         String[] results = s.split("\\(");
-                        if (s.contains(Constants.instrumentedMethodSuffix)) {
+                        if (s.contains(Constants.instrumentedMethodSuffix) || !defaultInline) {
                             newMethodList.add(StringHelper.concat(methodNameReMapping(results[0]), "(", results[1]));
                         }
                     }

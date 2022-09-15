@@ -33,8 +33,8 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
     String signature;
     String[] exceptions;
     String name;
+    boolean shouldInline;
 
-    ClassVisitor cv;
 
     boolean isInterface;
 
@@ -58,6 +58,9 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
         this.signature = signature;
         this.exceptions = exceptions;
         String newName = methodNameMapping(name);
+        shouldInline = name.equals("<init>") || name.equals("<clinit>")
+                || name.equals("fillInStackTrace")
+                || owner.startsWith("jdk/internal/reflect/Generated");
         originNode = new InlineSwitchMethodNode(access,
                 StringHelper.concat(newName, Constants.originMethodSuffix),
                 descriptor, signature, exceptions);
@@ -139,6 +142,15 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
         } else if (!isSecondPass) {
             super.visitAttribute(attribute);
         }
+    }
+
+    @Override
+    public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
+        if (descriptor.contains("CallerSensitive") ||
+                descriptor.contains("ForceInline")) {
+            shouldInline = true;
+        }
+        return super.visitAnnotation(descriptor, visible);
     }
 
     @Override
