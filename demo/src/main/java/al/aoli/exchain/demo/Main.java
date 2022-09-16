@@ -29,7 +29,9 @@ public class Main {
 
     public static void main(String[] args)
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        TestEnableExchainDynamically.test();
+        TestEnableExchainDynamically test = new TestEnableExchainDynamically();
+        test.test();
+        test.test2();
     }
 
 //    public static String merged(String a, String b, String c, String d) {
