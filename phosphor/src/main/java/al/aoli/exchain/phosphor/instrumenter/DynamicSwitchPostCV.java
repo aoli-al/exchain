@@ -38,7 +38,7 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LRETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.RETURN;
 
 public class DynamicSwitchPostCV extends ClassVisitor {
-    public static boolean defaultInline = false;
+    public static boolean defaultInline = true;
 
     private int index;
     private String owner = null;

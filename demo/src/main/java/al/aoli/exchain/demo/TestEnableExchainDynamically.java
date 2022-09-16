@@ -12,6 +12,7 @@ public class TestEnableExchainDynamically {
     }
 
     static void test() {
+        ExceptionJavaRuntime.enabled = true;
         Foo f = null;
         f = MultiTainter.taintedReference(f, "123");
         Taint t = MultiTainter.getTaint(f);

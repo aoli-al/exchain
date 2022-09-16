@@ -29,13 +29,7 @@ public class Main {
 
     public static void main(String[] args)
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        print("1", "2", "3", "4");
-//        TestEnableExchainDynamically.test();
-//        if (ExceptionJavaRuntime.enabled) {
-//            f = true;
-//        } else {
-//            f = false;
-//        }
+        TestEnableExchainDynamically.test();
     }
 
 //    public static String merged(String a, String b, String c, String d) {
