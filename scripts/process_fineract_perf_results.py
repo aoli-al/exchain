@@ -22,8 +22,6 @@ increase = []
 for key in origin_result:
     if key not in instrumented_result:
         continue
-    if len(origin_result[key]) > 1:
-        print(key)
     origin_avg = sum(origin_result[key]) / len(origin_result[key])
     instrumented_avg = sum(instrumented_result[key]) / len(instrumented_result[key])
     increase.append((instrumented_avg - origin_avg) / origin_avg)
