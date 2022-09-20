@@ -320,12 +320,10 @@ void setup(HTTPClient client, Request r) {
         LOG.error("client failure");
     }
 }
-
 void sendRequest(HTTPClient client, Request r) {
     setup(client);
     client.sentRequest(r); // throws RequestException
 }
-
 ```
 
 // Local var, method call
@@ -560,6 +558,8 @@ class Endpoint {
 }
 
 ```
+
+From `org.apache.tomcat.util.net.SecureNioChannel.java` and `org.apache.tomcat.util.net.NioEndpoint`
 
 // local variables, fields
 

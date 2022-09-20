@@ -31,7 +31,9 @@ public class Main {
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         TestEnableExchainDynamically test = new TestEnableExchainDynamically();
         test.test();
-        test.test2();
+        test.test3();
+//        test.test();
+//        test.test2();
     }
 
 //    public static String merged(String a, String b, String c, String d) {
