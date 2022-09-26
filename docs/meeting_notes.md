@@ -224,12 +224,35 @@ Two challenges:
 
 Identify the causal relationships among exceptions.
 
-## Existing Log Analysis Works
+- Input: source code/bytecode of the system
+- Output: Causality chain of system internal exceptions
+
+## Related Works
 
 - Use logs to disambiguate call paths of executions. [[OSDI 14](http://log20.dsrg.utoronto.ca/log20_sosp17_paper.pdf),
-[ATC 18](https://www.usenix.org/system/files/conference/atc18/atc18-luo.pdf)]
-    - Only shows the control-flow dependency, does not show data flow
-    dependency.
+[ATC 18](https://www.usenix.org/system/files/conference/atc18/atc18-luo.pdf), [MICRO-96](https://web.eecs.umich.edu/~weimerw/2018-481/readings/pathprofile.pdf)]
+    - Focus on execution trace reconstruction when failure happens.
+    - Different output: Execution traces are not sufficient to debug the root cause
+    of the system when the exceptions are thrown across requests.
+- Find logs that are related to root cause of failures. [[MLSys 22](http://web.cs.ucla.edu/~dogga/publications/mlsys22.pdf)]
+    - Use machine learning to generate __queries__ for finding root causes
+    in distributed systems.
+    - Different output: User may not log sufficient data
+    to help developers to identify
+        - Counter point: what if we log all exceptions automatically, can we use such techniques to identify all exceptions that are related to the failure?
+        - Such tool cannot tell the causality among exceptions.
+
+- Distributed tracing. [[NSDI 07](https://www.usenix.org/conference/nsdi-07/x-trace-pervasive-network-tracing-framework), [OSDI 13](https://dl.acm.org/doi/10.1145/2815400.2815415)]
+    - Different problem: try to construct the causal paths
+    in network protocols.
+    - They complement each other.
+
+- Monitoring. [[NSDI 20](https://www.cs.jhu.edu/~huang/paper/omegagen-nsdi20-preprint.pdf)]
+    - Monitor all sensitive API calls in applications.
+    - High overhead.
+    - Do not show the causality among exceptions.
+
+
 
 
 ## High Level Design
@@ -237,9 +260,12 @@ Identify the causal relationships among exceptions.
 
 Given an exception $e$ we want to compute:
 
-- source variables $S_e$: variables that cause the exception
-- affected variables $A_e$: variables whose values are affected by the exception
-- The propagation of $A_e$
+- source variables $S_e$: a set of variables that cause
+the exception $e$.
+- affected variables $A_e$: a set variables whose values are affected
+by the exception $e$.
+- The propagation of $A_e$: how affected variables affect the state
+of the program.
 
 We define:
 - Exception $e_1$ is caused by exception $e_2$ if and only if
@@ -274,13 +300,13 @@ void sendRequest(HTTPClient client, Request r) {
 ```
 
 - RuntimeException:16:
-    - entailing var: `this` or none
+    - source var: `this` or none
     - affected var: `cert`
 - NullPointerException:10
-    - entailing var: `cert`
+    - source var: `cert`
     - affected var: `client`
 - RequestException:20
-    - entailing var: `client`, `r`
+    - source var: `client`, `r`
     - affected var: `client`
 
 
@@ -374,21 +400,84 @@ void setup(HTTPClient client, Request r) {
 Idea: Use static data-flow analysis to identify the taint relationships
 offline.
 
-- Challenges:
-    - What is the entry point of each program?
-        - Main function?
-        - Request handlers?
-        - The first function in the exception trace?
-    - How to pass taint tags across functions?
+Challenges 1: what is the entry point of each program:
 
+- Pattern 1:
+    - Exceptions happen in the same thread, same execution
+    - Exceptions happen in different threads, different execution
+
+```{.java .numberLines .lineAnchors}
+class Loader {
+    int totalCommits = 0;
+    // Entry point 1
+    void recoverRequest(Checkpoint checkpoints) {
+        try {
+            for (commit: checkpoints) {
+                if (condition) {
+                    throw new OOMException();
+                }
+                totalCommits++;
+            }
+        }
+        catch (Exception e) {
+            LOG.error(e);
+        }
+    }
+
+    // Entry point 2
+    void commitRequest(int id) {
+        checkId(id, totalCommits);
+        //...
+        totalCommits++;
+    }
+    void checkId(int id, int totalCommits) {
+        if (id != totalCommits+1) {
+            throw new InconsistentIdException();
+        }
+    }
+}
+```
+
+
+Challenge 2: how to model collections?
+
+```{.java .numberLines .lineAnchors}
+void tes1(Object[] a) {
+    try {
+        throw new Exception();
+        a[1] = null; // a[1] is affected var
+    } catch (Exception e) {
+    }
+
+    a[2].callMethod(); // throws NPE. a[2] is source var.
+}
+```
+
+Other implementation level challenges:
+
+Challenge 3: how to model function calls?
+
+```{.java .numberLines .lineAnchors}
+void foo(Object a) {
+    if (condition) {
+        foo(a);
+    }
+    // a is tainted here
+    Object b = a;
+    // ...
+}
+```
 Algorithm
 
-- Work list $W\leftarrow\emptyset$
+- Lattice: a set of exception labels.
+    - Top: all exceptions
+    - Bot: empty set
+
 
 - Pros:
     - The algorithm is performed offline. Overhead is low.
 - Cons:
-    -
+    - False positives
 
 
 ### Dynamic Taint Analysis
