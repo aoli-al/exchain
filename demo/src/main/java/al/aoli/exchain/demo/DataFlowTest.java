@@ -1,6 +1,5 @@
 package al.aoli.exchain.demo;
 
-import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
 
 import java.util.Random;
 import java.util.zip.DataFormatException;

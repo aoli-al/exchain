@@ -29,9 +29,11 @@ public class Main {
 
     public static void main(String[] args)
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        TestEnableExchainDynamically test = new TestEnableExchainDynamically();
-        test.test();
-        test.test3();
+        DataFlowTest test = new DataFlowTest();
+        test.callScene1();
+//        TestEnableExchainDynamically test = new TestEnableExchainDynamically();
+//        test.test();
+//        test.test3();
 //        test.test();
 //        test.test2();
     }

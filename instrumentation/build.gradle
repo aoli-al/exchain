@@ -21,6 +21,7 @@ dependencies {
     implementation group: 'net.bytebuddy', name: 'byte-buddy-dep', version: '1.12.12'
     implementation group: 'net.bytebuddy', name: 'byte-buddy-agent', version: '1.12.12'
     compileOnly project(path: ":runtime", configuration: "shadow")
+
 }
 
 test {
@@ -36,13 +37,13 @@ jar {
     }
 }
 
-shadowJar {
-    archiveBaseName.set('instrumentation')
-    archiveClassifier.set('')
-    archiveVersion.set('')
-
-    relocate 'org.objectweb.asm', 'shadow.asm'
-}
+//shadowJar {
+//    archiveBaseName.set('instrumentation')
+//    archiveClassifier.set('')
+//    archiveVersion.set('')
+//
+//    relocate 'org.objectweb.asm', 'shadow.asm'
+//}
 
 task startInstrumentation(dependsOn: 'classes', type: JavaExec) {
     mainClass = "al.aoli.exchain.instrumentation.DoIntegrationTestKt"

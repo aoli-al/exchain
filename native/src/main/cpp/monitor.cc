@@ -10,6 +10,7 @@
 #include "runtime.hpp"
 #include "utils.hpp"
 #include "exception_processor.hpp"
+#include "configuration.hpp"
 #include "plog/Init.h"
 #include "plog/Log.h"
 #include "plog/Appenders/ColorConsoleAppender.h"
@@ -43,7 +44,6 @@ jlong GetThreadId(jthread thread, JNIEnv *env) {
     auto method_id = env->GetMethodID(clazz, "getId", "()J");
     return env->CallLongMethod(thread, method_id);
 }
-
 
 void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
                                jmethodID method, jlocation location,
@@ -97,6 +97,8 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
 }
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
+    exchain::Configuration::GetInstance().Init(options);
+
     jvmtiEnv *jvmti;
     jvm = vm;
     vm->GetEnv((void **)&jvmti, JVMTI_VERSION_1_0);

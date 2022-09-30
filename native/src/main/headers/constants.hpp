@@ -28,5 +28,8 @@ const static char *kAnalyzeSourceFieldsMethodName = "analyzeSourceFields";
 const static char *kAnalyzeSourceFieldsMethodDescriptor =
     "(Ljava/lang/Object;Lal/aoli/exchain/runtime/analyzers/"
     "AffectedVarResult;Ljava/lang/Object;Ljava/lang/String;)V";
+const static char *kOnExceptionCaughtMethodName = "onExceptionCaught";
+const static char *kOnExceptionCaughtMethodDescriptor =
+    "(Ljava/lang/Throwable;)V";
 
 }  // namespace exchain

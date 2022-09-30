@@ -47,6 +47,8 @@ class ExceptionProcessor: ProcessorBase {
     bool ShouldIgnoreClass(std::string signature);
     bool ShouldTerminateEarly(std::string signature);
     int ComputeExceptionId(jobject obj);
+    void FullPass();
+    void LoggingPass();
 
    public:
     void Process();

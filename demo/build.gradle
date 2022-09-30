@@ -80,6 +80,22 @@ task instrumentJarOrigin(type: JavaExec) {
     dependsOn jar
 }
 
+task runOriginJar(type: JavaExec) {
+    classpath "${buildDir}/libs/${project.name}-${version}.jar"
+    var runtime = project(":runtime")
+    classpath "${runtime.buildDir}/libs/out.jar"
+    mainClass = "al.aoli.exchain.demo.Main"
+    var nat= project(":native")
+    jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=logging"
+    var instrumentation = project(":instrumentation")
+    jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
+    dependsOn jar
+    dependsOn ":instrumentation:jar"
+    dependsOn ":runtime:createShadow"
+    dependsOn ":native:build"
+}
+
+
 
 task runInstrumentedJarOrigin(type: JavaExec) {
     executable = "${project.rootProject.projectDir}/dependencies/phosphor/integration-tests/target/jvm-inst-data/bin/java"
@@ -114,11 +130,11 @@ task runInstrumentedJar(type: JavaExec) {
 //    classpath "${buildDir}/libs/${project.name}-${version}.jar"
     mainClass = "al.aoli.exchain.demo.Main"
     var instrumentation = project(":instrumentation")
+//    jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
     jvmArgs "--patch-module=java.base=/Users/aoli/repos/exchain/phosphor/build/libs/phosphor.jar"
     jvmArgs "-javaagent:${project.rootProject.projectDir}/" +
             "dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
             "phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
-//    jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
     var nat= project(":native")
 //    jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib"
 
