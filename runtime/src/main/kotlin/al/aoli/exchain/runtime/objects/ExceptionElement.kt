@@ -1,5 +1,7 @@
 package al.aoli.exchain.runtime.objects
 
-class ExceptionElement(val type: String, val stack: List<String>, val message: String?) {
+import java.sql.Timestamp
 
+class ExceptionElement(val type: String, val stack: List<String>, val message: String?) {
+    val time: Timestamp = Timestamp(System.currentTimeMillis())
 }

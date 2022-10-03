@@ -86,7 +86,7 @@ task runOriginJar(type: JavaExec) {
     classpath "${runtime.buildDir}/libs/out.jar"
     mainClass = "al.aoli.exchain.demo.Main"
     var nat= project(":native")
-    jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=logging"
+    jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=stats"
     var instrumentation = project(":instrumentation")
     jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
     dependsOn jar

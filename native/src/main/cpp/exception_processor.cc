@@ -56,8 +56,8 @@ void ExceptionProcessor::Process() {
         case LOGGING:
             LoggingPass();
             break;
-
         case FULL:
+        case STAT:
             FullPass();
             break;
         default:

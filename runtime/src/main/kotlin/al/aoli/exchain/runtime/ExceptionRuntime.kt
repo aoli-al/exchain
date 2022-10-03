@@ -46,6 +46,14 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
+    fun onExceptionStats(e: Throwable, affectedVarResult: AffectedVarResult,
+                         numOfObjects: Int, numOfArrays: Int, numOfPrimitives: Int,
+                         numOfNulls: Int,
+                         shouldReport: Boolean) {
+        ExceptionLogger.logStats(e, affectedVarResult, numOfObjects, numOfArrays, numOfPrimitives, numOfNulls, shouldReport)
+    }
+
+    @JvmStatic
     fun onExceptionStackInfo(clazz: String, method: String, throwLocation: Long, catchLocation: Long, isThrowInsn: Boolean): AffectedVarResult? {
         return AffectedVarDriver.analyzeAffectedVar(clazz, method, throwLocation, catchLocation, isThrowInsn)
     }

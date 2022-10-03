@@ -20,6 +20,10 @@ class AffectedResultProcessor: ProcessorBase {
     jthread thread_;
     jvmtiLocalVariableEntry *table_;
     jint table_size_;
+    int num_of_primitives_ = 0;
+    int num_of_objects_ = 0;
+    int num_of_nulls_ = 0;
+    int num_of_arrays_ = 0;
 
    public:
     AffectedResultProcessor(jvmtiEnv *jvmti, JNIEnv *jni, jvmtiFrameInfo frame,
@@ -45,6 +49,7 @@ class AffectedResultProcessor: ProcessorBase {
     void ProcessAffectedFields();
     void ProcessSourceFields();
     jint GetCorrespondingTaintObjectSlot(int slot);
+    jint GetCorrespondingObjectSlot(int slot);
     std::string GetLocalObjectSignature(int slot);
 };
 }  // namespace exchain

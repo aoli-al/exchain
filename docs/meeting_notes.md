@@ -252,6 +252,7 @@ Identify the causal relationships among exceptions.
     - High overhead.
     - Do not show the causality among exceptions.
 
+- https://valgrind.org/docs/origin-tracking2007.pdf
 
 
 
@@ -387,7 +388,6 @@ void setup(HTTPClient client, Request r) {
     }
 }
 ```
-
 - Without exception line 2, 4 are executed.
 - With exception line 2, 6 are executed.
 - Affected vars are `cert` and `LOG`.
@@ -489,3 +489,91 @@ Idea: taint all affected variables $A$ with exception ID.
 - Cons
     - High overhead (> 400%)
 
+
+# Oct 2
+
+- Analyzed Hadoop HDFS-4128
+    - SecondaryNameNode is a service that runs periodically
+    - By default, it runs the checkout method every ~30min.
+    - There is an execution where an exception makes the service into bad stats.
+    - In the following execution the service crashes.
+
+- Simulation environment:
+    - We force the SecondaryNameNode to run two consecutive checkouts.
+    - In the first execution we inject the error.
+    - In the second execution we observe the crash.
+
+- Raw logging:
+
+```
+ClassNotFoundException 11041
+FileNotFoundException 17
+IOException 24
+UnsatisfiedLinkError 1
+NoSuchMethodException 12
+NoSuchMethodError 2
+MalformedURLException 4
+ConfigurationException 1
+NoSuchFieldException 1
+NotCompliantMBeanException 18
+UnixException 327
+NoSuchFileException 133
+RuntimeException 5
+XMLEntityScanner$1 4
+UnsupportedOperationException 1
+InvocationTargetException 1
+SecurityException 2
+UnknownHostException 1
+BlockPlacementPolicy$NotEnoughReplicasException 2
+MissingResourceException 1
+EOFException 1
+InterruptedException 198
+AsynchronousCloseException 20
+```
+
+
+- We apply the following filters:
+    - discard exceptions that are caught inside JDK
+    - discard exceptions that does not affect the state of the program
+        - Exception does not affect the value of any local variables
+        - Exception does not affect the value of global variables
+
+```
+java.io.FileNotFoundException 8
+java.lang.ClassNotFoundException 2
+java.io.IOException 10
+java.lang.NoSuchMethodException 5
+java.net.MalformedURLException 2
+org.apache.commons.configuration2.ex.ConfigurationException 1
+java.nio.file.NoSuchFileException 5
+java.lang.RuntimeException 5
+java.lang.UnsupportedOperationException 1
+java.lang.reflect.InvocationTargetException 1
+java.lang.SecurityException 2
+org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy$NotEnoughReplicasException 2
+java.lang.InterruptedException 14
+Total: 58
+```
+
+- For each exception that affects the state of the program:
+    - Affected local objects: 1.96
+    - Affected local arrays 0.02
+    - Affected local primitives: 0.14
+    - Affected local objects that are null: 0.38
+    - Affected class fields: 1.14
+
+
+- Most affected variables are objects and fields
+    - Static analysis are bad at tracking global information (class fields).
+    - But they are really good at tracking local information (local variables).
+- The number of affected primitives and nulls are small
+    - But are they important?
+    - Maybe worth to go to examples.
+- During the exception collection:
+    - It is hard to distinguish which exception belongs to which request/execution
+
+
+TODOS:
+
+- We still don't know how affected variables propagates in the system
+- Implement static data-flow analysis

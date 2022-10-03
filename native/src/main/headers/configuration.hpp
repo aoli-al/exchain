@@ -6,6 +6,7 @@ namespace exchain {
 
 enum ExceptionMode {
     LOGGING,
+    STAT,
     FULL,
 };
 

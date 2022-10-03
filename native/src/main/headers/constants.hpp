@@ -31,5 +31,9 @@ const static char *kAnalyzeSourceFieldsMethodDescriptor =
 const static char *kOnExceptionCaughtMethodName = "onExceptionCaught";
 const static char *kOnExceptionCaughtMethodDescriptor =
     "(Ljava/lang/Throwable;)V";
+const static char *kOnExceptionStatsMethodName = "onExceptionStats";
+const static char *kOnExceptionStatsMethodDescriptor =
+    "(Ljava/lang/Throwable;Lal/aoli/exchain/runtime/analyzers/"
+    "AffectedVarResult;IIIIZ)V";
 
 }  // namespace exchain
