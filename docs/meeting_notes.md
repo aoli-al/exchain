@@ -493,7 +493,7 @@ Idea: taint all affected variables $A$ with exception ID.
 # Oct 2
 
 - Analyzed Hadoop HDFS-4128
-    - SecondaryNameNode is a service that runs periodically
+    - SecondaryNameNode is a background service that runs periodically
     - By default, it runs the checkout method every ~30min.
     - There is an execution where an exception makes the service into bad stats.
     - In the following execution the service crashes.
