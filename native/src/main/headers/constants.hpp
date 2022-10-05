@@ -7,7 +7,8 @@ const static char *kAffectedVarResultClassName =
     "al/aoli/exchain/runtime/analyzers/AffectedVarResult";
 const static char *kExceptionStackInfoMethodName = "onExceptionStackInfo";
 const static char *kExceptionStackInfoDescriptor =
-    "(Ljava/lang/String;Ljava/lang/String;JJZ)Lal/aoli/exchain/"
+    "(Ljava/lang/Throwable;Ljava/lang/String;Ljava/lang/String;JJZ)Lal/aoli/"
+    "exchain/"
     "runtime/analyzers/AffectedVarResult;";
 const static char *kTaintObjectMethodName = "taintObject";
 const static char *kUpdateTaintMethodName = "updateTaint";

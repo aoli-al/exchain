@@ -18,23 +18,28 @@ void AffectedResultProcessor::Process() {
 
     jint modifier = 0;
     jvmti_->GetMethodModifiers(frame_.method, &modifier);
-    if (!(modifier & 0x0008) && Configuration::GetInstance().mode() == FULL) {
+    if (!(modifier & 0x0008) && Configuration::GetInstance().mode() == TAINT) {
         ProcessAffectedFields();
         ProcessSourceFields();
     }
-    if (Configuration::GetInstance().mode() == STAT) {
-        auto report_stats_method_id =
-            jni_->GetStaticMethodID(runtime_class_, kOnExceptionStatsMethodName,
-                                    kOnExceptionStatsMethodDescriptor);
-        PLOG_INFO << "report " << report_stats_method_id;
-        jni_->CallStaticVoidMethod(runtime_class_, report_stats_method_id,
-                                   exception_, result_,
-                                   num_of_objects_, num_of_arrays_,
-                                   num_of_primitives_, num_of_nulls_,
-                                   is_caught_by_frame_);
-    }
 
+    if (Configuration::GetInstance().mode() == STAT) {
+        ReportStats();
+    }
     jvmti_->Deallocate((unsigned char *)table_);
+}
+
+
+
+void AffectedResultProcessor::ReportStats() {
+    auto report_stats_method_id =
+        jni_->GetStaticMethodID(runtime_class_, kOnExceptionStatsMethodName,
+                                kOnExceptionStatsMethodDescriptor);
+    PLOG_INFO << "report " << report_stats_method_id;
+    jni_->CallStaticVoidMethod(runtime_class_, report_stats_method_id,
+                               exception_, result_, num_of_objects_,
+                               num_of_arrays_, num_of_primitives_,
+                               num_of_nulls_, is_caught_by_frame_);
 }
 
 void AffectedResultProcessor::ProcessAffectedFields() {
@@ -64,7 +69,7 @@ void AffectedResultProcessor::ProcessSourceFields() {
 
 void AffectedResultProcessor::ProcessSourceVars() {
     PLOG_INFO << "Start analyzing exception sources!";
-    if (Configuration::GetInstance().mode() != FULL) return;
+    if (Configuration::GetInstance().mode() != TAINT) return;
     auto analyze_source_method_id =
         jni_->GetStaticMethodID(runtime_class_, kAnalyzeSourceVarsMethodName,
                                 kAnalyzeSourceVarsMethodDescriptor);
@@ -90,7 +95,9 @@ void AffectedResultProcessor::ProcessSourceVars() {
             jni_->DeleteLocalRef(taint);
         }
 
-        auto signature = GetLocalObjectSignature(slot);
+        auto *entry = GetLocalVariableEntry(slot);
+        if (entry == nullptr) continue;
+        std::string signature = entry->signature;
         if (signature.starts_with("L") || signature.starts_with("[")) {
             jobject obj;
             jvmti_->GetLocalObject(thread_, depth_, slot, &obj);
@@ -105,15 +112,16 @@ void AffectedResultProcessor::ProcessSourceVars() {
     jni_->ReleaseIntArrayElements(source_vars, source_vars_cpy, NULL);
 }
 
-std::string AffectedResultProcessor::GetLocalObjectSignature(int slot) {
+jvmtiLocalVariableEntry *AffectedResultProcessor::GetLocalVariableEntry(int slot) {
     for (int i = 0; i < table_size_; i++) {
-        auto entry = table_[i];
-        if (entry.slot == slot && entry.start_location <= frame_.location &&
-            entry.start_location + entry.length >= frame_.location) {
-            return entry.signature;
+        auto *entry = &table_[i];
+        if (entry->slot == slot && entry->start_location <= frame_.location &&
+            entry->start_location + entry->length >= frame_.location) {
+        // if (entry->slot == slot) {
+            return entry;
         }
     }
-    return "";
+    return nullptr;
 }
 
 
@@ -153,9 +161,18 @@ void AffectedResultProcessor::ProcessAffectedVars() {
     PLOG_INFO << "Affected var size: " << affected_vars_length;
     for (int i = 0; i < affected_vars_length; i++) {
         const auto slot = affected_vars_cpy[i];
-        std::string signature = GetLocalObjectSignature(slot);
-
-        if (signature == "" || signature.contains("Ledu/columbia/cs")) {
+        auto *entry = GetLocalVariableEntry(slot);
+        if (entry == nullptr) {
+            LOG_INFO << "Ignored slot: " << slot;
+            continue;
+        }
+        LOG_INFO << "Found local entry slot: " << slot
+                 << " name: " << entry->name
+                 << " signature: " << entry->signature
+                 << " start: " << entry->start_location
+                 << " length: " << entry->length;
+        std::string signature = entry->signature;
+        if (signature.contains("Ledu/columbia/cs")) {
             // Ignore taint objects.
             continue;
         }
@@ -174,14 +191,14 @@ void AffectedResultProcessor::ProcessAffectedVars() {
                 num_of_nulls_ += 1;
             }
         }
-
-        if (Configuration::GetInstance().mode() == FULL) {
+        local_variable_map_.emplace_back(entry->slot, entry->name);
+        if (Configuration::GetInstance().mode() == TAINT) {
             // We only taint primitive types if the exception is
             // caught by the current frame.
             jint taint_slot = GetCorrespondingTaintObjectSlot(slot);
 
             if (is_caught_by_frame_ && taint_slot != -1) {
-                PLOG_INFO << "Taint local variable with type: " << signature
+                PLOG_INFO << "Taint local variable with type: " << entry
                           << " at slot: " << slot;
                 jobject taint;
                 jvmti_->GetLocalObject(thread_, depth_, taint_slot, &taint);
@@ -198,7 +215,7 @@ void AffectedResultProcessor::ProcessAffectedVars() {
                 jobject obj;
                 jvmti_->GetLocalObject(thread_, depth_, slot, &obj);
                 if (obj == NULL) continue;
-                PLOG_INFO << "Taint object with type: " << signature
+                PLOG_INFO << "Taint object with type: " << entry
                           << " at slot: " << slot;
                 jni_->CallStaticVoidMethod(runtime_class_,
                                            taint_object_method_id, obj, slot,

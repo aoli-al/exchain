@@ -14,6 +14,8 @@ class ProcessorBase {
    public:
     ProcessorBase(jvmtiEnv *jvmti, JNIEnv *jni) : jvmti_(jvmti), jni_(jni) {}
     bool CheckJvmTIError(jvmtiError error, std::string msg);
+    std::string GetMethodSignature(jmethodID method);
+    std::string GetClassSignature(jmethodID clazz);
 };
 
 }  // namespace exchain

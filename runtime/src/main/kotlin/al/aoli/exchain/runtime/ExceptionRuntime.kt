@@ -54,8 +54,9 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
-    fun onExceptionStackInfo(clazz: String, method: String, throwLocation: Long, catchLocation: Long, isThrowInsn: Boolean): AffectedVarResult? {
-        return AffectedVarDriver.analyzeAffectedVar(clazz, method, throwLocation, catchLocation, isThrowInsn)
+    fun onExceptionStackInfo(e: Throwable, clazz: String, method: String, throwLocation: Long, catchLocation: Long,
+                             isThrowInsn: Boolean): AffectedVarResult? {
+        return AffectedVarDriver.analyzeAffectedVar(e, clazz, method, throwLocation, catchLocation, isThrowInsn)
     }
 
     @JvmStatic

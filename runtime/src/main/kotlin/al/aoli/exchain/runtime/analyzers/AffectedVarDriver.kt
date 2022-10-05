@@ -13,7 +13,8 @@ import java.lang.Exception
 private val logger = KotlinLogging.logger {}
 object AffectedVarDriver {
     val store = InMemoryAffectedVarStore()
-    fun analyzeAffectedVar(clazz: String, method: String, throwIndex: Long, catchIndex: Long, isThrowInsn: Boolean) : AffectedVarResult? {
+    fun analyzeAffectedVar(e: Throwable, clazz: String, method: String, throwIndex: Long,
+                           catchIndex: Long, isThrowInsn: Boolean) : AffectedVarResult? {
         val cached = store.getCachedAffectedVarResult(clazz, method, throwIndex, catchIndex)
         if (cached != null) {
             return cached
@@ -46,7 +47,9 @@ object AffectedVarDriver {
         val sourceVars = visitor.methodVisitor?.sourceVars?.toIntArray() ?: intArrayOf()
         val sourceFields = visitor.methodVisitor?.sourceFields?.filter { !it.contains("PHOSPHOR") }
             ?.toTypedArray() ?: emptyArray()
-        val result = AffectedVarResult(affectedVars, affectedFields, sourceVars, sourceFields)
+        val label = ExceptionLogger.logException(e)
+        val result = AffectedVarResult(label, clazz, method, affectedVars, affectedFields, sourceVars, sourceFields)
+        ExceptionLogger.logAffectedVarResult(result)
         store.putCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, result)
         return result
     }

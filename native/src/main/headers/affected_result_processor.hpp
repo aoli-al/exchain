@@ -1,4 +1,8 @@
 #pragma once
+
+#include <map>
+#include <vector>
+
 #include <jni.h>
 #include <jvmti.h>
 
@@ -24,6 +28,7 @@ class AffectedResultProcessor: ProcessorBase {
     int num_of_objects_ = 0;
     int num_of_nulls_ = 0;
     int num_of_arrays_ = 0;
+    std::vector<std::pair<int, std::string>> local_variable_map_;
 
    public:
     AffectedResultProcessor(jvmtiEnv *jvmti, JNIEnv *jni, jvmtiFrameInfo frame,
@@ -48,8 +53,9 @@ class AffectedResultProcessor: ProcessorBase {
     void ProcessSourceVars();
     void ProcessAffectedFields();
     void ProcessSourceFields();
+    void ReportStats();
     jint GetCorrespondingTaintObjectSlot(int slot);
     jint GetCorrespondingObjectSlot(int slot);
-    std::string GetLocalObjectSignature(int slot);
+    jvmtiLocalVariableEntry *GetLocalVariableEntry(int slot);
 };
 }  // namespace exchain

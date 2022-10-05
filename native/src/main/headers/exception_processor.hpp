@@ -41,8 +41,6 @@ class ExceptionProcessor: ProcessorBase {
 
    private:
     void ProcessStackFrameInfo(jvmtiFrameInfo frameInfo, int depth);
-    std::string GetMethodSignature(jmethodID method);
-    std::string GetClassSignature(jmethodID clazz);
     bool CheckJvmTIError(jvmtiError error, std::string msg);
     bool ShouldIgnoreClass(std::string signature);
     bool ShouldTerminateEarly(std::string signature);

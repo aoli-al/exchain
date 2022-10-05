@@ -7,7 +7,8 @@ namespace exchain {
 enum ExceptionMode {
     LOGGING,
     STAT,
-    FULL,
+    TAINT,
+    STATIC,
 };
 
 class Configuration {
@@ -27,7 +28,7 @@ class Configuration {
     void operator=(Configuration const &) = delete;
 
    private:
-    ExceptionMode mode_ = FULL;
+    ExceptionMode mode_ = TAINT;
 };
 
 }  // namespace exchain

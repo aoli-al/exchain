@@ -56,7 +56,7 @@ void ExceptionProcessor::Process() {
         case LOGGING:
             LoggingPass();
             break;
-        case FULL:
+        case TAINT:
         case STAT:
             FullPass();
             break;
@@ -121,7 +121,8 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
     jboolean is_throw_insn = depth == 0;
 
     jobject result = (jintArray)jni_->CallStaticObjectMethod(
-        clazz, method_id, class_jstring, method_jstring, frame.location,
+        clazz, method_id, exception_,
+        class_jstring, method_jstring, frame.location,
         catch_current_method, is_throw_insn);
     jni_->DeleteLocalRef(method_jstring);
     jni_->DeleteLocalRef(class_jstring);
@@ -132,29 +133,6 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
                                       frame.method == catch_method_,
                                       location_string_, exception_, thread_);
     processor.Process();
-}
-
-std::string ExceptionProcessor::GetMethodSignature(jmethodID method) {
-    char *name, *signature;
-    ProcessorBase::CheckJvmTIError(
-        jvmti_->GetMethodName(method, &name, &signature, NULL),
-        "get method name failed.");
-    std::string sig = std::string(name) + std::string(signature);
-    jvmti_->Deallocate((unsigned char *)name);
-    jvmti_->Deallocate((unsigned char *)signature);
-    return sig;
-}
-
-std::string ExceptionProcessor::GetClassSignature(jmethodID method) {
-    jclass clazz;
-    jvmti_->GetMethodDeclaringClass(method, &clazz);
-    char *signature;
-    ProcessorBase::CheckJvmTIError(
-        jvmti_->GetClassSignature(clazz, &signature, NULL),
-        "get class signature failed.");
-    std::string sig = signature;
-    jvmti_->Deallocate((unsigned char *)signature);
-    return sig;
 }
 
 int ExceptionProcessor::ComputeExceptionId(jobject obj) {
