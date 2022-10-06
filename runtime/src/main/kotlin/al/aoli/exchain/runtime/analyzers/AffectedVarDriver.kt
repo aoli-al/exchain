@@ -17,6 +17,9 @@ object AffectedVarDriver {
                            catchIndex: Long, isThrowInsn: Boolean) : AffectedVarResult? {
         val cached = store.getCachedAffectedVarResult(clazz, method, throwIndex, catchIndex)
         if (cached != null) {
+            val label = ExceptionLogger.logException(e)
+            cached.label = label
+            ExceptionLogger.logAffectedVarResult(cached)
             return cached
         }
         val classPath = clazz.substring(1 until clazz.length-1)
