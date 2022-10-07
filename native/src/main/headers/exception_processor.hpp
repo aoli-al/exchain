@@ -16,6 +16,7 @@ class ExceptionProcessor: ProcessorBase {
     int exception_id_;
     jobject exception_;
     jstring location_string_;
+    bool is_throw_from_helper_ = false;
 
     static const int kMaxStackDepth = 100;
 

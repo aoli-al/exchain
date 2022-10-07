@@ -4,8 +4,10 @@ import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 
-class AffectedVarClassVisitor(private val throwIndex: Long, private val catchIndex: Long, private val isThrowInsn:
-Boolean, val owner: String, val method: String, val classReader: AffectedVarClassReader
+class AffectedVarClassVisitor(private val exception: Throwable,
+                              private val throwIndex: Long, private val catchIndex: Long,
+                              private val isThrowInsn: Boolean, val owner: String, val method: String,
+                              val classReader: AffectedVarClassReader
 ): ClassVisitor(Opcodes.ASM8) {
     var methodVisitor: AffectedVarMethodVisitor? = null
     override fun visitMethod(
@@ -17,6 +19,7 @@ Boolean, val owner: String, val method: String, val classReader: AffectedVarClas
     ): MethodVisitor? {
         return if (name + descriptor == method) {
             methodVisitor = AffectedVarMethodVisitor(
+                exception,
                 throwIndex, catchIndex, isThrowInsn, owner, access, name,
                 descriptor, signature, exceptions, classReader
             )

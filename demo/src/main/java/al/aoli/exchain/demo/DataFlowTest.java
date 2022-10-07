@@ -47,7 +47,9 @@ public class DataFlowTest {
 
         void test() {
             try {
-                System.out.println(sub.length());
+                if (sub == null) {
+                    logError("sub is null");
+                }
             }
             catch (RuntimeException e) {
                 System.out.println(e.getMessage());
@@ -147,14 +149,22 @@ public class DataFlowTest {
     Object o = null;
 
     public String scene1(Dummy d) {
-
+//        try {
+//            if (d.sub == null) {
+//                throw new RuntimeException("sub is null");
+//            }
+//        }
+//        catch (RuntimeException e) {
+//            System.out.println(e.getMessage());
+//        }
+//        return "";
         try {
             o = createObjectWithException();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
-        d.sub = (String) o;
+        test2(d, (String) o);
 
         String s = null;
         try {
@@ -165,6 +175,17 @@ public class DataFlowTest {
             System.out.println(e.getMessage());
         }
         return s;
+    }
+
+    public static void logError(String s) {
+        if (s != null) {
+            throw new RuntimeException(s);
+        }
+    }
+
+    public void test2(Dummy d, String o) {
+        d.sub = o;
+
     }
 
     public void callScene1() {

@@ -15,7 +15,7 @@ object AffectedVarDriver {
     val store = InMemoryAffectedVarStore()
     fun analyzeAffectedVar(e: Throwable, clazz: String, method: String, throwIndex: Long,
                            catchIndex: Long, isThrowInsn: Boolean) : AffectedVarResult? {
-        val cached = store.getCachedAffectedVarResult(clazz, method, throwIndex, catchIndex)
+        val cached = store.getCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, isThrowInsn)
         if (cached != null) {
             val label = ExceptionLogger.logException(e)
             cached.label = label
@@ -41,7 +41,7 @@ object AffectedVarDriver {
             }
 
         }
-        val visitor = AffectedVarClassVisitor(throwIndex, catchIndex, isThrowInsn, className, method, classReader)
+        val visitor = AffectedVarClassVisitor(e, throwIndex, catchIndex, isThrowInsn, className, method, classReader)
         classReader.accept(visitor, 0)
         // We are going to taint class fields here and local variables in native.
         val affectedFields = visitor.methodVisitor?.affectedFields?.filter { !it.contains("PHOSPHOR") }
@@ -50,10 +50,12 @@ object AffectedVarDriver {
         val sourceVars = visitor.methodVisitor?.sourceVars?.toIntArray() ?: intArrayOf()
         val sourceFields = visitor.methodVisitor?.sourceFields?.filter { !it.contains("PHOSPHOR") }
             ?.toTypedArray() ?: emptyArray()
+        val branchLines = visitor.methodVisitor?.branchLines?.toIntArray() ?: intArrayOf()
         val label = ExceptionLogger.logException(e)
-        val result = AffectedVarResult(label, clazz, method, affectedVars, affectedFields, sourceVars, sourceFields)
+        val result = AffectedVarResult(label, clazz, method, affectedVars, affectedFields, sourceVars, sourceFields,
+            branchLines)
         ExceptionLogger.logAffectedVarResult(result)
-        store.putCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, result)
+        store.putCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, isThrowInsn, result)
         return result
     }
 

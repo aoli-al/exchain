@@ -59,6 +59,7 @@ object ExceptionLogger {
         }
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")
         val path = formatter.format(LocalDateTime.now())
+        File("$basePath/latest").writeText(path)
         val dataFolder = File("$basePath/$path")
         dataFolder.mkdir()
 

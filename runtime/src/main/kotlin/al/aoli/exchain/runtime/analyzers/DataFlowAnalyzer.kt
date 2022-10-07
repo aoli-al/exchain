@@ -9,7 +9,7 @@ import org.objectweb.asm.tree.analysis.Value
 open class DataFlowAnalyzer<V: Value>(val instructions: InsnList, interpreter: Interpreter<V>): Analyzer<V>(interpreter) {
     val indexSuccessors = mutableMapOf<Int, MutableSet<Int>>()
     val instructionSuccessors = mutableMapOf<AbstractInsnNode, MutableSet<AbstractInsnNode>>()
-    val predecessors = mutableMapOf<Int, MutableSet<Int>>()
+    val instructionPredecessors = mutableMapOf<AbstractInsnNode, MutableSet<AbstractInsnNode>>()
 
     fun reachableBlocks(from: AbstractInsnNode): Set<AbstractInsnNode> {
         val workItems = mutableListOf(from)
@@ -28,6 +28,8 @@ open class DataFlowAnalyzer<V: Value>(val instructions: InsnList, interpreter: I
         indexSuccessors.getOrPut(insnIndex) { mutableSetOf() }.add(successorIndex)
         instructionSuccessors.getOrPut(instructions[insnIndex]) { mutableSetOf() }
             .add(instructions[successorIndex])
+        instructionPredecessors.getOrPut(instructions[successorIndex]) { mutableSetOf() }
+            .add(instructions[insnIndex])
         super.newControlFlowEdge(insnIndex, successorIndex)
     }
 

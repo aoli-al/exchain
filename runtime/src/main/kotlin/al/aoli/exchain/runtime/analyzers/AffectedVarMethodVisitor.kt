@@ -5,9 +5,11 @@ import org.objectweb.asm.*
 import org.objectweb.asm.tree.*
 import org.objectweb.asm.tree.analysis.Frame
 import org.objectweb.asm.tree.analysis.SourceValue
+import java.lang.NullPointerException
 
 private val logger = KotlinLogging.logger {}
-class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val isThrowInsn: Boolean, val owner: String,
+class AffectedVarMethodVisitor(val exception: Throwable,
+                               val throwIndex: Long, val catchIndex: Long, val isThrowInsn: Boolean, val owner: String,
                                access: Int, name: String, descriptor: String, signature: String?,
                                exceptions: Array<out String>?, val classReader: AffectedVarClassReader
 ):
@@ -159,6 +161,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
     val affectedFields = mutableSetOf<String>()
     val sourceVars = mutableSetOf<Int>()
     val sourceFields = mutableSetOf<String>()
+    val branchLines = mutableSetOf<Int>()
     val affectedParams = mutableSetOf<Int>()
 
     private fun processAffectedInsns(affectedInsns: Set<AbstractInsnNode>, frames: Array<Frame<SourceValue>>) {
@@ -169,10 +172,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                 is MethodInsnNode -> {
                     if (insn.opcode != Opcodes.INVOKESTATIC && insn.opcode != Opcodes.INVOKEDYNAMIC) {
                         val value = try {
-                            for (type in Type.getArgumentTypes(insn.desc)) {
-                                frame.pop()
-                            }
-                            frame.pop()
+                            frame.getStack(frame.stackSize - Type.getArgumentTypes(insn.desc).size - 1)
                         } catch (e: IndexOutOfBoundsException) {
                             logger.error { "Processing instruction $insn failed." }
                             continue
@@ -181,7 +181,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                             val srcFrame = frames[instructions.indexOf(src)]
                             // If a method call is declared in a field the field must be from `this`.
                             if (src is FieldInsnNode && src.opcode == Opcodes.GETFIELD && !isStatic) {
-                                val fieldValue = srcFrame.pop()
+                                val fieldValue = srcFrame.getStack(srcFrame.stackSize - 1)
                                 if (fieldValue.insns.size != 1) continue
                                 val fieldSrc = fieldValue.insns.first()
                                 if (fieldSrc is VarInsnNode && fieldSrc.opcode == Opcodes.ALOAD && fieldSrc.`var` == 0) {
@@ -190,6 +190,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                                         sourceFields.add(src.name)
                                     }
                                 }
+                                srcFrame.push(fieldValue)
                             }
                             // If a method call is from a local object, check if the object is on the stack.
                             if (src is VarInsnNode && src.opcode == Opcodes.ALOAD) {
@@ -210,8 +211,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                 is FieldInsnNode -> {
                     if (insn.opcode == Opcodes.PUTFIELD) {
                         val objRef = try {
-                            frame.pop()
-                            frame.pop()
+                            frame.getStack(frame.stackSize - 2)
                         } catch (e: IndexOutOfBoundsException) {
                             logger.error { "Processing instruction $insn failed. Error: $e" }
                             continue
@@ -232,7 +232,7 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
                     }
                     if (insn.opcode == Opcodes.GETFIELD) {
                         val objRef = try {
-                            frame.pop()
+                            frame.getStack(frame.stackSize - 1)
                         } catch (e: IndexOutOfBoundsException) {
                             logger.error { "Processing instruction $insn failed. Error $e" }
                             continue
@@ -264,6 +264,31 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
         println(affectedVars)
     }
 
+    fun findDirectBranch(analyzer: AffectedVarAnalyser<SourceValue>) {
+        if (throwInsn?.opcode == Opcodes.ATHROW || throwInsn is MethodInsnNode) {
+            var currentInsn = throwInsn
+            while (analyzer.instructionPredecessors[currentInsn]?.size == 1 &&
+                    currentInsn !is JumpInsnNode) {
+                currentInsn = analyzer.instructionPredecessors[currentInsn]?.first()
+            }
+            if (currentInsn !is JumpInsnNode && analyzer.instructionPredecessors[currentInsn]?.size == 2) {
+                for (insn in analyzer.instructionPredecessors[currentInsn]!!) {
+                    if (insn is JumpInsnNode) {
+                        currentInsn = insn
+                    }
+                }
+            }
+            if (currentInsn is JumpInsnNode) {
+                while (currentInsn !is LineNumberNode && analyzer.instructionPredecessors[currentInsn]?.size == 1) {
+                    currentInsn = analyzer.instructionPredecessors[currentInsn]?.first()
+                }
+                if (currentInsn is LineNumberNode) {
+                    branchLines.add(currentInsn.line)
+                }
+            }
+        }
+    }
+
     override fun visitEnd() {
         super.visitEnd()
 
@@ -292,6 +317,9 @@ class AffectedVarMethodVisitor(val throwIndex: Long, val catchIndex: Long, val i
             }
             affectedInsns.add(throwInsn!!)
             processAffectedInsns(affectedInsns, analyzer.frames)
+            if (isThrowInsn && exception !is NullPointerException && exception !is IndexOutOfBoundsException) {
+                findDirectBranch(analyzer)
+            }
         } else {
             logger.error { "Error finding throwInsn/catchInsn at index $throwIndex in class $owner:$name" }
         }

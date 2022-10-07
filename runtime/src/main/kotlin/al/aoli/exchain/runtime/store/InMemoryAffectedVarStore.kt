@@ -9,9 +9,10 @@ class InMemoryAffectedVarStore: AffectedVarStore {
         clazz: String,
         method: String,
         throwLocation: Long,
-        catchLocation: Long
+        catchLocation: Long,
+        isThrowInsn: Boolean
     ): AffectedVarResult? {
-        val sig = "$clazz:$method:$throwLocation:$catchLocation"
+        val sig = "$clazz:$method:$throwLocation:$catchLocation$isThrowInsn"
         return store[sig]
     }
 
@@ -20,9 +21,10 @@ class InMemoryAffectedVarStore: AffectedVarStore {
         method: String,
         throwLocation: Long,
         catchLocation: Long,
+        isThrowInsn: Boolean,
         result: AffectedVarResult
     ) {
-        val sig = "$clazz:$method:$throwLocation:$catchLocation"
+        val sig = "$clazz:$method:$throwLocation:$catchLocation:$isThrowInsn"
         store[sig] = result
     }
 

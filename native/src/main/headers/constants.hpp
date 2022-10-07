@@ -1,5 +1,8 @@
 #pragma once
 
+#include <set>
+#include <string>
+
 namespace exchain {
 const static char *kRuntimeClassName =
     "al/aoli/exchain/runtime/ExceptionRuntime";
@@ -36,5 +39,10 @@ const static char *kOnExceptionStatsMethodName = "onExceptionStats";
 const static char *kOnExceptionStatsMethodDescriptor =
     "(Ljava/lang/Throwable;Lal/aoli/exchain/runtime/analyzers/"
     "AffectedVarResult;IIIIZ)V";
+
+const static std::set<std::string> kExceptionHelpers = {
+    "editLogLoaderPrompt(Ljava/lang/String;Lorg/apache/hadoop/hdfs/server/"
+    "namenode/MetaRecoveryContext;Ljava/lang/String;)V",
+    "logError(Ljava/lang/String;)V"};
 
 }  // namespace exchain

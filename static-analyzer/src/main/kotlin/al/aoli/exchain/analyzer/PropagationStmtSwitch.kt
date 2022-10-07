@@ -6,9 +6,8 @@ import soot.SootMethod
 import soot.Value
 import soot.jimple.*
 import soot.tagkit.Tag
-import java.awt.Label
 
-class PropagationStmtSwitch(val affectedVarResultAnalyzer: AffectedVarResultAnalyzer,
+class PropagationStmtSwitch(val analyzer: Analyzer,
                             val affectedVarResult: AffectedVarResult?,
                             val method: SootMethod): StmtSwitch, AbstractJimpleValueSwitch<Set<Tag>>() {
 
@@ -27,13 +26,14 @@ class PropagationStmtSwitch(val affectedVarResultAnalyzer: AffectedVarResultAnal
         updateValue(stmt.leftOp, result)
     }
 
-    fun updateValue(value: Value, result: Set<Tag>) {
+    fun updateValue(value: Value, result: Set<Tag>?) {
+        if (result == null) return
         if (value is FieldRef) {
             val field = value.field
             if (field.declaringClass?.name != null) {
                 val key = field.declaringClass.name + "." + field.name
                 for (labelTag in result.filterIsInstance<LabelTag>()) {
-                    affectedVarResultAnalyzer.fieldTaints
+                    analyzer.fieldTaints
                         .getOrPut(key) { mutableSetOf() }
                         .add(labelTag.label)
                 }
@@ -46,6 +46,9 @@ class PropagationStmtSwitch(val affectedVarResultAnalyzer: AffectedVarResultAnal
     }
 
     override fun caseIdentityStmt(stmt: IdentityStmt) {
+        stmt.rightOp.apply(this)
+        stmt.rightOpBox.addAll(result)
+        updateValue(stmt.leftOp, result)
     }
 
     override fun caseEnterMonitorStmt(stmt: EnterMonitorStmt) {
@@ -58,6 +61,13 @@ class PropagationStmtSwitch(val affectedVarResultAnalyzer: AffectedVarResultAnal
     }
 
     override fun caseIfStmt(stmt: IfStmt) {
+        if (affectedVarResult != null && stmt.javaSourceStartLineNumber in affectedVarResult.branchLines) {
+            stmt.condition.apply(this)
+            stmt.conditionBox.addAll(result)
+            for (labelTag in stmt.conditionBox.tags.filterIsInstance<LabelTag>()) {
+                analyzer.addEdge(affectedVarResult.label, labelTag.label)
+            }
+        }
     }
 
     override fun caseLookupSwitchStmt(stmt: LookupSwitchStmt) {
@@ -70,6 +80,24 @@ class PropagationStmtSwitch(val affectedVarResultAnalyzer: AffectedVarResultAnal
     }
 
     override fun caseReturnStmt(stmt: ReturnStmt) {
+        var updated = false
+        stmt.op.apply(this)
+        for (tag in result) {
+            if (tag !in method.tags) {
+                method.addTag(tag)
+                updated = true
+            }
+        }
+
+        if (updated) {
+            val dependencies = analyzer.methodDependency
+                .getOrPut(method) { mutableSetOf() }
+            for (dependency in dependencies) {
+                if (dependency !in analyzer.workList) {
+                    analyzer.workList.add(dependency)
+                }
+            }
+        }
     }
 
     override fun caseReturnVoidStmt(stmt: ReturnVoidStmt) {
@@ -90,11 +118,60 @@ class PropagationStmtSwitch(val affectedVarResultAnalyzer: AffectedVarResultAnal
             .filterIsInstance<LabelTag>().toSet()
     }
 
+    fun processInvokeExpr(invokeExpr: InvokeExpr) {
+        if (invokeExpr.method == null) {
+            return
+        }
+        analyzer.methodDependency
+            .getOrPut(invokeExpr.method) { mutableSetOf() }
+            .add(method)
+        val paramList = analyzer.methodParameterTaintMap
+            .getOrPut(invokeExpr.method) {
+                MutableList(invokeExpr.useBoxes.size) {
+                    mutableSetOf()
+                }
+            }
+
+        var updated = false
+        for (index in invokeExpr.useBoxes.indices) {
+            val useBox = invokeExpr.useBoxes[index]
+            useBox.value.apply(this)
+            useBox.addAll(result)
+            for (labelTag in useBox.tags.filterIsInstance<LabelTag>()) {
+                if (labelTag !in paramList[index]) {
+                    paramList[index].add(labelTag)
+                    updated = true
+                }
+            }
+        }
+        if (updated && invokeExpr.method !in analyzer.workList) {
+            analyzer.workList.add(invokeExpr.method)
+        }
+        result = invokeExpr.method.tags.filterIsInstance<LabelTag>().toSet()
+    }
+
+    fun processExpr(expr: Expr) {
+        val out = mutableSetOf<Tag>()
+        for (useBox in expr.useBoxes) {
+            useBox.value.apply(this)
+            useBox.addAll(result)
+            out.addAll(useBox.tags.filterIsInstance<LabelTag>())
+        }
+        result = out
+    }
+
+    override fun caseParameterRef(v: ParameterRef) {
+        val idx = if (method.isStatic) v.index else v.index + 1
+        analyzer.methodParameterTaintMap[method]?.get(idx)?.let {
+            result = it
+        }
+    }
+
     override fun caseLocal(v: Local) {
         if (affectedVarResult?.sourceVars?.contains(v.number) == true) {
             for (useBox in v.useBoxes) {
                 for (labelTag in useBox.tags.filterIsInstance<LabelTag>()) {
-                    affectedVarResultAnalyzer.addEdge(affectedVarResult.label, labelTag.label)
+                    analyzer.addEdge(affectedVarResult.label, labelTag.label)
                 }
             }
         }
@@ -103,7 +180,6 @@ class PropagationStmtSwitch(val affectedVarResultAnalyzer: AffectedVarResultAnal
         } else {
             emptySet()
         }
-
         result += localMap.getOrDefault(v, mutableSetOf())
     }
 
@@ -113,7 +189,7 @@ class PropagationStmtSwitch(val affectedVarResultAnalyzer: AffectedVarResultAnal
         v.baseBox.addAll(result)
         val key = fieldClass + "." + v.field.name
         result =
-            affectedVarResultAnalyzer.fieldTaints.getOrDefault(key, mutableSetOf())
+            analyzer.fieldTaints.getOrDefault(key, mutableSetOf())
                 .map { LabelTag.get(it) }.toSet() + v.baseBox.tags.filterIsInstance<LabelTag>()
         v.field.addAll(result)
 
@@ -123,7 +199,7 @@ class PropagationStmtSwitch(val affectedVarResultAnalyzer: AffectedVarResultAnal
         if (v.field.declaringClass?.name == className) {
             if (affectedVarResult?.sourceFields?.contains(v.field.name) == true) {
                 for (labelTag in v.field.tags.filterIsInstance<LabelTag>()) {
-                    affectedVarResultAnalyzer.addEdge(affectedVarResult.label, labelTag.label)
+                    analyzer.addEdge(affectedVarResult.label, labelTag.label)
                 }
             }
         }
@@ -136,10 +212,11 @@ class PropagationStmtSwitch(val affectedVarResultAnalyzer: AffectedVarResultAnal
 
 
     override fun defaultCase(obj: Any) {
+        result = emptySet()
         when (obj) {
             is BinopExpr -> processBinopExpr(obj)
-            else -> {}
+            is InvokeExpr -> processInvokeExpr(obj)
+            is Expr -> processExpr(obj)
         }
-        result = emptySet()
     }
 }
