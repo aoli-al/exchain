@@ -47,9 +47,20 @@ object AffectedVarDriver {
         val affectedFields = visitor.methodVisitor?.affectedFields?.filter { !it.contains("PHOSPHOR") }
             ?.toTypedArray() ?: emptyArray()
         val affectedVars = visitor.methodVisitor?.affectedVars?.toIntArray() ?: intArrayOf()
-        val sourceVars = visitor.methodVisitor?.sourceVars?.toIntArray() ?: intArrayOf()
-        val sourceFields = visitor.methodVisitor?.sourceFields?.filter { !it.contains("PHOSPHOR") }
-            ?.toTypedArray() ?: emptyArray()
+//        val sourceVars = visitor.methodVisitor?.sourceVars?.toIntArray() ?: intArrayOf()
+//        val sourceFields = visitor.methodVisitor?.sourceFields?.filter { !it.contains("PHOSPHOR") }
+//            ?.toTypedArray() ?: emptyArray()
+
+        val (sourceFields, sourceVars) =
+            if (isThrowInsn && (e is NullPointerException || e is IndexOutOfBoundsException)) {
+                Pair(visitor.methodVisitor?.sourceFields?.filter { !it.contains("PHOSPHOR") }
+                    ?.toTypedArray() ?: emptyArray(),
+                    visitor.methodVisitor?.sourceVars?.toIntArray() ?: intArrayOf())
+            } else {
+                Pair(emptyArray(), intArrayOf())
+            }
+
+
         val branchLines = visitor.methodVisitor?.branchLines?.toIntArray() ?: intArrayOf()
         val label = ExceptionLogger.logException(e)
         val result = AffectedVarResult(label, clazz, method, affectedVars, affectedFields, sourceVars, sourceFields,

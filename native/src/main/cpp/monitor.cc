@@ -52,10 +52,13 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
     if (!initialized) return;
     if (thread == NULL) return;
     jlong exception_thread_id = GetThreadId(thread, env);
+    processing_threads_mutex.lock();
     if (processing_threads.find(exception_thread_id) !=
         processing_threads.end()) {
+        processing_threads_mutex.unlock();
         return;
     }
+    processing_threads_mutex.unlock();
     std::thread new_thread([=]() {
         if (jvm == nullptr) {
             LOG_ERROR << "JavaVM is null!";
@@ -116,7 +119,7 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
     jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_EXCEPTION, NULL);
 
     static plog::ColorConsoleAppender<plog::FuncMessageFormatter> console_appender;
-    plog::init(plog::info, &console_appender);
+    plog::init(plog::warning, &console_appender);
 
     return 0;
 }

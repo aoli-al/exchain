@@ -13,6 +13,7 @@ class Analyzer(val affectedVarResults: List<AffectedVarResult>) {
     val exceptionGraph = mutableMapOf<Int, MutableSet<Int>>()
     val methodDependency = mutableMapOf<SootMethod, MutableSet<SootMethod>>()
     val methodParameterTaintMap = mutableMapOf<SootMethod, List<MutableSet<Tag>>>()
+    val localMap = mutableMapOf<Local, MutableSet<Tag>>()
     val workList = mutableListOf<SootMethod>()
 
     fun addEdge(from: Int, to: Int) {

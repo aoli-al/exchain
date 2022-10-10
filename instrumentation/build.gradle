@@ -30,20 +30,19 @@ test {
 
 jar {
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    var runtime = project(":runtime")
     manifest {
         attributes 'Premain-Class': "al.aoli.exchain.instrumentation.MainKt"
         attributes 'Can-Redefine-Classes': true
         attributes 'Can-Retransform-Classes': true
+        attributes 'Class-Path': "${runtime.buildDir}/libs/out.jar"
     }
 }
 
-//shadowJar {
-//    archiveBaseName.set('instrumentation')
-//    archiveClassifier.set('')
-//    archiveVersion.set('')
-//
-//    relocate 'org.objectweb.asm', 'shadow.asm'
-//}
+shadowJar {
+    archiveBaseName.set('instrumentation')
+    from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+}
 
 task startInstrumentation(dependsOn: 'classes', type: JavaExec) {
     mainClass = "al.aoli.exchain.instrumentation.DoIntegrationTestKt"

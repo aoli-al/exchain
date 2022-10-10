@@ -56,6 +56,10 @@ public class DataFlowTest {
             }
         }
 
+        void test1() {
+            throw new RuntimeException("2");
+        }
+
     }
 
 
@@ -147,6 +151,26 @@ public class DataFlowTest {
     }
 
     Object o = null;
+
+    public void scene10() {
+        for (int i = 0; i < 10; i++) {
+            try {
+                dummy.test1();
+            } catch (Exception e) {
+            }
+        }
+    }
+
+    public void sceneLocal() {
+        Object s = null;
+        try {
+            s = createObjectWithException();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        System.out.println(s.toString());
+    }
 
     public String scene1(Dummy d) {
 //        try {

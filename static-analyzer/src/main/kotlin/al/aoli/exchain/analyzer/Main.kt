@@ -17,6 +17,9 @@ fun setupSoot(sourceDirectory: String) {
 //    Options.v().set_whole_program(true)
     Options.v().set_prepend_classpath(true)
     Options.v().set_allow_phantom_refs(true)
+    Options.v().set_write_local_annotations(true)
+    Options.v().setPhaseOption("jb", "use-original-names:true")
+    Options.v().setPhaseOption("jb", "keep-offset:true")
 }
 
 fun loadAndProcess(dataDirectory: String) {

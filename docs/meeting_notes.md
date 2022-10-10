@@ -577,3 +577,60 @@ TODOS:
 
 - We still don't know how affected variables propagates in the system
 - Implement static data-flow analysis
+
+
+# Oct 10
+
+- We have finished implementing the static data flow analysis
+    - Identify and taint affected global variables ✅
+    - Identify and taint affected local variables 🚧
+    - Propagate taint variables through local variables ✅
+    - Propagate taint variables through global variables ✅
+
+- Taint Propagation Algorithm:
+    - $G$ a global context that saves the tags for method parameters.
+    - $R$ a global context that saves the tags for method returns.
+    - $D$ a dependency graph that saves all callers of a method $m$
+    - Input: A method $m_{in}$ that throws an exception $e$, a set of affected variables $V$,
+    - Initialize the work list $W\leftarrow \{m_{in}\}$
+    - If $W\not=\emptyset$
+        - Remove an element $m$ from $W$
+        - For statement $s$ in $m$
+            - case $s = v_1 := v_2$
+                - If $v_2$ is parameter:
+                    - $tag_{v_1} \leftarrow G[v_2]$
+                - Else
+                    - $tag_{v_1} \leftarrow tag_{v_2}$
+                - If $v_1 \in V$:
+                    - $tag_{v_1} \leftarrow tag_{v_1} \cup \{e\}$
+            - case $s = v := f(v_1)$
+                - If $G[v_1] \cup tag_{v_1} \not= G[v_1]$:
+                    - $G[v_1] \leftarrow G[v_1] \cup tag_{v_1}$
+                    - $W\leftarrow W\cup \{f\}$
+                - $tag_v \leftarrow R[f]$
+            - case $s = \mathrm{return}\ v$
+                - If $R[m] \cup tag_{v} \not= R[m]$:
+                    - $R[m] \leftarrow R[m] \cup tag_{v}$
+                    - for $m'\in D[m]$
+                        - $W\leftarrow W\cup \{m'\}$
+    - Issues:
+        - We assume methods are pure functional (we ignore global variables, and side
+        effects of function parameters)
+
+
+- Implementation challenges:
+    - Mapping between static information and dynamic information
+        - Bytecode offset v.s. line number
+            - Runtime: bytecode offset (which instruction throws the exception)
+            - Static: Soot does not preserve bytecode offset.
+                - https://www.sable.mcgill.ca/soot/tutorial/usage/
+            - Solution
+                - not sure if it is because I'm using Jimple representation. I'll try to
+                use shimple to see if it works
+                - Use ASM and debug information to construct the mapping between bytecode
+                offset and line numbers.
+        - Stack index v.s. variable name
+
+
+
+

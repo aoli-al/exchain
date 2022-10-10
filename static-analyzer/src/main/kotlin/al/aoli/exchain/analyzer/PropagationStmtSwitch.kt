@@ -11,7 +11,6 @@ class PropagationStmtSwitch(val analyzer: Analyzer,
                             val affectedVarResult: AffectedVarResult?,
                             val method: SootMethod): StmtSwitch, AbstractJimpleValueSwitch<Set<Tag>>() {
 
-    val localMap = mutableMapOf<Local, MutableSet<Tag>>()
 
     override fun caseBreakpointStmt(stmt: BreakpointStmt) {
     }
@@ -39,7 +38,7 @@ class PropagationStmtSwitch(val analyzer: Analyzer,
                 }
             }
         } else if (value is Local) {
-            localMap.getOrPut(value) { mutableSetOf() }.addAll(result)
+            analyzer.localMap.getOrPut(value) { mutableSetOf() }.addAll(result)
         } else if (value is ArrayRef) {
             updateValue(value.base, result)
         }
@@ -180,7 +179,7 @@ class PropagationStmtSwitch(val analyzer: Analyzer,
         } else {
             emptySet()
         }
-        result += localMap.getOrDefault(v, mutableSetOf())
+        result += analyzer.localMap.getOrDefault(v, mutableSetOf())
     }
 
     override fun caseInstanceFieldRef(v: InstanceFieldRef) {
