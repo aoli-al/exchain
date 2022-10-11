@@ -60,13 +60,13 @@ class PropagationStmtSwitch(val analyzer: Analyzer,
     }
 
     override fun caseIfStmt(stmt: IfStmt) {
-        if (affectedVarResult != null && stmt.javaSourceStartLineNumber in affectedVarResult.branchLines) {
-            stmt.condition.apply(this)
-            stmt.conditionBox.addAll(result)
-            for (labelTag in stmt.conditionBox.tags.filterIsInstance<LabelTag>()) {
-                analyzer.addEdge(affectedVarResult.label, labelTag.label)
-            }
-        }
+//        if (affectedVarResult != null && stmt.javaSourceStartLineNumber in affectedVarResult.sourceLines) {
+//            stmt.condition.apply(this)
+//            stmt.conditionBox.addAll(result)
+//            for (labelTag in stmt.conditionBox.tags.filterIsInstance<LabelTag>()) {
+//                analyzer.addEdge(affectedVarResult.label, labelTag.label)
+//            }
+//        }
     }
 
     override fun caseLookupSwitchStmt(stmt: LookupSwitchStmt) {
@@ -167,18 +167,18 @@ class PropagationStmtSwitch(val analyzer: Analyzer,
     }
 
     override fun caseLocal(v: Local) {
-        if (affectedVarResult?.sourceVars?.contains(v.number) == true) {
-            for (useBox in v.useBoxes) {
-                for (labelTag in useBox.tags.filterIsInstance<LabelTag>()) {
-                    analyzer.addEdge(affectedVarResult.label, labelTag.label)
-                }
-            }
-        }
-        result = if (affectedVarResult?.affectedVars?.contains(v.number) == true) {
-            setOf(LabelTag.get(affectedVarResult.label))
-        } else {
-            emptySet()
-        }
+//        if (affectedVarResult?.sourceVars?.contains(v.number) == true) {
+//            for (useBox in v.useBoxes) {
+//                for (labelTag in useBox.tags.filterIsInstance<LabelTag>()) {
+//                    analyzer.addEdge(affectedVarResult.label, labelTag.label)
+//                }
+//            }
+//        }
+//        result = if (affectedVarResult?.affectedVars?.contains(v.number) == true) {
+//            setOf(LabelTag.get(affectedVarResult.label))
+//        } else {
+//            emptySet()
+//        }
         result += analyzer.localMap.getOrDefault(v, mutableSetOf())
     }
 
@@ -195,13 +195,13 @@ class PropagationStmtSwitch(val analyzer: Analyzer,
         val className = affectedVarResult?.clazz
             ?.substring(1, affectedVarResult.clazz.length - 1)
             ?.replace("/", ".")
-        if (v.field.declaringClass?.name == className) {
-            if (affectedVarResult?.sourceFields?.contains(v.field.name) == true) {
-                for (labelTag in v.field.tags.filterIsInstance<LabelTag>()) {
-                    analyzer.addEdge(affectedVarResult.label, labelTag.label)
-                }
-            }
-        }
+//        if (v.field.declaringClass?.name == className) {
+//            if (affectedVarResult?.sourceFields?.contains(v.field.name) == true) {
+//                for (labelTag in v.field.tags.filterIsInstance<LabelTag>()) {
+//                    analyzer.addEdge(affectedVarResult.label, labelTag.label)
+//                }
+//            }
+//        }
     }
 
     override fun caseCastExpr(v: CastExpr) {

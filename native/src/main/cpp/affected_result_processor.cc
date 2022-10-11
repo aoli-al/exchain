@@ -146,7 +146,10 @@ jint AffectedResultProcessor::GetCorrespondingTaintObjectSlot(int slot) {
 void AffectedResultProcessor::ProcessAffectedVars() {
     PLOG_INFO << "Start processing affected variables!";
     auto affected_vars_field_id =
-        jni_->GetFieldID(result_class_, "affectedVars", "[I");
+        jni_->GetFieldID(result_class_, "affectedLocalIndex", "[I");
+    if (affected_vars_field_id == 0) {
+        PLOG_ERROR << "Affected vars field ID is NULL!";
+    }
     jintArray affected_vars =
         (jintArray)jni_->GetObjectField(result_, affected_vars_field_id);
 

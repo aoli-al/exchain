@@ -1,0 +1,12 @@
+.decl Var_DeclaringMethod(v: symbol, m: symbol)
+  .input Var_DeclaringMethod(IO="file", filename="Var-DeclaringMethod.facts", delimiter="\t")
+
+.decl VarPointsTo(c1: symbol, h: symbol, c2: symbol, v: symbol)
+  .input VarPointsTo(IO="file", filename="VarPointsTo.csv", delimiter="\t")
+
+
+.decl Temp(v: symbol, h: symbol)
+  Temp(v, h) :-
+    VarPointsTo(_, h, _, v),
+    Var_DeclaringMethod(v, "<al.aoli.exchain.demo.DataFlowTest: java.lang.String scene1(al.aoli.exchain.demo.DataFlowTest$Dummy)>").
+.output Temp

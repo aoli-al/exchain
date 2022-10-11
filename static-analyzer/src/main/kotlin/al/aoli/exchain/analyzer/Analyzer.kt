@@ -24,32 +24,32 @@ class Analyzer(val affectedVarResults: List<AffectedVarResult>) {
     }
 
     fun process() {
-        for (affectedVarResult in affectedVarResults) {
-            val className = affectedVarResult.clazz
-                .substring(1, affectedVarResult.clazz.length - 1)
-                .replace("/", ".")
-            if (affectedVarResult.sourceFields.isEmpty() && affectedVarResult.affectedFields.isEmpty()
-                && affectedVarResult.affectedVars.isEmpty() && affectedVarResult.sourceVars.isEmpty()) continue
-            Scene.v().forceResolve(className, SootClass.BODIES)
-            val clazz = Scene.v().getSootClass(className)
-            clazz.setApplicationClass()
-            Scene.v().loadNecessaryClasses()
-            val name = affectedVarResult.method.split("(")[0]
-            val paramTypes = getParamTypes("(" + affectedVarResult.method.split("(")[1])
-            val method = try {
-                clazz.getMethod(name, paramTypes)
-            } catch (e: AmbiguousMethodException) {
-                logger.warn("Failed to get method: $name", e)
-                continue
-            }
-            for (affectedField in affectedVarResult.affectedFields) {
-                val key = "$className.$affectedField"
-                fieldTaints
-                    .getOrPut(key) { mutableSetOf() }
-                    .add(affectedVarResult.label)
-            }
-            propagateAffectedVars(method, affectedVarResult)
-        }
+//        for (affectedVarResult in affectedVarResults) {
+//            val className = affectedVarResult.clazz
+//                .substring(1, affectedVarResult.clazz.length - 1)
+//                .replace("/", ".")
+//            if (affectedVarResult.sourceFields.isEmpty() && affectedVarResult.affectedFields.isEmpty()
+//                && affectedVarResult.affectedVars.isEmpty() && affectedVarResult.sourceVars.isEmpty()) continue
+//            Scene.v().forceResolve(className, SootClass.BODIES)
+//            val clazz = Scene.v().getSootClass(className)
+//            clazz.setApplicationClass()
+//            Scene.v().loadNecessaryClasses()
+//            val name = affectedVarResult.method.split("(")[0]
+//            val paramTypes = getParamTypes("(" + affectedVarResult.method.split("(")[1])
+//            val method = try {
+//                clazz.getMethod(name, paramTypes)
+//            } catch (e: AmbiguousMethodException) {
+//                logger.warn("Failed to get method: $name", e)
+//                continue
+//            }
+//            for (affectedField in affectedVarResult.affectedFields) {
+//                val key = "$className.$affectedField"
+//                fieldTaints
+//                    .getOrPut(key) { mutableSetOf() }
+//                    .add(affectedVarResult.label)
+//            }
+//            propagateAffectedVars(method, affectedVarResult)
+//        }
     }
 
     fun propagateAffectedVars(method: SootMethod, affectedVarResult: AffectedVarResult) {

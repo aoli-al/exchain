@@ -38,7 +38,7 @@ object ExceptionLogger {
         exceptionMap[e]!![1] += numOfArrays
         exceptionMap[e]!![2] += numOfPrimitives
         exceptionMap[e]!![3] += numOfNulls
-        exceptionMap[e]!![4] += affectedVarResult.affectedFields.size
+        exceptionMap[e]!![4] += affectedVarResult.affectedFieldName.size
 
         if (shouldReport) {
             exceptionStats.appendText("${e.javaClass.name}, " +

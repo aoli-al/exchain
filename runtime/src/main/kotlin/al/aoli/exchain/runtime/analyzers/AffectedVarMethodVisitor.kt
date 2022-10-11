@@ -156,50 +156,70 @@ class AffectedVarMethodVisitor(val exception: Throwable,
         }
     }
 
+    val affectedVars = mutableSetOf<Triple<Int, Int, String>>()
+    val affectedFields = mutableSetOf<Pair<Int, String>>()
+    val sourceLines = mutableSetOf<Pair<Int, SourceType>>()
 
-    val affectedVars = mutableSetOf<Int>()
-    val affectedFields = mutableSetOf<String>()
-    val sourceVars = mutableSetOf<Int>()
-    val sourceFields = mutableSetOf<String>()
-    val branchLines = mutableSetOf<Int>()
-    val affectedParams = mutableSetOf<Int>()
+    // This is not the right way to get local variable names.
+    // However, this is the implementation of Soot and we
+    // need to make it consistent.
+    // https://github.com/soot-oss/soot/blob/ea2f0c2956fda48698416dd342233f7df15b5d76/src/main/java/soot/asm/AsmMethodSource.java#L403
+    fun getLocalName(idx: Int): String {
+        for (lvn in localVariables) {
+            if (lvn.index == idx && lvn.start != lvn.end) {
+                return lvn.name
+            }
+        }
+        return "l" + idx
+    }
 
-    private fun processAffectedInsns(affectedInsns: Set<AbstractInsnNode>, frames: Array<Frame<SourceValue>>) {
-        val throwInsnFrame = frames[instructions.indexOf(throwInsn)]
+    fun getLineNumber(insn: AbstractInsnNode): Int {
+        var cur: AbstractInsnNode? = insn
+        while (cur != null && cur !is LineNumberNode) {
+            cur = cur.previous
+        }
+        if (cur == null) return -1
+        return (cur as LineNumberNode).line
+    }
+
+    fun appendAffectedFields(insn: FieldInsnNode) {
+        affectedFields.add(Pair(getLineNumber(insn), insn.name))
+    }
+
+    fun appendAffectedVars(insn: VarInsnNode) {
+        affectedVars.add(Triple(getLineNumber(insn), insn.`var`, getLocalName(insn.`var`)))
+    }
+
+    private fun processAffectedInsns(affectedInsns: Set<AbstractInsnNode>, frames: Array<Frame<SourceValue>?>) {
+        val throwInsnIndex = instructions.indexOf(throwInsn)
+        val throwInsnFrame = frames[throwInsnIndex]
         for (insn in affectedInsns) {
             val frame = frames[instructions.indexOf(insn)]
             when (insn) {
                 is MethodInsnNode -> {
                     if (insn.opcode != Opcodes.INVOKESTATIC && insn.opcode != Opcodes.INVOKEDYNAMIC) {
                         val value = try {
-                            frame.getStack(frame.stackSize - Type.getArgumentTypes(insn.desc).size - 1)
+                            frame?.getStack(frame.stackSize - Type.getArgumentTypes(insn.desc).size - 1)
                         } catch (e: IndexOutOfBoundsException) {
                             logger.error { "Processing instruction $insn failed." }
                             continue
-                        }
+                        } ?: continue
                         for (src in value.insns) {
                             val srcFrame = frames[instructions.indexOf(src)]
                             // If a method call is declared in a field the field must be from `this`.
                             if (src is FieldInsnNode && src.opcode == Opcodes.GETFIELD && !isStatic) {
-                                val fieldValue = srcFrame.getStack(srcFrame.stackSize - 1)
+                                val fieldValue = srcFrame?.getStack(srcFrame.stackSize - 1) ?: continue
                                 if (fieldValue.insns.size != 1) continue
                                 val fieldSrc = fieldValue.insns.first()
                                 if (fieldSrc is VarInsnNode && fieldSrc.opcode == Opcodes.ALOAD && fieldSrc.`var` == 0) {
-                                    affectedFields.add(src.name)
-                                    if (insn == throwInsn) {
-                                        sourceFields.add(src.name)
-                                    }
+                                    appendAffectedFields(src)
                                 }
-                                srcFrame.push(fieldValue)
                             }
                             // If a method call is from a local object, check if the object is on the stack.
                             if (src is VarInsnNode && src.opcode == Opcodes.ALOAD) {
                                 try {
-                                    if (throwInsnFrame.getLocal(src.`var`) == srcFrame.getLocal(src.`var`)) {
-                                        if (insn == throwInsn) {
-                                            sourceVars.add(src.`var`)
-                                        }
-                                        affectedVars.add(src.`var`)
+                                    if (throwInsnFrame?.getLocal(src.`var`) == srcFrame?.getLocal(src.`var`)) {
+                                        appendAffectedVars(src)
                                     }
                                 } catch (e: IndexOutOfBoundsException) {
                                     logger.info { "Local object is not on the stack!" }
@@ -211,49 +231,29 @@ class AffectedVarMethodVisitor(val exception: Throwable,
                 is FieldInsnNode -> {
                     if (insn.opcode == Opcodes.PUTFIELD) {
                         val objRef = try {
-                            frame.getStack(frame.stackSize - 2)
+                            frame?.getStack(frame.stackSize - 2)
                         } catch (e: IndexOutOfBoundsException) {
                             logger.error { "Processing instruction $insn failed. Error: $e" }
                             continue
-                        }
+                        } ?: continue
                         for (src in objRef.insns) {
                             if (src is VarInsnNode) {
                                 if (src.`var` == 0 && !isStatic) {
-                                    affectedFields.add(insn.name)
-                                    if (insn == throwInsn) {
-                                        sourceVars.add(src.`var`)
-                                    }
+                                    appendAffectedFields(insn)
                                 }
                                 else {
-                                    affectedVars.add(src.`var`)
-                                }
-                            }
-                        }
-                    }
-                    if (insn.opcode == Opcodes.GETFIELD) {
-                        val objRef = try {
-                            frame.getStack(frame.stackSize - 1)
-                        } catch (e: IndexOutOfBoundsException) {
-                            logger.error { "Processing instruction $insn failed. Error $e" }
-                            continue
-                        }
-                        for (src in objRef.insns) {
-                            if (src is VarInsnNode) {
-                                if (src.`var` == 0 && !isStatic) {
-                                    if (insn == throwInsn) {
-                                        sourceVars.add(src.`var`)
-                                    }
+                                    appendAffectedVars(src)
                                 }
                             }
                         }
                     }
                 }
                 is VarInsnNode -> {
-                    if (catchInsn == null) continue
+                    if (catchInsn == null || throwInsnFrame == null) continue
                     when (insn.opcode) {
                         Opcodes.ISTORE, Opcodes.LSTORE, Opcodes.FSTORE, Opcodes.DSTORE, Opcodes.ASTORE -> {
                             if (insn.`var` < throwInsnFrame.locals) {
-                                affectedVars.add(insn.`var`)
+                                appendAffectedVars(insn)
                             }
                         }
                     }
@@ -265,10 +265,11 @@ class AffectedVarMethodVisitor(val exception: Throwable,
     }
 
     fun findDirectBranch(analyzer: AffectedVarAnalyser<SourceValue>) {
-        if (throwInsn?.opcode == Opcodes.ATHROW || throwInsn is MethodInsnNode) {
+        if (exception !is NullPointerException &&
+            exception !is IndexOutOfBoundsException) {
             var currentInsn = throwInsn
             while (analyzer.instructionPredecessors[currentInsn]?.size == 1 &&
-                    currentInsn !is JumpInsnNode) {
+                currentInsn !is JumpInsnNode) {
                 currentInsn = analyzer.instructionPredecessors[currentInsn]?.first()
             }
             if (currentInsn !is JumpInsnNode && analyzer.instructionPredecessors[currentInsn]?.size == 2) {
@@ -279,15 +280,15 @@ class AffectedVarMethodVisitor(val exception: Throwable,
                 }
             }
             if (currentInsn is JumpInsnNode) {
-                while (currentInsn !is LineNumberNode && analyzer.instructionPredecessors[currentInsn]?.size == 1) {
-                    currentInsn = analyzer.instructionPredecessors[currentInsn]?.first()
-                }
-                if (currentInsn is LineNumberNode) {
-                    branchLines.add(currentInsn.line)
-                }
+                sourceLines.add(Pair(getLineNumber(currentInsn), SourceType.JUMP))
             }
+        } else if (throwInsn is FieldInsnNode) {
+            sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.JUMP))
+        } else if (throwInsn is MethodInsnNode) {
+            sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.INVOKE))
         }
     }
+
 
     override fun visitEnd() {
         super.visitEnd()
@@ -317,7 +318,7 @@ class AffectedVarMethodVisitor(val exception: Throwable,
             }
             affectedInsns.add(throwInsn!!)
             processAffectedInsns(affectedInsns, analyzer.frames)
-            if (isThrowInsn && exception !is NullPointerException && exception !is IndexOutOfBoundsException) {
+            if (isThrowInsn) {
                 findDirectBranch(analyzer)
             }
         } else {
