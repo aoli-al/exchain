@@ -18,20 +18,29 @@ public class Utils {
         List<Object> locals = new ArrayList<>();
         for (Type argumentType : argumentTypes) {
             switch (argumentType.getSort()) {
-                case Type.INT, Type.BYTE, Type.CHAR, Type.BOOLEAN, Type.SHORT -> {
+                case Type.INT:
+                case Type.BYTE :
+                case Type.CHAR:
+                case Type.BOOLEAN:
+                case Type.SHORT: {
                     locals.add(INTEGER);
+                    break;
                 }
-                case Type.LONG -> {
+                case Type.LONG: {
                     locals.add(LONG);
+                    break;
                 }
-                case Type.DOUBLE -> {
+                case Type.DOUBLE: {
                     locals.add(DOUBLE);
+                    break;
                 }
-                case Type.FLOAT -> {
+                case Type.FLOAT: {
                     locals.add(FLOAT);
+                    break;
                 }
-                default -> {
+                default: {
                     locals.add(argumentType.getInternalName());
+                    break;
                 }
             }
         }

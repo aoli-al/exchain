@@ -4,3 +4,9 @@
 [submodule "dependencies/phosphor"]
 	path = dependencies/phosphor
 	url = git@github.com:aoli-al/phosphor.git
+[submodule "dependencies/soot"]
+	path = dependencies/soot
+	url = git@github.com:aoli-al/soot.git
+[submodule "dependencies/FlowDroid"]
+	path = dependencies/FlowDroid
+	url = git@github.com:aoli-al/FlowDroid.git

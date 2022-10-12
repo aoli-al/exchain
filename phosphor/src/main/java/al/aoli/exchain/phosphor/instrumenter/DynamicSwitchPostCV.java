@@ -134,20 +134,29 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         }
         for (int i = 0; i < argumentTypes.length; i++) {
             switch (argumentTypes[i].getSort()) {
-                case Type.BOOLEAN, Type.BYTE, Type.CHAR,
-                        Type.INT, Type.SHORT ->
-                        mv.visitVarInsn(ILOAD, i + offset);
-                case Type.LONG -> {
+                case Type.BOOLEAN:
+                case Type.BYTE:
+                case Type.CHAR:
+                case Type.INT:
+                case Type.SHORT:
+                    mv.visitVarInsn(ILOAD, i + offset);
+                    break;
+                case Type.LONG: {
                     mv.visitVarInsn(LLOAD, i + offset);
                     offset += 1;
+                    break;
                 }
-                case Type.FLOAT ->
-                        mv.visitVarInsn(FLOAD, i + offset);
-                case Type.DOUBLE -> {
+                case Type.FLOAT:
+                    mv.visitVarInsn(FLOAD, i + offset);
+                    break;
+                case Type.DOUBLE: {
                     mv.visitVarInsn(DLOAD, i + offset);
                     offset += 1;
+                    break;
                 }
-                default -> mv.visitVarInsn(ALOAD, i + offset);
+                default:
+                    mv.visitVarInsn(ALOAD, i + offset);
+                    break;
 
             }
         }
@@ -156,19 +165,28 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         Type returnType = Type.getReturnType(descriptor);
 
         switch (returnType.getSort()) {
-            case Type.BOOLEAN, Type.BYTE, Type.CHAR,
-                    Type.INT, Type.SHORT ->
-                    mv.visitInsn(IRETURN);
-            case Type.LONG ->
-                    mv.visitInsn(LRETURN);
-            case Type.FLOAT ->
-                    mv.visitInsn(FRETURN);
-            case Type.DOUBLE ->
-                    mv.visitInsn(DRETURN);
-            case Type.VOID ->
-                    mv.visitInsn(RETURN);
-            default -> mv.visitInsn(ARETURN);
-
+            case Type.BOOLEAN:
+            case Type.BYTE:
+            case Type.CHAR:
+            case Type.INT:
+            case Type.SHORT:
+                mv.visitInsn(IRETURN);
+                break;
+            case Type.LONG:
+                mv.visitInsn(LRETURN);
+                break;
+            case Type.FLOAT:
+                mv.visitInsn(FRETURN);
+                break;
+            case Type.DOUBLE:
+                mv.visitInsn(DRETURN);
+                break;
+            case Type.VOID:
+                mv.visitInsn(RETURN);
+                break;
+            default:
+                mv.visitInsn(ARETURN);
+                break;
         }
     }
 
@@ -197,9 +215,13 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         }
         for (Type type: Type.getArgumentTypes(descriptor)) {
             switch (type.getSort()) {
-                case Type.DOUBLE, Type.LONG ->
+                case Type.DOUBLE:
+                case Type.LONG:
                         locals += 2;
-                default -> locals += 1;
+                        break;
+                default:
+                    locals += 1;
+                    break;
             }
         }
         mv.visitMaxs(Integer.max(locals, 1), locals);

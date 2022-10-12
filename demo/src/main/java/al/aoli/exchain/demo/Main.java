@@ -31,10 +31,10 @@ public class Main {
     public static void main(String[] args)
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         DataFlowTest test = new DataFlowTest();
-        test.sceneLocal();
+//        test.sceneLocal();
 //        test.scene10();
 //        TestEnableExchainDynamically test = new TestEnableExchainDynamically();
-//        test.callScene1();
+        test.callScene1();
 //        test.test3();
 //        test.test();
 //        test.test2();

@@ -9,6 +9,8 @@ import soot.G
 import soot.Scene
 import soot.SootClass
 import soot.jimple.infoflow.Infoflow
+import soot.jimple.infoflow.InfoflowConfiguration
+import soot.jimple.infoflow.InfoflowConfiguration.StaticFieldTrackingMode
 import soot.options.Options
 import java.io.File
 
@@ -42,7 +44,7 @@ fun loadAndProcess(args: List<String>) {
     }
 
     val infoFlow = Infoflow("", false, null)
-    infoFlow.setThrowExceptions(true)
+    infoFlow.setThrowExceptions(false)
     infoFlow.setSootConfig { options, configs ->
         options.set_allow_phantom_refs(true)
         options.set_prepend_classpath(true)
@@ -53,8 +55,13 @@ fun loadAndProcess(args: List<String>) {
         options.setPhaseOption("jb", "use-original-names:true")
         options.set_ignore_classpath_errors(true)
         options.set_drop_bodies_after_load(false)
-//        options.set_ignore_resolution_errors(true)
+        options.set_ignore_resolution_errors(true)
         options.set_ignore_resolving_levels(true)
+        configs.enableExceptionTracking = false
+        configs.staticFieldTrackingMode = StaticFieldTrackingMode.ContextFlowInsensitive
+        configs.solverConfiguration.dataFlowSolver = InfoflowConfiguration.DataFlowSolver.GarbageCollecting
+        configs.pathConfiguration.pathBuildingAlgorithm = InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
+
     }
 
     val libPath = libs.joinToString(File.pathSeparator)
@@ -62,18 +69,24 @@ fun loadAndProcess(args: List<String>) {
     val exceptionGraph = mutableMapOf<Int, MutableSet<Int>>()
 
     for (result in results) {
-        Scene.v().forceResolve(result.getSootClassName(), SootClass.BODIES)
-        val clazz = Scene.v().getSootClass(result.getSootClassName())
-        clazz.setApplicationClass()
-        Scene.v().loadNecessaryClasses()
         sourceVarAnalyzer.disabledLabels.add(result.label)
+
+        if (result.affectedLocalName.isEmpty() && result.affectedFieldName.isEmpty()) continue
+        logger.info("Start analysing ${result.label}.")
+//        Scene.v().forceResolve(result.getSootClassName(), SootClass.BODIES)
+//        val clazz = Scene.v().getSootClass(result.getSootClassName())
+//        clazz.setApplicationClass()
+//        Scene.v().loadNecessaryClasses()
         try {
-             val method = clazz.getMethod(result.getSootMethodSubsignature())
-            infoFlow.computeInfoflow(libPath, libPath, method.signature, SourceSinkManager(method, result, sourceVarAnalyzer))
+//            val method = clazz.getMethod(result.getSootMethodSubsignature())
+            infoFlow.computeInfoflow(libPath, libPath, result.getSootMethodSignature(),
+                SourceSinkManager(result.getSootMethodSignature(), result, sourceVarAnalyzer))
         } catch (e: RuntimeException) {
             logger.warn("Failed to get method: ${result.getSootMethodSubsignature()}", e)
+            infoFlow.config.sootIntegrationMode = InfoflowConfiguration.SootIntegrationMode.UseExistingCallgraph
             continue
         }
+        infoFlow.config.sootIntegrationMode = InfoflowConfiguration.SootIntegrationMode.UseExistingCallgraph
 
         if (!infoFlow.results.isEmpty) {
             for (sourceSinkInfo in infoFlow.results.results) {
@@ -81,6 +94,7 @@ fun loadAndProcess(args: List<String>) {
                 if (definition is LabeledSinkDefinition) {
                     for (i in definition.label) {
                         exceptionGraph.getOrPut(i) { mutableSetOf() }.add(result.label)
+                        println("Dependency ${i} --------> ${result.label}")
                     }
                 }
             }

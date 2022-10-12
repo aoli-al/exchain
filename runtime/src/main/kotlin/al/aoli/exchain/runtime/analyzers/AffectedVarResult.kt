@@ -43,7 +43,7 @@ class AffectedVarResult(var label: Int, val clazz: String, val method: String,
         }
         currentOffset += 1;
         val returnType = stringToType(method.substring(currentOffset))
-        return "$returnType $methodName(${parameterTypes.joinToString(".")})"
+        return "$returnType $methodName(${parameterTypes.joinToString(",")})"
     }
 
     fun stringToType(signature: String): String {
