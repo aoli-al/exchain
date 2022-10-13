@@ -26,5 +26,6 @@ test {
 }
 
 run {
+    jvmArgs "-Xmx32g"
     mainClassName = "al.aoli.exchain.analyzer.MainKt"
 }
