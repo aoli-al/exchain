@@ -175,7 +175,7 @@ void AffectedResultProcessor::ProcessAffectedVars() {
                  << " start: " << entry->start_location
                  << " length: " << entry->length;
         std::string signature = entry->signature;
-        if (signature.contains("Ledu/columbia/cs")) {
+        if (signature.starts_with("Ledu/columbia/cs")) {
             // Ignore taint objects.
             continue;
         }
