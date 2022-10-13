@@ -21,7 +21,7 @@ class SourceSinkManager(val methodSignature: String, val result: AffectedVarResu
     }
 
     override fun getSourceInfo(stmt: Stmt, manager: InfoflowManager): SourceInfo? {
-        val currentMethod = manager.icfg.getMethodOf(stmt)
+        val currentMethod = manager.icfg.getMethodOf(stmt) ?: return null
         if (currentMethod.signature == methodSignature) {
             if (stmt is DefinitionStmt) {
                 val analyzer = AffectedVarAnalyzer(result, currentMethod, stmt)
@@ -36,7 +36,7 @@ class SourceSinkManager(val methodSignature: String, val result: AffectedVarResu
     }
 
     override fun getSinkInfo(stmt: Stmt, manager: InfoflowManager, ap: AccessPath?): SinkInfo? {
-        val currentMethod = manager.icfg.getMethodOf(stmt)
+        val currentMethod = manager.icfg.getMethodOf(stmt) ?: return null
         val result = sourceVarAnalyzer.process(stmt, currentMethod)
         if (result != null) {
             return SinkInfo(LabeledSinkDefinition(SootMethodAndClass(currentMethod), result))

@@ -57,11 +57,12 @@ fun loadAndProcess(args: List<String>) {
         options.set_drop_bodies_after_load(false)
         options.set_ignore_resolution_errors(true)
         options.set_ignore_resolving_levels(true)
+        configs.memoryThreshold = 0.3
         configs.enableExceptionTracking = false
         configs.staticFieldTrackingMode = StaticFieldTrackingMode.ContextFlowInsensitive
         configs.solverConfiguration.dataFlowSolver = InfoflowConfiguration.DataFlowSolver.GarbageCollecting
         configs.pathConfiguration.pathBuildingAlgorithm = InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
-
+        configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.None
     }
 
     val libPath = libs.joinToString(File.pathSeparator)
@@ -73,12 +74,7 @@ fun loadAndProcess(args: List<String>) {
 
         if (result.affectedLocalName.isEmpty() && result.affectedFieldName.isEmpty()) continue
         logger.info("Start analysing ${result.label}.")
-//        Scene.v().forceResolve(result.getSootClassName(), SootClass.BODIES)
-//        val clazz = Scene.v().getSootClass(result.getSootClassName())
-//        clazz.setApplicationClass()
-//        Scene.v().loadNecessaryClasses()
         try {
-//            val method = clazz.getMethod(result.getSootMethodSubsignature())
             infoFlow.computeInfoflow(libPath, libPath, result.getSootMethodSignature(),
                 SourceSinkManager(result.getSootMethodSignature(), result, sourceVarAnalyzer))
         } catch (e: RuntimeException) {
