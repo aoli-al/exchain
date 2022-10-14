@@ -20,6 +20,10 @@ class AffectedVarResult(var label: Int, val clazz: String, val method: String,
             .replace("/", ".")
     }
 
+    fun getSignature(): String {
+        return "$label:${getSootMethodSignature()}"
+    }
+
     fun getSootMethodSignature(): String {
         return "<${getSootClassName()}: ${getSootMethodSubsignature()}>"
     }

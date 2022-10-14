@@ -67,10 +67,17 @@ fun loadAndProcess(args: List<String>) {
 
     val libPath = libs.joinToString(File.pathSeparator)
     val sourceVarAnalyzer = SourceVarAnalyzer(results)
-    val exceptionGraph = mutableMapOf<Int, MutableSet<Int>>()
+    val dependencyFile = File("$dataDirectory/$path/dependency.json")
+    val dependencies =
+        if (dependencyFile.exists()) {
+            Gson().fromJson(dependencyFile.readText(), Dependencies::class.java)
+        } else {
+            Dependencies()
+        }
 
     for (result in results) {
         sourceVarAnalyzer.disabledLabels.add(result.label)
+        if (dependencies.processed.contains(result.getSignature())) continue
 
         if (result.affectedLocalName.isEmpty() && result.affectedFieldName.isEmpty()) continue
         logger.info("Start analysing ${result.label}.")
@@ -83,20 +90,21 @@ fun loadAndProcess(args: List<String>) {
             continue
         }
         infoFlow.config.sootIntegrationMode = InfoflowConfiguration.SootIntegrationMode.UseExistingCallgraph
+        dependencies.processed.add(result.getSignature())
 
         if (!infoFlow.results.isEmpty) {
             for (sourceSinkInfo in infoFlow.results.results) {
                 val definition = sourceSinkInfo.o1.definition
                 if (definition is LabeledSinkDefinition) {
                     for (i in definition.label) {
-                        exceptionGraph.getOrPut(i) { mutableSetOf() }.add(result.label)
+                        dependencies.exceptionGraph.getOrPut(i) { mutableSetOf() }.add(result.label)
                         println("Dependency ${i} --------> ${result.label}")
                     }
                 }
             }
         }
+        File("$dataDirectory/$path/dependency.json").writeText(Gson().toJson(dependencies))
     }
-    File("$dataDirectory/$path/dependency.json").writeText(Gson().toJson(exceptionGraph))
 }
 
 fun main(argv: Array<String>) {
