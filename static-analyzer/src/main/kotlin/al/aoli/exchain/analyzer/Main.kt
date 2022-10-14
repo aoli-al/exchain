@@ -63,6 +63,7 @@ fun loadAndProcess(args: List<String>) {
         configs.solverConfiguration.dataFlowSolver = InfoflowConfiguration.DataFlowSolver.GarbageCollecting
         configs.pathConfiguration.pathBuildingAlgorithm = InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
         configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.None
+        configs.dataFlowTimeout = 10 * 60
     }
 
     val libPath = libs.joinToString(File.pathSeparator)
