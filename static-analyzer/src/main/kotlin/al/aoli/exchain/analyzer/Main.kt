@@ -59,9 +59,12 @@ fun loadAndProcess(args: List<String>) {
         options.set_ignore_resolving_levels(true)
         configs.memoryThreshold = 0.3
         configs.enableExceptionTracking = false
-        configs.staticFieldTrackingMode = StaticFieldTrackingMode.ContextFlowInsensitive
+        configs.enableArrayTracking = false
+        configs.flowSensitiveAliasing = false
+        configs.staticFieldTrackingMode = StaticFieldTrackingMode.None
         configs.solverConfiguration.dataFlowSolver = InfoflowConfiguration.DataFlowSolver.GarbageCollecting
         configs.pathConfiguration.pathBuildingAlgorithm = InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
+        configs.pathConfiguration.pathReconstructionTimeout = 2 * 60
         configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.None
         configs.dataFlowTimeout = 10 * 60
     }
