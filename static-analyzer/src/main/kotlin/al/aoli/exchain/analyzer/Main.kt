@@ -34,7 +34,7 @@ fun loadAndProcess(args: List<String>) {
     val libs = setupSoot(args[0])
     val dataDirectory = args[1]
 
-    val path = File("$dataDirectory/latest").readText()
+    val path = File("$dataDirectory/latest").readText().trim()
     val data = File("$dataDirectory/$path/affected-var-results.json").readText()
     val results = mutableListOf<AffectedVarResult>()
     for (s in data.split("\n")) {
