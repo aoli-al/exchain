@@ -6,11 +6,10 @@ title: Meeting Notes
 
 ## Progress
 
-- Goal: Enabling taint propagation dynamically
-- Idea: add if branch in each method
+-   Goal: Enabling taint propagation dynamically
+-   Idea: add if branch in each method
 
-
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 // origin version
 public class Foo {
     public foo() {
@@ -30,19 +29,19 @@ public class Foo {
 }
 ```
 
-
-- Implementation is done.
-- We instrument Fineract and tested the implementation using integration tests.
--  All tests are passed (with/without taint propagation).
-    - Overhead measurement is pending.
-- Enable taint propagation in the middle of program execution makes the application crash!
-
+-   Implementation is done.
+-   We instrument Fineract and tested the implementation using
+    integration tests.
+-   All tests are passed (with/without taint propagation).
+    -   Overhead measurement is pending.
+-   Enable taint propagation in the middle of program execution makes
+    the application crash!
 
 ## Examples
 
 Origin Program:
 
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 public class Foo {
     Object a;
     public Foo() {
@@ -56,7 +55,7 @@ public class Foo {
 
 Instrumented Program:
 
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 public class Foo {
     Object a;
     Taint a_taint;
@@ -71,7 +70,7 @@ public class Foo {
 
 Problem:
 
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 void run() {
     tracingEnabled = false;
     Foo foo = new Foo();
@@ -79,17 +78,18 @@ void run() {
     foo.test();
 }
 ```
+
 ## Ideas
 
-- What if we only taint objects
-    - Performance impact is low
-    - We cannot handle:
-        - local null pointers
-        - local variables with primitive types
-
+-   What if we only taint objects
+    -   Performance impact is low
+    -   We cannot handle:
+        -   local null pointers
+        -   local variables with primitive types
 
 Origin:
-```{.java .numberLines .lineAnchors}
+
+``` {.java .numberLines .lineAnchors}
 public class Foo {
     void localVars() {
         int a = 0;
@@ -100,7 +100,8 @@ public class Foo {
 ```
 
 Fully Instrumented:
-```{.java .numberLines .lineAnchors}
+
+``` {.java .numberLines .lineAnchors}
 public class Foo {
     Taint thisTag;
     void localVars() {
@@ -116,7 +117,8 @@ public class Foo {
 ```
 
 Partially Instrumented:
-```{.java .numberLines .lineAnchors}
+
+``` {.java .numberLines .lineAnchors}
 public class Foo {
     Taint thisTag;
     void localVars() {
@@ -130,10 +132,9 @@ public class Foo {
 
 Case Study:
 
-
 Can handle partially:
 
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 void setup(HTTPClient client, Request r) {
     Cert cert = null;
     try {
@@ -159,7 +160,8 @@ void sendRequest(HTTPClient client, Request r) {
 ```
 
 Cannot handle:
-```{.java .numberLines .lineAnchors}
+
+``` {.java .numberLines .lineAnchors}
 void sendRequest(Request r) {
     int retry = 0;
     while (retry < MAX_RETRY) {
@@ -178,10 +180,9 @@ void sendRequest(Request r) {
 }
 ```
 
-
 More complicated:
 
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 class Loader {
     int totalCommits = 0;
     void recoverRequest(Checkpoint checkpoints) {
@@ -213,70 +214,79 @@ class Loader {
 ```
 
 Two challenges:
-- Identify branch condition: `id != totalCommits+1`
-- totalCommits is passed as a local variable and the taint is missing.
 
+-   Identify branch condition: `id != totalCommits+1`
+-   totalCommits is passed as a local variable and the taint is missing.
 
 # Sep 26
-
 
 ## Revisit
 
 Identify the causal relationships among exceptions.
 
-- Input: source code/bytecode of the system
-- Output: Causality chain of system internal exceptions
+-   Input: source code/bytecode of the system
+-   Output: Causality chain of system internal exceptions
 
 ## Related Works
 
-- Use logs to disambiguate call paths of executions. [[OSDI 14](http://log20.dsrg.utoronto.ca/log20_sosp17_paper.pdf),
-[ATC 18](https://www.usenix.org/system/files/conference/atc18/atc18-luo.pdf), [MICRO-96](https://web.eecs.umich.edu/~weimerw/2018-481/readings/pathprofile.pdf)]
-    - Focus on execution trace reconstruction when failure happens.
-    - Different output: Execution traces are not sufficient to debug the root cause
-    of the system when the exceptions are thrown across requests.
-- Find logs that are related to root cause of failures. [[MLSys 22](http://web.cs.ucla.edu/~dogga/publications/mlsys22.pdf)]
-    - Use machine learning to generate __queries__ for finding root causes
-    in distributed systems.
-    - Different output: User may not log sufficient data
-    to help developers to identify
-        - Counter point: what if we log all exceptions automatically, can we use such techniques to identify all exceptions that are related to the failure?
-        - Such tool cannot tell the causality among exceptions.
+-   Use logs to disambiguate call paths of executions. \[[OSDI
+    14](http://log20.dsrg.utoronto.ca/log20_sosp17_paper.pdf), [ATC
+    18](https://www.usenix.org/system/files/conference/atc18/atc18-luo.pdf),
+    [MICRO-96](https://web.eecs.umich.edu/~weimerw/2018-481/readings/pathprofile.pdf)\]
 
-- Distributed tracing. [[NSDI 07](https://www.usenix.org/conference/nsdi-07/x-trace-pervasive-network-tracing-framework), [OSDI 13](https://dl.acm.org/doi/10.1145/2815400.2815415)]
-    - Different problem: try to construct the causal paths
-    in network protocols.
-    - They complement each other.
+    -   Focus on execution trace reconstruction when failure happens.
+    -   Different output: Execution traces are not sufficient to debug
+        the root cause of the system when the exceptions are thrown
+        across requests.
 
-- Monitoring. [[NSDI 20](https://www.cs.jhu.edu/~huang/paper/omegagen-nsdi20-preprint.pdf)]
-    - Monitor all sensitive API calls in applications.
-    - High overhead.
-    - Do not show the causality among exceptions.
+-   Find logs that are related to root cause of failures. \[[MLSys
+    22](http://web.cs.ucla.edu/~dogga/publications/mlsys22.pdf)\]
 
-- https://valgrind.org/docs/origin-tracking2007.pdf
+    -   Use machine learning to generate **queries** for finding root
+        causes in distributed systems.
+    -   Different output: User may not log sufficient data to help
+        developers to identify
+        -   Counter point: what if we log all exceptions automatically,
+            can we use such techniques to identify all exceptions that
+            are related to the failure?
+        -   Such tool cannot tell the causality among exceptions.
 
+-   Distributed tracing. \[[NSDI
+    07](https://www.usenix.org/conference/nsdi-07/x-trace-pervasive-network-tracing-framework),
+    [OSDI 13](https://dl.acm.org/doi/10.1145/2815400.2815415)\]
 
+    -   Different problem: try to construct the causal paths in network
+        protocols.
+    -   They complement each other.
+
+-   Monitoring. \[[NSDI
+    20](https://www.cs.jhu.edu/~huang/paper/omegagen-nsdi20-preprint.pdf)\]
+
+    -   Monitor all sensitive API calls in applications.
+    -   High overhead.
+    -   Do not show the causality among exceptions.
+
+-   https://valgrind.org/docs/origin-tracking2007.pdf
 
 ## High Level Design
 
-
 Given an exception $e$ we want to compute:
 
-- source variables $S_e$: a set of variables that cause
-the exception $e$.
-- affected variables $A_e$: a set variables whose values are affected
-by the exception $e$.
-- The propagation of $A_e$: how affected variables affect the state
-of the program.
+-   source variables $S_e$: a set of variables that cause the exception
+    $e$.
+-   affected variables $A_e$: a set variables whose values are affected
+    by the exception $e$.
+-   The propagation of $A_e$: how affected variables affect the state of
+    the program.
 
 We define:
-- Exception $e_1$ is caused by exception $e_2$ if and only if
-the intersection of $S_{e_1}$ and $A_{e_2}$ is not empty.
 
+-   Exception $e_1$ is caused by exception $e_2$ if and only if the
+    intersection of $S_{e_1}$ and $A_{e_2}$ is not empty.
 
 Example:
 
-
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 void setup(HTTPClient client, Request r) {
     Cert cert = null;
     try {
@@ -300,35 +310,33 @@ void sendRequest(HTTPClient client, Request r) {
 }
 ```
 
-- RuntimeException:16:
-    - source var: `this` or none
-    - affected var: `cert`
-- NullPointerException:10
-    - source var: `cert`
-    - affected var: `client`
-- RequestException:20
-    - source var: `client`, `r`
-    - affected var: `client`
-
+-   RuntimeException:16:
+    -   source var: `this` or none
+    -   affected var: `cert`
+-   NullPointerException:10
+    -   source var: `cert`
+    -   affected var: `client`
+-   RequestException:20
+    -   source var: `client`, `r`
+    -   affected var: `client`
 
 ## Compute Source Variables $S_e$
 
 Algorithm:
 
-- If the exception is NPE
-    - Callee is the source variable
-- If the exception is OutOfBoundException
-    - Callee and arguments are the source variables
-- If the exception is an AssertError or the exception is
-from a throw instruction
-    - Identify the closest branch instruction and its
-    variables are source variables.
-    - This is a heuristic
-
+-   If the exception is NPE
+    -   Callee is the source variable
+-   If the exception is OutOfBoundException
+    -   Callee and arguments are the source variables
+-   If the exception is an AssertError or the exception is from a throw
+    instruction
+    -   Identify the closest branch instruction and its variables are
+        source variables.
+    -   This is a heuristic
 
 Example:
 
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 class Loader {
     int totalCommits = 0;
 
@@ -352,33 +360,32 @@ class Loader {
 }
 ```
 
-The source
-The source variables of `RuntimeException` are `id` and `totalCommits`.
-
+The source The source variables of `RuntimeException` are `id` and
+`totalCommits`.
 
 ## Compute Affected Variables $A_e$
 
 Algorithm:
 
-- Given an exception $e$. Let $A_e\leftarrow \emptyset$
-- for each function in the stack trace:
-    - Run the data flow analysis $DF_1$ to compute the source values $SV_1$
-    of each variable without exception path.
-    - Run the data flow analysis $DF_2$ to compute the source values $SV_2$
-    of each variable with exception path.
-    - For instructions that are only executed in $DF_1$ and $DF_2$
-        - If the instruction updates a variable $v$ and $\ SV_1[\![v]\!] \not=SV_1[\![v]\!]$:
-            - $A_e\leftarrow A_e\cup v$
-        - If the instruction calls a method of a variable $v$:
-            - $A_e\leftarrow A_e\cup v$
-    - If the exception is caught in the current function then break
+-   Given an exception $e$. Let $A_e\leftarrow \emptyset$
+-   for each function in the stack trace:
+    -   Run the data flow analysis $DF_1$ to compute the source values
+        $SV_1$ of each variable without exception path.
+    -   Run the data flow analysis $DF_2$ to compute the source values
+        $SV_2$ of each variable with exception path.
+    -   For instructions that are only executed in $DF_1$ and $DF_2$
+        -   If the instruction updates a variable $v$ and
+            $\ SV_1[\![v]\!] \not=SV_1[\![v]\!]$:
+            -   $A_e\leftarrow A_e\cup v$
+        -   If the instruction calls a method of a variable $v$:
+            -   $A_e\leftarrow A_e\cup v$
+    -   If the exception is caught in the current function then break
 
 Example:
 
-Let's only consider the `RuntimeException` thrown by `getCert`
-method.
+Let's only consider the `RuntimeException` thrown by `getCert` method.
 
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 void setup(HTTPClient client, Request r) {
     Cert cert = null;                       // cert = null
     try {
@@ -388,10 +395,10 @@ void setup(HTTPClient client, Request r) {
     }
 }
 ```
-- Without exception line 2, 4 are executed.
-- With exception line 2, 6 are executed.
-- Affected vars are `cert` and `LOG`.
 
+-   Without exception line 2, 4 are executed.
+-   With exception line 2, 6 are executed.
+-   Affected vars are `cert` and `LOG`.
 
 ## Compute the Propagation of $A_e$
 
@@ -402,11 +409,11 @@ offline.
 
 Challenges 1: what is the entry point of each program:
 
-- Pattern 1:
-    - Exceptions happen in the same thread, same execution
-    - Exceptions happen in different threads, different execution
+-   Pattern 1:
+    -   Exceptions happen in the same thread, same execution
+    -   Exceptions happen in different threads, different execution
 
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 class Loader {
     int totalCommits = 0;
     // Entry point 1
@@ -438,10 +445,9 @@ class Loader {
 }
 ```
 
-
 Challenge 2: how to model collections?
 
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 void tes1(Object[] a) {
     try {
         throw new Exception();
@@ -457,7 +463,7 @@ Other implementation level challenges:
 
 Challenge 3: how to model function calls?
 
-```{.java .numberLines .lineAnchors}
+``` {.java .numberLines .lineAnchors}
 void foo(Object a) {
     if (condition) {
         foo(a);
@@ -467,223 +473,260 @@ void foo(Object a) {
     // ...
 }
 ```
+
 Algorithm
 
-- Lattice: a set of exception labels.
-    - Top: all exceptions
-    - Bot: empty set
+-   Lattice: a set of exception labels.
 
+    -   Top: all exceptions
+    -   Bot: empty set
 
-- Pros:
-    - The algorithm is performed offline. Overhead is low.
-- Cons:
-    - False positives
+-   Pros:
 
+    -   The algorithm is performed offline. Overhead is low.
+
+-   Cons:
+
+    -   False positives
 
 ### Dynamic Taint Analysis
 
 Idea: taint all affected variables $A$ with exception ID.
 
-- Pros
-    - Available taint analysis framework
-- Cons
-    - High overhead (> 400%)
-
+-   Pros
+    -   Available taint analysis framework
+-   Cons
+    -   High overhead (\> 400%)
 
 # Oct 2
 
-- Analyzed Hadoop HDFS-4128
-    - SecondaryNameNode is a background service that runs periodically
-    - By default, it runs the checkout method every ~30min.
-    - There is an execution where an exception makes the service into bad stats.
-    - In the following execution the service crashes.
+-   Analyzed Hadoop HDFS-4128
 
-- Simulation environment:
-    - We force the SecondaryNameNode to run two consecutive checkouts.
-    - In the first execution we inject the error.
-    - In the second execution we observe the crash.
+    -   SecondaryNameNode is a background service that runs periodically
+    -   By default, it runs the checkout method every \~30min.
+    -   There is an execution where an exception makes the service into
+        bad stats.
+    -   In the following execution the service crashes.
 
-- Raw logging:
+-   Simulation environment:
 
+    -   We force the SecondaryNameNode to run two consecutive checkouts.
+    -   In the first execution we inject the error.
+    -   In the second execution we observe the crash.
+
+-   Raw logging:
+
+```{=html}
+<!-- -->
 ```
-ClassNotFoundException 11041
-FileNotFoundException 17
-IOException 24
-UnsatisfiedLinkError 1
-NoSuchMethodException 12
-NoSuchMethodError 2
-MalformedURLException 4
-ConfigurationException 1
-NoSuchFieldException 1
-NotCompliantMBeanException 18
-UnixException 327
-NoSuchFileException 133
-RuntimeException 5
-XMLEntityScanner$1 4
-UnsupportedOperationException 1
-InvocationTargetException 1
-SecurityException 2
-UnknownHostException 1
-BlockPlacementPolicy$NotEnoughReplicasException 2
-MissingResourceException 1
-EOFException 1
-InterruptedException 198
-AsynchronousCloseException 20
+    ClassNotFoundException 11041
+    FileNotFoundException 17
+    IOException 24
+    UnsatisfiedLinkError 1
+    NoSuchMethodException 12
+    NoSuchMethodError 2
+    MalformedURLException 4
+    ConfigurationException 1
+    NoSuchFieldException 1
+    NotCompliantMBeanException 18
+    UnixException 327
+    NoSuchFileException 133
+    RuntimeException 5
+    XMLEntityScanner$1 4
+    UnsupportedOperationException 1
+    InvocationTargetException 1
+    SecurityException 2
+    UnknownHostException 1
+    BlockPlacementPolicy$NotEnoughReplicasException 2
+    MissingResourceException 1
+    EOFException 1
+    InterruptedException 198
+    AsynchronousCloseException 20
+
+-   We apply the following filters:
+    -   discard exceptions that are caught inside JDK
+    -   discard exceptions that does not affect the state of the program
+        -   Exception does not affect the value of any local variables
+        -   Exception does not affect the value of global variables
+
+```{=html}
+<!-- -->
 ```
+    java.io.FileNotFoundException 8
+    java.lang.ClassNotFoundException 2
+    java.io.IOException 10
+    java.lang.NoSuchMethodException 5
+    java.net.MalformedURLException 2
+    org.apache.commons.configuration2.ex.ConfigurationException 1
+    java.nio.file.NoSuchFileException 5
+    java.lang.RuntimeException 5
+    java.lang.UnsupportedOperationException 1
+    java.lang.reflect.InvocationTargetException 1
+    java.lang.SecurityException 2
+    org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy$NotEnoughReplicasException 2
+    java.lang.InterruptedException 14
+    Total: 58
 
+-   For each exception that affects the state of the program:
 
-- We apply the following filters:
-    - discard exceptions that are caught inside JDK
-    - discard exceptions that does not affect the state of the program
-        - Exception does not affect the value of any local variables
-        - Exception does not affect the value of global variables
+    -   Affected local objects: 1.96
+    -   Affected local arrays 0.02
+    -   Affected local primitives: 0.14
+    -   Affected local objects that are null: 0.38
+    -   Affected class fields: 1.14
 
-```
-java.io.FileNotFoundException 8
-java.lang.ClassNotFoundException 2
-java.io.IOException 10
-java.lang.NoSuchMethodException 5
-java.net.MalformedURLException 2
-org.apache.commons.configuration2.ex.ConfigurationException 1
-java.nio.file.NoSuchFileException 5
-java.lang.RuntimeException 5
-java.lang.UnsupportedOperationException 1
-java.lang.reflect.InvocationTargetException 1
-java.lang.SecurityException 2
-org.apache.hadoop.hdfs.server.blockmanagement.BlockPlacementPolicy$NotEnoughReplicasException 2
-java.lang.InterruptedException 14
-Total: 58
-```
+-   Most affected variables are objects and fields
 
-- For each exception that affects the state of the program:
-    - Affected local objects: 1.96
-    - Affected local arrays 0.02
-    - Affected local primitives: 0.14
-    - Affected local objects that are null: 0.38
-    - Affected class fields: 1.14
+    -   Static analysis are bad at tracking global information (class
+        fields).
+    -   But they are really good at tracking local information (local
+        variables).
 
+-   The number of affected primitives and nulls are small
 
-- Most affected variables are objects and fields
-    - Static analysis are bad at tracking global information (class fields).
-    - But they are really good at tracking local information (local variables).
-- The number of affected primitives and nulls are small
-    - But are they important?
-    - Maybe worth to go to examples.
-- During the exception collection:
-    - It is hard to distinguish which exception belongs to which request/execution
+    -   But are they important?
+    -   Maybe worth to go to examples.
 
+-   During the exception collection:
+
+    -   It is hard to distinguish which exception belongs to which
+        request/execution
 
 TODOS:
 
-- We still don't know how affected variables propagates in the system
-- Implement static data-flow analysis
-
+-   We still don't know how affected variables propagates in the system
+-   Implement static data-flow analysis
 
 # Oct 10
 
-- We have finished implementing the static data flow analysis
-    - Identify and taint affected global variables ✅
-    - Identify and taint affected local variables 🚧
-    - Propagate taint variables through local variables ✅
-    - Propagate taint variables through global variables ✅
+-   We have finished implementing the static data flow analysis
 
-- Taint Propagation Algorithm:
-    - $G$ a global context that saves the tags for method parameters.
-    - $R$ a global context that saves the tags for method returns.
-    - $D$ a dependency graph that saves all callers of a method $m$
-    - Input: A method $m_{in}$ that throws an exception $e$, a set of affected variables $V$,
-    - Initialize the work list $W\leftarrow \{m_{in}\}$
-    - If $W\not=\emptyset$
-        - Remove an element $m$ from $W$
-        - For statement $s$ in $m$
-            - case $s = v_1 := v_2$
-                - If $v_2$ is parameter:
-                    - $tag_{v_1} \leftarrow G[v_2]$
-                - Else
-                    - $tag_{v_1} \leftarrow tag_{v_2}$
-                - If $v_1 \in V$:
-                    - $tag_{v_1} \leftarrow tag_{v_1} \cup \{e\}$
-            - case $s = v := f(v_1)$
-                - If $G[v_1] \cup tag_{v_1} \not= G[v_1]$:
-                    - $G[v_1] \leftarrow G[v_1] \cup tag_{v_1}$
-                    - $W\leftarrow W\cup \{f\}$
-                - $tag_v \leftarrow R[f]$
-            - case $s = \mathrm{return}\ v$
-                - If $R[m] \cup tag_{v} \not= R[m]$:
-                    - $R[m] \leftarrow R[m] \cup tag_{v}$
-                    - for $m'\in D[m]$
-                        - $W\leftarrow W\cup \{m'\}$
-    - Issues:
-        - We assume methods are pure functional (we ignore global variables, and side
-        effects of function parameters)
+    -   Identify and taint affected global variables ✅
+    -   Identify and taint affected local variables 🚧
+    -   Propagate taint variables through local variables ✅
+    -   Propagate taint variables through global variables ✅
 
+-   Taint Propagation Algorithm:
 
-- Implementation challenges:
-    - Mapping between static information and dynamic information
-        - Bytecode offset v.s. line number
-            - Runtime: bytecode offset (which instruction throws the exception)
-            - Static: Soot does not preserve bytecode offset.
-                - https://www.sable.mcgill.ca/soot/tutorial/usage/
-            - Solution
-                - not sure if it is because I'm using Jimple representation. I'll try to
-                use shimple to see if it works
-                - Use ASM and debug information to construct the mapping between bytecode
-                offset and line numbers.
-        - Stack index v.s. variable name
+    -   $G$ a global context that saves the tags for method parameters.
+    -   $R$ a global context that saves the tags for method returns.
+    -   $D$ a dependency graph that saves all callers of a method $m$
+    -   Input: A method $m_{in}$ that throws an exception $e$, a set of
+        affected variables $V$,
+    -   Initialize the work list $W\leftarrow \{m_{in}\}$
+    -   If $W\not=\emptyset$
+        -   Remove an element $m$ from $W$
+        -   For statement $s$ in $m$
+            -   case $s = v_1 := v_2$
+                -   If $v_2$ is parameter:
+                    -   $tag_{v_1} \leftarrow G[v_2]$
+                -   Else
+                    -   $tag_{v_1} \leftarrow tag_{v_2}$
+                -   If $v_1 \in V$:
+                    -   $tag_{v_1} \leftarrow tag_{v_1} \cup \{e\}$
+            -   case $s = v := f(v_1)$
+                -   If $G[v_1] \cup tag_{v_1} \not= G[v_1]$:
+                    -   $G[v_1] \leftarrow G[v_1] \cup tag_{v_1}$
+                    -   $W\leftarrow W\cup \{f\}$
+                -   $tag_v \leftarrow R[f]$
+            -   case $s = \mathrm{return}\ v$
+                -   If $R[m] \cup tag_{v} \not= R[m]$:
+                    -   $R[m] \leftarrow R[m] \cup tag_{v}$
+                    -   for $m'\in D[m]$
+                        -   $W\leftarrow W\cup \{m'\}$
+    -   Issues:
+        -   We assume methods are pure functional (we ignore global
+            variables, and side effects of function parameters)
 
+-   Implementation challenges:
 
+    -   Mapping between static information and dynamic information
+        -   Bytecode offset v.s. line number
+            -   Runtime: bytecode offset (which instruction throws the
+                exception)
+            -   Static: Soot does not preserve bytecode offset.
+                -   https://www.sable.mcgill.ca/soot/tutorial/usage/
+            -   Solution
+                -   not sure if it is because I'm using Jimple
+                    representation. I'll try to use shimple to see if it
+                    works
+                -   Use ASM and debug information to construct the
+                    mapping between bytecode offset and line numbers.
+        -   Stack index v.s. variable name
 
 # Oct 17
 
-- We use Soot InfoFlow to conduct static taint analysis.
-- We successfully analyzed HDFS (HDFS-4128) and Fineract ()
-    - Fineract:
-        - 4888 exceptions thrown
-        - 3644 exceptions affects the state of the program
-        - If the exception affects the state of the program, on average, each exception causes 8 affected local variable, 5 affected class fields
-    - HDFS:
-        - 139 exceptions thrown
-        - 125 exceptions affects the state of the program
-        - If the exception affects the state of the program, on average, each exception causes 5 affected local variable, 2 affected class fields
+-   We use Soot InfoFlow to conduct static taint analysis.
+    -   Context-insensitive
+    -   Aggressive time and memory constraints
+-   We successfully analyzed HDFS (HDFS-4128) and Fineract ()
+    -   Fineract:
+        -   Still running
+        -   117 false positives
+            -   4 after deduplicate
+        -   4888 exceptions thrown
+        -   3644 exceptions affects the state of the program
+        -   If the exception affects the state of the program, on
+            average, each exception causes 8 affected local variable, 5
+            affected class fields
+    -   HDFS:
+        -   139 exceptions thrown
+        -   125 exceptions affects the state of the program
+        -   If the exception affects the state of the program, on
+            average, each exception causes 5 affected local variable, 2
+            affected class fields
+        -   0 false positive reported!
 
 ## False Relations
 
+-   There are two sources of false positives:
+-   Source 1: the propagation happens, but the propagation is not the
+    root cause of the exceptions
+    -   Inaccurate affected/source var identification
+    -   Solution: collect more false positives, label them based on
+        domain knowledge
 
-- Inaccurate affected var, source var analysis
-
-
-```java
+``` java
 void firstException() {
     //...
     if (error) {
         throw new RuntimeException();
     }
     //...
-    logger.info("Finished"); // logger is identified as affected var
+    logger.info("Finished"); // logger is identified as affected field
 }
 
 void secondException(String info) {
-    if (logger != null) {  // logger is identified as source var
+    if (logger != null) {  // logger is identified as source field
         logger.error(info);
         throw new RuntimeException(info);
     }
 }
 ```
 
-- Same method (different object) throws the same exceptions. Inaccurate taint analysis.
+Note: I didn't reproduce the exception manually so it is unclear if the
+`logger` object in two methods points to the same heap object.
 
+-   Source 2: the propagation does not happen.
+    -   In accurate static taint analysis
+    -   Candidate solution: can we prune out those impossible
 
 ``` java
 void process()
   {
     int i;
     if ((i = inputStream.read(nextCharBuf, maxNextCharInd,
-                                        4096 - maxNextCharInd)) == -1) // maxNextCharInd is affected Var
-    {
-    throw new java.io.IOException();
+                                        4096 - maxNextCharInd)) == -1) { // maxNextCharInd is source Var
+        throw new java.io.IOException();
     }
     else
-        maxNextCharInd += i; // maxNextCharInd is source Var
+        maxNextCharInd += i; // maxNextCharInd is affected field
     return;
   }
+
+void read() {
+    while (true) {
+        process();
+    }
+}
 ```

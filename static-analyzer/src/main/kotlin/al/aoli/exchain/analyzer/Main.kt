@@ -43,6 +43,8 @@ fun loadAndProcess(args: List<String>) {
         }
     }
 
+    val gson = GsonBuilder().setPrettyPrinting().create()
+
     val infoFlow = Infoflow("", false, null)
     infoFlow.setThrowExceptions(false)
     infoFlow.setSootConfig { options, configs ->
@@ -109,7 +111,7 @@ fun loadAndProcess(args: List<String>) {
                 }
             }
         }
-        File("$dataDirectory/$path/dependency.json").writeText(Gson().toJson(dependencies))
+        File("$dataDirectory/$path/dependency.json").writeText(gson.toJson(dependencies))
     }
 }
 
