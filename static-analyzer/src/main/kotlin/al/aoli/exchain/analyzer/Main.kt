@@ -102,7 +102,8 @@ fun loadAndProcess(args: List<String>) {
                 val definition = sourceSinkInfo.o1.definition
                 if (definition is LabeledSinkDefinition) {
                     for (i in definition.label) {
-                        dependencies.exceptionGraph.getOrPut(i) { mutableSetOf() }.add(result.label)
+                        dependencies.exceptionGraph.getOrPut(i) { mutableSetOf() }
+                            .add(Pair(result.label, sourceSinkInfo.toString()))
                         println("Dependency ${i} --------> ${result.label}")
                     }
                 }
