@@ -633,4 +633,57 @@ TODOS:
 
 
 
+# Oct 17
 
+- We use Soot InfoFlow to conduct static taint analysis.
+- We successfully analyzed HDFS (HDFS-4128) and Fineract ()
+    - Fineract:
+        - 4888 exceptions thrown
+        - 3644 exceptions affects the state of the program
+        - If the exception affects the state of the program, on average, each exception causes 8 affected local variable, 5 affected class fields
+    - HDFS:
+        - 139 exceptions thrown
+        - 125 exceptions affects the state of the program
+        - If the exception affects the state of the program, on average, each exception causes 5 affected local variable, 2 affected class fields
+
+## False Relations
+
+
+- Inaccurate affected var, source var analysis
+
+
+```java
+void firstException() {
+    //...
+    if (error) {
+        throw new RuntimeException();
+    }
+    //...
+    logger.info("Finished"); // logger is identified as affected var
+}
+
+void secondException(String info) {
+    if (logger != null) {  // logger is identified as source var
+        logger.error(info);
+        throw new RuntimeException(info);
+    }
+}
+```
+
+- Same method (different object) throws the same exceptions. Inaccurate taint analysis.
+
+
+``` java
+void process()
+  {
+    int i;
+    if ((i = inputStream.read(nextCharBuf, maxNextCharInd,
+                                        4096 - maxNextCharInd)) == -1) // maxNextCharInd is affected Var
+    {
+    throw new java.io.IOException();
+    }
+    else
+        maxNextCharInd += i; // maxNextCharInd is source Var
+    return;
+  }
+```
