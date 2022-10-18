@@ -549,9 +549,6 @@ Idea: taint all affected variables $A$ with exception ID.
         -   Exception does not affect the value of any local variables
         -   Exception does not affect the value of global variables
 
-```{=html}
-<!-- -->
-```
     java.io.FileNotFoundException 8
     java.lang.ClassNotFoundException 2
     java.io.IOException 10
@@ -659,7 +656,7 @@ TODOS:
 -   We use Soot InfoFlow to conduct static taint analysis.
     -   Context-insensitive
     -   Aggressive time and memory constraints
--   We successfully analyzed HDFS (HDFS-4128) and Fineract ()
+-   We successfully analyzed HDFS (HDFS-4128) and Fineract (FINERACT-1211)
     -   Fineract:
         -   Still running
         -   117 false positives
@@ -677,7 +674,7 @@ TODOS:
             affected class fields
         -   0 false positive reported!
 
-## False Relations
+## False Positives
 
 -   There are two sources of false positives:
 -   Source 1: the propagation happens, but the propagation is not the
@@ -686,7 +683,7 @@ TODOS:
     -   Solution: collect more false positives, label them based on
         domain knowledge
 
-``` java
+``` {.java .numberLines .lineAnchors}
 void firstException() {
     //...
     if (error) {
@@ -711,7 +708,7 @@ Note: I didn't reproduce the exception manually so it is unclear if the
     -   In accurate static taint analysis
     -   Candidate solution: can we prune out those impossible
 
-``` java
+``` {.java .numberLines .lineAnchors}
 void process()
   {
     int i;
