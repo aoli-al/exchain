@@ -316,7 +316,9 @@ class AffectedVarMethodVisitor(val exception: Throwable,
                     }
                 }
             }
-            affectedInsns.add(throwInsn!!)
+            if (isThrowInsn) {
+                affectedInsns.add(throwInsn!!)
+            }
             processAffectedInsns(affectedInsns, analyzer.frames)
             if (isThrowInsn) {
                 findDirectBranch(analyzer)

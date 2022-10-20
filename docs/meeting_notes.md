@@ -727,3 +727,12 @@ void read() {
     }
 }
 ```
+
+## Oct 20
+
+## Revisit
+
+- End result is from static analysis. Use dynamic analysis to remove false positives.
+    - Main challenge: false positives
+- End result is from dynamic analysis. Use static analysis to improve performance.
+    -

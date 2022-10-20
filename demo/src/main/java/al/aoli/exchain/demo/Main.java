@@ -34,7 +34,8 @@ public class Main {
 //        test.sceneLocal();
 //        test.scene10();
 //        TestEnableExchainDynamically test = new TestEnableExchainDynamically();
-        test.callScene1();
+        test.affectedLocalTest();
+//        test.callScene1();
 //        test.test3();
 //        test.test();
 //        test.test2();
