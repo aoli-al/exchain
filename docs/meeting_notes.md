@@ -549,6 +549,10 @@ Idea: taint all affected variables $A$ with exception ID.
         -   Exception does not affect the value of any local variables
         -   Exception does not affect the value of global variables
 
+
+```{=html}
+<!-- -->
+```
     java.io.FileNotFoundException 8
     java.lang.ClassNotFoundException 2
     java.io.IOException 10
@@ -734,5 +738,121 @@ void read() {
 
 - End result is from static analysis. Use dynamic analysis to remove false positives.
     - Main challenge: false positives
+    - Idea: use dynamic analysis to collect information to reduce false positives.
+    - Issues:
+        - False positives are unknown unknowns. Theoretically, the static analysis can never avoid false positives.
+
 - End result is from dynamic analysis. Use static analysis to improve performance.
-    -
+    - Main challenge: overhead
+    - Idea: dynamically enable and disable taint analysis.
+    - Implementation / design challenges:
+
+
+
+- Issue 1: current implementation changes types of objects dynamically. Enabling and disabling instrumentation dynamically causes type mismatch.
+
+Origin Program:
+
+``` {.java .numberLines .lineAnchors}
+public class Foo {
+    Object a;
+    public Foo() {
+        a = new int[3];
+    }
+    void test() {
+        ((int[]) a)[0] = 5;
+    }
+}
+```
+
+Instrumented Program:
+
+``` {.java .numberLines .lineAnchors}
+public class Foo {
+    Object a;
+    public Foo() {
+        a = new TaggedArray(new int[3]);
+    }
+    void test() {
+        ((TaggedArray) a).put(0, 5);
+    }
+}
+```
+
+Problem:
+
+``` {.java .numberLines .lineAnchors}
+void run() {
+    tracingEnabled = false;
+    Foo foo = new Foo(); // foo.a is int[]
+    tracingEnabled = true;
+    foo.test();          // foo.a is used as TaggedArray
+}
+```
+
+- Issue 2: we cannot switch between origin and instrumentation inside
+
+``` {.java .numberLines .lineAnchors}
+void setup(HTTPClient client) {
+    if (GlobalConfig.enabled) {
+        setupInstrumented(client);
+    } else {
+        setupOrigin(client);
+    }
+}
+
+void setupOrigin(HTTPClient client) {
+    Cert cert = null;
+    try {
+        cert = getCert(); // throws RuntimeException
+    } catch (Exception e) {
+        // ...
+    }
+    try {
+        client.setCert(cert.getData()); // throws NPE
+    } catch (Exception e) {
+        //...
+    }
+}
+
+void setupInstrumented(HTTPClient client) {
+    Cert cert = null;
+    Taint certTaint = null;
+    try {
+        cert = getCert(); // throws RuntimeException
+        certTaint = ShadowStack.returnTaint;
+    } catch (Exception e) {
+        // ...
+    }
+    try {
+        var tmp = cert.getData(); // throws NPE
+        var tmpTaint = ShadowStack.returnTaint;
+        ShadowStack.setArgTaint(0, tmpTaint);
+        client.setCert(tmp);
+    } catch (Exception e) {
+        //...
+    }
+}
+```
+
+
+
+``` {.java .numberLines .lineAnchors}
+void process()
+  {
+    int i;
+    if ((i = inputStream.read(nextCharBuf, maxNextCharInd,
+                                        4096 - maxNextCharInd)) == -1) { // maxNextCharInd is source Var
+        throw new java.io.IOException();
+    }
+    else
+        maxNextCharInd += i; // maxNextCharInd is affected field
+    return;
+  }
+
+void read() {
+    while (true) {
+        process();
+    }
+}
+```
