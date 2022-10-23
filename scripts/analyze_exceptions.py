@@ -26,7 +26,11 @@ def process(path: str):
     print(len(interesting))
 
 def process_csv(path: str):
+    # obj, array, primitive, null, fields.
     result = [0, 0, 0, 0, 0]
+    field_only_exceptions = 0
+    local_only_exceptions = 0
+    both_exceptions = 0
     count = 0
     exceptions = {}
     total = 0
@@ -39,12 +43,23 @@ def process_csv(path: str):
                 result[idx] += stats[idx]
                 if stats[idx] != 0:
                     flag = True
+            local = result[0] + result[2] > 0
+            field = result[-1] > 0
+            if local and not field:
+                local_only_exceptions += 1
+            if field and not local:
+                field_only_exceptions += 1
+            if local and field:
+                both_exceptions += 1
             if flag:
                 if name not in exceptions:
                     exceptions[name] = 0
                 exceptions[name] += 1
                 count += 1
     print(count)
+    print("Local only", local_only_exceptions)
+    print("Field only", field_only_exceptions)
+    print("Both", both_exceptions)
     for i in range(5):
         print(result[i] / count)
     for name, count in exceptions.items():
