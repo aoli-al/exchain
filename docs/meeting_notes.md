@@ -734,6 +734,9 @@ void read() {
 
 ## Oct 20
 
+
+## Experiment Results
+
 ## Revisit
 
 - End result is from static analysis. Use dynamic analysis to remove false positives.
@@ -745,11 +748,13 @@ void read() {
 - End result is from dynamic analysis. Use static analysis to improve performance.
     - Main challenge: overhead
     - Idea: dynamically enable and disable taint analysis.
-    - Implementation / design challenges:
+        1. need to understand when to enable/disable taint analysis
+        2. implement functionalities to disable/enable taint analysis dynamically.
 
 
 
 - Issue 1: current implementation changes types of objects dynamically. Enabling and disabling instrumentation dynamically causes type mismatch.
+    - Re-implement array taint functionality. Instead of rewrite the type of the original array object. We can store all array wrappers in a centralized location and fetch them every time an array is accessed.
 
 Origin Program:
 
@@ -790,7 +795,8 @@ void run() {
 }
 ```
 
-- Issue 2: we cannot switch between origin and instrumentation inside
+- Issue 2: we cannot switch between origin and instrumentation inside a method.
+    - When an exception is thrown in `setupOrigin`. We cannot taint the `cert` object immediately because `certTaint` local variable is not available.
 
 ``` {.java .numberLines .lineAnchors}
 void setup(HTTPClient client) {
@@ -816,6 +822,7 @@ void setupOrigin(HTTPClient client) {
 }
 
 void setupInstrumented(HTTPClient client) {
+    Taint clientTaint = ShadowStack.getArgTaint(0);
     Cert cert = null;
     Taint certTaint = null;
     try {
