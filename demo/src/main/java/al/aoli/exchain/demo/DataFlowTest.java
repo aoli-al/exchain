@@ -56,10 +56,19 @@ public class DataFlowTest {
             }
         }
 
+        void nothing() {
+        }
+
         void test1() {
             throw new RuntimeException("2");
         }
 
+    }
+
+    public Object affectedLocalTest() {
+        Object o = createObjectWithException();
+        dummy.nothing();
+        return o;
     }
 
 

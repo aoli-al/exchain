@@ -2,6 +2,7 @@ package al.aoli.exchain.analyzer
 
 import al.aoli.exchain.runtime.analyzers.AffectedVarResult
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import mu.KotlinLogging
 import polyglot.ast.Labeled
 import soot.AmbiguousMethodException
@@ -42,6 +43,8 @@ fun loadAndProcess(args: List<String>) {
             results.add(Gson().fromJson(s, AffectedVarResult::class.java))
         }
     }
+
+    val gson = GsonBuilder().setPrettyPrinting().create()
 
     val infoFlow = Infoflow("", false, null)
     infoFlow.setThrowExceptions(false)
@@ -109,7 +112,7 @@ fun loadAndProcess(args: List<String>) {
                 }
             }
         }
-        File("$dataDirectory/$path/dependency.json").writeText(Gson().toJson(dependencies))
+        File("$dataDirectory/$path/dependency.json").writeText(gson.toJson(dependencies))
     }
 }
 
