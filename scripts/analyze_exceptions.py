@@ -43,8 +43,8 @@ def process_csv(path: str):
                 result[idx] += stats[idx]
                 if stats[idx] != 0:
                     flag = True
-            local = result[0] + result[2] > 0
-            field = result[-1] > 0
+            local = stats[0] + stats[2] > 0
+            field = stats[-1] > 0
             if local and not field:
                 local_only_exceptions += 1
             if field and not local:
