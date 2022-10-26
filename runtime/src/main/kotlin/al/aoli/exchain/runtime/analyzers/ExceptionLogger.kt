@@ -41,7 +41,8 @@ object ExceptionLogger {
         exceptionMap[e]!![4] += affectedVarResult.affectedFieldName.size
 
         if (shouldReport) {
-            exceptionStats.appendText("${e.javaClass.name}, " +
+            val label = System.identityHashCode(e)
+            exceptionStats.appendText("${label}, " +
                     exceptionMap[e]!!.joinToString(",") + "\n")
         }
     }

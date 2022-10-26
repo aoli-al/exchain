@@ -709,7 +709,7 @@ Note: I didn't reproduce the exception manually so it is unclear if the
 `logger` object in two methods points to the same heap object.
 
 -   Source 2: the propagation does not happen.
-    -   In accurate static taint analysis
+    -   Inaccurate static taint analysis
     -   Candidate solution: can we prune out those impossible
 
 ``` {.java .numberLines .lineAnchors}
@@ -735,7 +735,76 @@ void read() {
 ## Oct 20
 
 
-## Experiment Results
+-   We successfully analyzed HDFS (HDFS-4128) and Fineract (FINERACT-1211)
+    -   Fineract:
+        -   Still running
+        -   117 false positives
+            -  4 after deduplicate
+        -   5294 exceptions thrown
+        -   3644 exceptions affects the state of the program
+        -   If the exception affects the state of the program, on
+            average, each exception causes 8 affected local variable, 5
+            affected class fields
+    -   HDFS:
+        -   139 exceptions thrown
+        -   125 exceptions affects the state of the program
+        -   If the exception affects the state of the program, on
+            average, each exception causes 5 affected local variable, 2
+            affected class fields
+        -   0 false positive reported!
+
+
+## False Positives
+
+-   the propagation does not happen.
+    -   Inaccurate static taint analysis
+
+``` {.java .numberLines .lineAnchors}
+class Reader {
+    maxNextCharInd = 0;
+    void process()
+    {
+        int i;
+        // When IOException 2 is thrown
+        // maxNextCharInd is source Var
+        if (maxNextCharInd > CONSTANT_LENGTH) {
+            throw new java.io.IOException();
+        }
+        else {
+            // When IO Exception 1 is thrown,
+            // maxNextCharInd is affected field
+            maxNextCharInd += i;
+        }
+        return;
+    }
+
+    void read() {
+        while (true) {
+            process();
+        }
+    }
+}
+void run() {
+    Reader r1 = new Reader();
+    try {
+        r1.read(); // IOException 1 is thrown
+    } catch (Exception e) {
+    }
+    Reader r2 = new Reader();
+    try {
+        r2.read(); // IOException 2 is thrown
+    } catch (Exception e) {
+    }
+}
+
+```
+
+## Stats
+
+- Out of 5294 thrown exceptions
+    - 1464 affect only local variables
+    - 63 affect only class fields
+    - 2117 affect both local variables and class fields.
 
 ## Revisit
 
@@ -747,11 +816,17 @@ void read() {
 
 - End result is from dynamic analysis. Use static analysis to improve performance.
     - Main challenge: overhead
-    - Idea: dynamically enable and disable taint analysis.
-        1. need to understand when to enable/disable taint analysis
-        2. implement functionalities to disable/enable taint analysis dynamically.
+    - Idea: only enable taint analysis when it is required
+        - Temporal
+            - dynamically enable and disable taint analysis.
+                1. need to understand when to enable/disable taint analysis
+                2. implement functionalities to disable/enable taint analysis dynamically.
+        - Spacial
+            - Only enable dynamic taint analysis for __required__ libraries.
+            - Program slicing?
 
 
+## Temporal
 
 - Issue 1: current implementation changes types of objects dynamically. Enabling and disabling instrumentation dynamically causes type mismatch.
     - Re-implement array taint functionality. Instead of rewrite the type of the original array object. We can store all array wrappers in a centralized location and fetch them every time an array is accessed.
@@ -790,6 +865,7 @@ Problem:
 void run() {
     tracingEnabled = false;
     Foo foo = new Foo(); // foo.a is int[]
+    // Exception thrown !!
     tracingEnabled = true;
     foo.test();          // foo.a is used as TaggedArray
 }
@@ -842,24 +918,10 @@ void setupInstrumented(HTTPClient client) {
 }
 ```
 
+## Spacial
 
+- Issue 1: common data structures are used everywhere!
+    - Map
+    - List
+    - Set
 
-``` {.java .numberLines .lineAnchors}
-void process()
-  {
-    int i;
-    if ((i = inputStream.read(nextCharBuf, maxNextCharInd,
-                                        4096 - maxNextCharInd)) == -1) { // maxNextCharInd is source Var
-        throw new java.io.IOException();
-    }
-    else
-        maxNextCharInd += i; // maxNextCharInd is affected field
-    return;
-  }
-
-void read() {
-    while (true) {
-        process();
-    }
-}
-```
