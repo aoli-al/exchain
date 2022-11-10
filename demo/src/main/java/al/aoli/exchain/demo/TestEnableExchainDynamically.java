@@ -9,17 +9,20 @@ public class TestEnableExchainDynamically {
     Object a = new int[3];
     int[] b= new int[3];
     Foo c = new Foo();
+    int o = 0;
 
     private static class Foo {
 
     }
 
     void test() {
-        for (int i = 0; i < 3; i++) {
-            ((int[]) a)[i] = MultiTainter.taintedInt(3, "foo");
-        }
-        b[1] = ((int[]) a)[0];
-        System.out.println(b);
+        int a = MultiTainter.taintedInt(1, "bar");
+        o = a + 24;
+        System.out.println(o);
+    }
+
+    void testO() {
+        System.out.println(MultiTainter.getTaint(o));
     }
 
     void test3() {

@@ -1,14 +1,10 @@
 package al.aoli.exchain.analyzer
 
-import al.aoli.exchain.runtime.analyzers.AffectedVarResult
+import al.aoli.exchain.runtime.objects.AffectedVarResult
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import mu.KotlinLogging
-import polyglot.ast.Labeled
-import soot.AmbiguousMethodException
 import soot.G
-import soot.Scene
-import soot.SootClass
 import soot.jimple.infoflow.Infoflow
 import soot.jimple.infoflow.InfoflowConfiguration
 import soot.jimple.infoflow.InfoflowConfiguration.StaticFieldTrackingMode

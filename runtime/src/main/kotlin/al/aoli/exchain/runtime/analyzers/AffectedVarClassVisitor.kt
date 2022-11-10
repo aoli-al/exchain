@@ -6,7 +6,8 @@ import org.objectweb.asm.Opcodes
 
 class AffectedVarClassVisitor(private val exception: Throwable,
                               private val throwIndex: Long, private val catchIndex: Long,
-                              private val isThrowInsn: Boolean, val owner: String, val method: String,
+                              private val isThrowInsn: Boolean, val findSource: Boolean,
+                              val owner: String, val method: String,
                               val classReader: AffectedVarClassReader
 ): ClassVisitor(Opcodes.ASM8) {
     var methodVisitor: AffectedVarMethodVisitor? = null
@@ -20,7 +21,8 @@ class AffectedVarClassVisitor(private val exception: Throwable,
         return if (name + descriptor == method) {
             methodVisitor = AffectedVarMethodVisitor(
                 exception,
-                throwIndex, catchIndex, isThrowInsn, owner, access, name,
+                throwIndex, catchIndex, isThrowInsn, findSource,
+                owner, access, name,
                 descriptor, signature, exceptions, classReader
             )
             methodVisitor

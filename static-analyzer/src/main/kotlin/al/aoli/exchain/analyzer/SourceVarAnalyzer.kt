@@ -1,13 +1,10 @@
 package al.aoli.exchain.analyzer
 
-import al.aoli.exchain.runtime.analyzers.AffectedVarResult
-import al.aoli.exchain.runtime.analyzers.SourceType
+import al.aoli.exchain.runtime.objects.AffectedVarResult
+import al.aoli.exchain.runtime.objects.SourceType
 import soot.SootMethod
 import soot.jimple.AbstractJimpleValueSwitch
-import soot.jimple.AssignStmt
 import soot.jimple.IfStmt
-import soot.jimple.InstanceFieldRef
-import soot.jimple.InvokeStmt
 import soot.jimple.Stmt
 
 class SourceVarAnalyzer(affectedVarResults: List<AffectedVarResult>): AbstractJimpleValueSwitch<MutableSet<Int>>() {

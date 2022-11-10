@@ -118,13 +118,7 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
     jstring class_jstring = jni_->NewStringUTF(class_signature.c_str());
     jlong catch_current_method =
         catch_method_ == frame.method ? catch_location_ : -1;
-    jboolean is_throw_insn = (depth == 0) || (depth == 1 && is_throw_from_helper_);
-    if (depth == 0) {
-        LOG_INFO << "Method: " << method;
-        if (kExceptionHelpers.find(method) != kExceptionHelpers.end()) {
-            is_throw_from_helper_ = true;
-        }
-    }
+    jboolean is_throw_insn = depth == 0;
     jobject result = (jintArray)jni_->CallStaticObjectMethod(
         clazz, method_id, exception_,
         class_jstring, method_jstring, frame.location,

@@ -125,7 +125,7 @@ task runInstrumentedJarLocal(type: JavaExec) {
 
 task runInstrumentedJar(type: JavaExec) {
     var runtime = project(":runtime")
-    executable = "${runtime.buildDir}/jre-inst/bin/java"
+    executable = "${runtime.buildDir}/jre-inst-enabled/bin/java"
     classpath "${buildDir}/libs/instrumented/${project.name}-${version}.jar"
 //    classpath "${buildDir}/libs/${project.name}-${version}.jar"
     mainClass = "al.aoli.exchain.demo.Main"

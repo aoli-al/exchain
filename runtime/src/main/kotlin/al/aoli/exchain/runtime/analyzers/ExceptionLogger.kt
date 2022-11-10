@@ -1,5 +1,6 @@
 package al.aoli.exchain.runtime.analyzers
 
+import al.aoli.exchain.runtime.objects.AffectedVarResult
 import al.aoli.exchain.runtime.objects.ExceptionElement
 import com.google.gson.Gson
 import java.io.File
@@ -29,7 +30,7 @@ object ExceptionLogger {
     }
 
     fun logStats(e: Throwable, affectedVarResult: AffectedVarResult, numOfObjects: Int, numOfArrays: Int, numOfPrimitives: Int, numOfNulls: Int,
-                         shouldReport: Boolean) {
+                 shouldReport: Boolean) {
         if (e !in exceptionMap) {
             exceptionMap[e] = mutableListOf(0, 0, 0, 0, 0)
         }

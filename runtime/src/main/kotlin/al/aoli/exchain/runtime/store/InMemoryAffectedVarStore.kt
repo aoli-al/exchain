@@ -1,10 +1,11 @@
 package al.aoli.exchain.runtime.store
 
-import al.aoli.exchain.runtime.analyzers.AffectedVarResult
+import al.aoli.exchain.runtime.objects.AffectedVarResult
 
 class InMemoryAffectedVarStore: AffectedVarStore {
 
-    val store = mutableMapOf<String, AffectedVarResult>()
+    val affectedVarResult = mutableMapOf<String, AffectedVarResult>()
+    val exceptionSourceIdentified = mutableMapOf<Int, Boolean>()
     override fun getCachedAffectedVarResult(
         clazz: String,
         method: String,
@@ -13,7 +14,7 @@ class InMemoryAffectedVarStore: AffectedVarStore {
         isThrowInsn: Boolean
     ): AffectedVarResult? {
         val sig = "$clazz:$method:$throwLocation:$catchLocation$isThrowInsn"
-        return store[sig]
+        return affectedVarResult[sig]
     }
 
     override fun putCachedAffectedVarResult(
@@ -25,7 +26,7 @@ class InMemoryAffectedVarStore: AffectedVarStore {
         result: AffectedVarResult
     ) {
         val sig = "$clazz:$method:$throwLocation:$catchLocation:$isThrowInsn"
-        store[sig] = result
+        affectedVarResult[sig] = result
     }
 
 

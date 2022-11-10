@@ -732,12 +732,11 @@ void read() {
 }
 ```
 
-## Oct 20
+## Oct 24/31
 
 
 -   We successfully analyzed HDFS (HDFS-4128) and Fineract (FINERACT-1211)
     -   Fineract:
-        -   Still running
         -   117 false positives
             -  4 after deduplicate
         -   5294 exceptions thrown

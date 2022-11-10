@@ -1,5 +1,6 @@
 package al.aoli.exchain.runtime.analyzers
 
+import al.aoli.exchain.runtime.objects.SourceType
 import mu.KotlinLogging
 import org.objectweb.asm.*
 import org.objectweb.asm.tree.*
@@ -8,8 +9,8 @@ import org.objectweb.asm.tree.analysis.SourceValue
 import java.lang.NullPointerException
 
 private val logger = KotlinLogging.logger {}
-class AffectedVarMethodVisitor(val exception: Throwable,
-                               val throwIndex: Long, val catchIndex: Long, val isThrowInsn: Boolean, val owner: String,
+class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, val catchIndex: Long,
+                               val isThrowInsn: Boolean, val findSource: Boolean, val owner: String,
                                access: Int, name: String, descriptor: String, signature: String?,
                                exceptions: Array<out String>?, val classReader: AffectedVarClassReader
 ):
@@ -159,6 +160,7 @@ class AffectedVarMethodVisitor(val exception: Throwable,
     val affectedVars = mutableSetOf<Triple<Int, Int, String>>()
     val affectedFields = mutableSetOf<Pair<Int, String>>()
     val sourceLines = mutableSetOf<Pair<Int, SourceType>>()
+//    val sourceFields = mutableSetOf<Pair>()
 
     // This is not the right way to get local variable names.
     // However, this is the implementation of Soot and we
@@ -260,11 +262,9 @@ class AffectedVarMethodVisitor(val exception: Throwable,
                 }
             }
         }
-        println(affectedFields)
-        println(affectedVars)
     }
 
-    fun findDirectBranch(analyzer: AffectedVarAnalyser<SourceValue>) {
+    fun findSourceInsn(analyzer: AffectedVarAnalyser<SourceValue>) {
         if (exception !is NullPointerException &&
             exception !is IndexOutOfBoundsException) {
             var currentInsn = throwInsn
@@ -282,12 +282,18 @@ class AffectedVarMethodVisitor(val exception: Throwable,
             if (currentInsn is JumpInsnNode) {
                 sourceLines.add(Pair(getLineNumber(currentInsn), SourceType.JUMP))
             }
-        } else if (throwInsn is FieldInsnNode) {
-            sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.JUMP))
-        } else if (throwInsn is MethodInsnNode) {
-            sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.INVOKE))
+        } else if (isThrowInsn) {
+            if (throwInsn is FieldInsnNode) {
+                sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.FIELD))
+            } else if (throwInsn is MethodInsnNode) {
+                sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.INVOKE))
+            }
         }
     }
+
+    fun findSourceVars() {
+    }
+
 
 
     override fun visitEnd() {
@@ -320,8 +326,8 @@ class AffectedVarMethodVisitor(val exception: Throwable,
                 affectedInsns.add(throwInsn!!)
             }
             processAffectedInsns(affectedInsns, analyzer.frames)
-            if (isThrowInsn) {
-                findDirectBranch(analyzer)
+            if (findSource && !Constants.exceptionHelpers.contains(name + desc)) {
+                findSourceInsn(analyzer)
             }
         } else {
             logger.error { "Error finding throwInsn/catchInsn at index $throwIndex in class $owner:$name" }

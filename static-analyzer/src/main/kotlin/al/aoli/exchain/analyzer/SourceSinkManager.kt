@@ -1,10 +1,7 @@
 package al.aoli.exchain.analyzer
 
-import al.aoli.exchain.runtime.analyzers.AffectedVarResult
-import soot.SootMethod
-import soot.jimple.AssignStmt
+import al.aoli.exchain.runtime.objects.AffectedVarResult
 import soot.jimple.DefinitionStmt
-import soot.jimple.IdentityStmt
 import soot.jimple.Stmt
 import soot.jimple.infoflow.InfoflowManager
 import soot.jimple.infoflow.data.AccessPath

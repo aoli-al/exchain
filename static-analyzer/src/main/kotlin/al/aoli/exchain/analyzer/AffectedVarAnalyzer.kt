@@ -1,6 +1,6 @@
 package al.aoli.exchain.analyzer
 
-import al.aoli.exchain.runtime.analyzers.AffectedVarResult
+import al.aoli.exchain.runtime.objects.AffectedVarResult
 import soot.Local
 import soot.SootMethod
 import soot.jimple.*

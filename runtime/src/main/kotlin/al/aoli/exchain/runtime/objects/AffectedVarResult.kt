@@ -1,4 +1,4 @@
-package al.aoli.exchain.runtime.analyzers
+package al.aoli.exchain.runtime.objects
 
 enum class SourceType {
     JUMP,
@@ -6,15 +6,19 @@ enum class SourceType {
     INVOKE
 }
 
-class AffectedVarResult(var label: Int, val clazz: String, val method: String,
-                        val affectedLocalIndex: IntArray,
-                        val affectedLocalName: Array<String>,
-                        val affectedLocalLine: IntArray,
-                        val affectedFieldName: Array<String>,
-                        val affectedFieldLine: IntArray,
-                        val sourceLines: Array<Pair<Int, SourceType>>,
-                        val sourceLocalIndex: IntArray = intArrayOf(),
-                        val sourceLocalField: Array<String> = emptyArray()) {
+data class AffectedVarResult(var label: Int,
+                             val clazz: String,
+                             val method: String,
+                             val throwIndex: Long,
+                             val catchIndex: Long,
+                             val affectedLocalIndex: IntArray,
+                             val affectedLocalName: Array<String>,
+                             val affectedLocalLine: IntArray,
+                             val affectedFieldName: Array<String>,
+                             val affectedFieldLine: IntArray,
+                             val sourceLines: Array<Pair<Int, SourceType>>,
+                             val sourceLocalIndex: IntArray = intArrayOf(),
+                             val sourceLocalField: Array<String> = emptyArray()) {
     fun getSootClassName(): String {
         return clazz.substring(1, clazz.length - 1)
             .replace("/", ".")
@@ -77,5 +81,25 @@ class AffectedVarResult(var label: Int, val clazz: String, val method: String,
             "V" -> "void"
             else -> "error"
         }
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AffectedVarResult
+
+        if (label != other.label) return false
+        if (clazz != other.clazz) return false
+        if (method != other.method) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = label
+        result = 31 * result + clazz.hashCode()
+        result = 31 * result + method.hashCode()
+        return result
     }
 }

@@ -1,5 +1,6 @@
 package al.aoli.exchain.runtime.analyzers
 
+import al.aoli.exchain.runtime.objects.AffectedVarResult
 import al.aoli.exchain.runtime.store.InMemoryAffectedVarStore
 import al.aoli.exchain.runtime.store.TransformedCodeStore
 import com.github.ajalt.mordant.rendering.TextColors
@@ -16,8 +17,8 @@ object AffectedVarDriver {
     fun analyzeAffectedVar(e: Throwable, clazz: String, method: String, throwIndex: Long,
                            catchIndex: Long, isThrowInsn: Boolean) : AffectedVarResult? {
         val cached = store.getCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, isThrowInsn)
+        val label = ExceptionLogger.logException(e)
         if (cached != null) {
-            val label = ExceptionLogger.logException(e)
             cached.label = label
             ExceptionLogger.logAffectedVarResult(cached)
             return cached
@@ -41,8 +42,12 @@ object AffectedVarDriver {
             }
 
         }
-        val visitor = AffectedVarClassVisitor(e, throwIndex, catchIndex, isThrowInsn, className, method, classReader)
+        val sourceIdentified = store.exceptionSourceIdentified.getOrDefault(label, false)
+
+        val visitor = AffectedVarClassVisitor(e, throwIndex, catchIndex, isThrowInsn, sourceIdentified,
+            className, method, classReader)
         classReader.accept(visitor, 0)
+
         // We are going to taint class fields here and local variables in native.
         val affectedFields = visitor.methodVisitor?.affectedFields?.filter { !it.second.contains("PHOSPHOR") }
             ?.toTypedArray() ?: emptyArray()
@@ -50,10 +55,11 @@ object AffectedVarDriver {
         val affectedVars = visitor.methodVisitor?.affectedVars?.toTypedArray() ?: emptyArray()
         val (affectedLocalLine, affectedLocalIndex, affectedLocalName) = affectedVars.unzip()
         val sourceLines = visitor.methodVisitor?.sourceLines?.toTypedArray() ?: emptyArray()
-
-        val label = ExceptionLogger.logException(e)
-        val result = AffectedVarResult(label, clazz, method, affectedLocalIndex.toIntArray(),
-            affectedLocalName.toTypedArray(), affectedLocalLine.toIntArray(),
+        if (sourceLines.isNotEmpty()) {
+            store.exceptionSourceIdentified[label] = true
+        }
+        val result = AffectedVarResult(label, clazz, method, throwIndex, catchIndex,
+            affectedLocalIndex.toIntArray(), affectedLocalName.toTypedArray(), affectedLocalLine.toIntArray(),
             affectedFieldName.toTypedArray(), affectedFieldLine.toIntArray(),
             sourceLines)
         ExceptionLogger.logAffectedVarResult(result)

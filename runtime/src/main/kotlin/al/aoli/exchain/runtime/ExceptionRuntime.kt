@@ -1,15 +1,13 @@
 package al.aoli.exchain.runtime
 
 import al.aoli.exchain.runtime.analyzers.AffectedVarDriver
-import al.aoli.exchain.runtime.analyzers.AffectedVarResult
+import al.aoli.exchain.runtime.objects.AffectedVarResult
 import al.aoli.exchain.runtime.analyzers.ExceptionLogger
 import al.aoli.exchain.runtime.objects.exceptions.ExceptionInjector
 import al.aoli.exchain.runtime.server.ExceptionServiceImpl
 import edu.columbia.cs.psl.phosphor.runtime.Taint
 import edu.columbia.cs.psl.phosphor.struct.PowerSetTree.SetNode
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
-import java.io.PrintWriter
-import java.io.StringWriter
 
 object ExceptionRuntime {
 
