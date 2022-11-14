@@ -279,3 +279,20 @@ void run() {
     }
 }
 ```
+
+## Source Vars
+
+- Out of 5k exceptions, only 2 exceptions don't have source variables.
+    - NoSuchMethodError
+
+```{.java .numberLines .lineAnchors}
+private static MDCAdapter bwCompatibleGetMDCAdapterFromBinder() throws NoClassDefFoundError {
+    try {
+        return StaticMDCBinder.getSingleton().getMDCA();
+    } catch (NoSuchMethodError nsme) {
+        // binding is probably a version of SLF4J older than 1.7.14
+        return StaticMDCBinder.SINGLETON.getMDCA();
+    }
+}
+```
+
