@@ -6,7 +6,6 @@ import org.objectweb.asm.*
 import org.objectweb.asm.tree.*
 import org.objectweb.asm.tree.analysis.Frame
 import org.objectweb.asm.tree.analysis.SourceValue
-import java.lang.NullPointerException
 
 private val logger = KotlinLogging.logger {}
 class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, val catchIndex: Long,
@@ -265,29 +264,41 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
     }
 
     fun findSourceInsn(analyzer: AffectedVarAnalyser<SourceValue>) {
-        if (exception !is NullPointerException &&
-            exception !is IndexOutOfBoundsException) {
-            var currentInsn = throwInsn
-            while (analyzer.instructionPredecessors[currentInsn]?.size == 1 &&
-                currentInsn !is JumpInsnNode) {
-                currentInsn = analyzer.instructionPredecessors[currentInsn]?.first()
-            }
-            if (currentInsn !is JumpInsnNode && analyzer.instructionPredecessors[currentInsn]?.size == 2) {
-                for (insn in analyzer.instructionPredecessors[currentInsn]!!) {
-                    if (insn is JumpInsnNode) {
-                        currentInsn = insn
-                    }
-                }
-            }
-            if (currentInsn is JumpInsnNode) {
-                sourceLines.add(Pair(getLineNumber(currentInsn), SourceType.JUMP))
-            }
-        } else if (isThrowInsn) {
+        if (isThrowInsn && (exception is NullPointerException || exception is IndexOutOfBoundsException)) {
             if (throwInsn is FieldInsnNode) {
                 sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.FIELD))
             } else if (throwInsn is MethodInsnNode) {
                 sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.INVOKE))
             }
+            // TODO: handle array here
+            return
+        }
+
+        if (exception is ClassNotFoundException && throwInsn is MethodInsnNode
+            && (throwInsn as MethodInsnNode).name.contains("forName")) {
+            sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.INVOKE))
+            return
+        }
+
+        // this is default behavior
+        var currentInsn = throwInsn
+
+        // We want to find the jump instruction that leads to the throw instruction.
+        while (analyzer.instructionPredecessors[currentInsn]?.size == 1 &&
+            currentInsn !is JumpInsnNode) {
+            currentInsn = analyzer.instructionPredecessors[currentInsn]?.first()
+        }
+
+        // If the instruction has two predecessors, we want to find the corresponding jump INSN.
+        if (currentInsn !is JumpInsnNode && analyzer.instructionPredecessors[currentInsn]?.size == 2) {
+            for (insn in analyzer.instructionPredecessors[currentInsn]!!) {
+                if (insn is JumpInsnNode) {
+                    currentInsn = insn
+                }
+            }
+        }
+        if (currentInsn is JumpInsnNode) {
+            sourceLines.add(Pair(getLineNumber(currentInsn), SourceType.JUMP))
         }
     }
 

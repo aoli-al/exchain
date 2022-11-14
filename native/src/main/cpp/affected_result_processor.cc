@@ -8,7 +8,7 @@ namespace exchain {
 void AffectedResultProcessor::Process() {
     if (!ProcessorBase::CheckJvmTIError(
             jvmti_->GetLocalVariableTable(frame_.method, &table_size_, &table_),
-            "get local variable table failed.")) {
+            "get local variable table " + location_string_)) {
         return;
     }
     PLOG_INFO << "Start processing affected result!";
@@ -63,7 +63,7 @@ void AffectedResultProcessor::ProcessSourceFields() {
     jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
     if (obj != NULL) {
         jni_->CallStaticVoidMethod(runtime_class_, analyze_source_method_id,
-                                   obj, result_, exception_, location_);
+                                   obj, result_, exception_, location_jstring_);
     }
 }
 
@@ -90,7 +90,7 @@ void AffectedResultProcessor::ProcessSourceVars() {
             if (taint != NULL) {
                 jni_->CallStaticVoidMethod(runtime_class_,
                                            analyze_source_method_id, taint,
-                                           exception_, location_);
+                                           exception_, location_jstring_);
             }
             jni_->DeleteLocalRef(taint);
         }
@@ -104,7 +104,7 @@ void AffectedResultProcessor::ProcessSourceVars() {
             if (obj != NULL) {
                 jni_->CallStaticVoidMethod(runtime_class_,
                                            analyze_source_method_id, obj,
-                                           exception_, location_);
+                                           exception_, location_jstring_);
             }
             jni_->DeleteLocalRef(obj);
         }

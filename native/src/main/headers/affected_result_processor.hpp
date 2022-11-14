@@ -19,7 +19,8 @@ class AffectedResultProcessor: ProcessorBase {
     int depth_;
     jobject result_;
     jboolean is_caught_by_frame_;
-    jstring location_;
+    jstring location_jstring_;
+    std::string location_string_;
     jobject exception_;
     jthread thread_;
     jvmtiLocalVariableEntry *table_;
@@ -33,17 +34,19 @@ class AffectedResultProcessor: ProcessorBase {
    public:
     AffectedResultProcessor(jvmtiEnv *jvmti, JNIEnv *jni, jvmtiFrameInfo frame,
                             int depth, jobject result, jboolean is_caught_by_frame,
-                            jstring location, jobject exception, jthread thread)
+                            std::string location_string, jobject exception, jthread thread)
         : ProcessorBase(jvmti, jni),
           frame_(frame),
           depth_(depth),
           result_(result),
           is_caught_by_frame_(is_caught_by_frame),
-          location_(location),
+          location_string_(location_string),
           exception_(exception),
           thread_(thread) {
         result_class_ = jni_->FindClass(kAffectedVarResultClassName);
         runtime_class_ = jni_->FindClass(kRuntimeClassName);
+        location_jstring_ =
+            jni_->NewStringUTF(location_string_.c_str());
     }
 
     void Process();

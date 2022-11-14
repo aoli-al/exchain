@@ -3,6 +3,7 @@ package al.aoli.exchain.runtime.objects
 enum class SourceType {
     JUMP,
     FIELD,
+    ARRAY,
     INVOKE
 }
 

@@ -37,4 +37,14 @@ std::string ProcessorBase::GetClassSignature(jmethodID method) {
     return sig;
 }
 
+std::string ProcessorBase::GetClassSignature(jclass clazz) {
+    char *signature;
+    ProcessorBase::CheckJvmTIError(
+        jvmti_->GetClassSignature(clazz, &signature, NULL),
+        "get class signature failed.");
+    std::string sig = signature;
+    jvmti_->Deallocate((unsigned char *)signature);
+    return sig;
+}
+
 }  // namespace exchain

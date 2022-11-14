@@ -15,7 +15,7 @@ class ExceptionProcessor: ProcessorBase {
     jthread thread_;
     int exception_id_;
     jobject exception_;
-    jstring location_string_;
+    std::string location_string_;
 
     static const int kMaxStackDepth = 100;
 
@@ -32,11 +32,9 @@ class ExceptionProcessor: ProcessorBase {
           thread_(thread),
           exception_(exception) {
         // exception_id_ = ComputeExceptionId(exception);
-        location_string_ =
-            jni_->NewStringUTF((GetClassSignature(throw_method_) + ":" +
-                                GetMethodSignature(throw_method_) + ":" +
-                                std::to_string(throw_location_))
-                                   .c_str());
+        location_string_ = GetClassSignature(throw_method_) + ":" +
+                           GetMethodSignature(throw_method_) + ":" +
+                           std::to_string(throw_location_);
     };
 
    private:

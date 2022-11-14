@@ -16,6 +16,7 @@ class ProcessorBase {
     bool CheckJvmTIError(jvmtiError error, std::string msg);
     std::string GetMethodSignature(jmethodID method);
     std::string GetClassSignature(jmethodID clazz);
+    std::string GetClassSignature(jclass clazz);
 };
 
 }  // namespace exchain

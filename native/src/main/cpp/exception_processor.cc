@@ -21,11 +21,17 @@ void ExceptionProcessor::FullPass() {
             "failed to get stack trace.")) {
         PLOG_INFO << "Stack count: " << count;
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
+
             auto class_signature = GetClassSignature(frames[stack_idx].method);
             if (ShouldIgnoreClass(class_signature)) {
                 if (frames[stack_idx].method == catch_method_) {
                     break;
                 }
+                continue;
+            }
+            jint flags;
+            jvmti_->GetMethodModifiers(frames[stack_idx].method, &flags);
+            if (flags & JVM_ACC_NATIVE) {
                 continue;
             }
             if (ShouldTerminateEarly(class_signature)) {
@@ -66,32 +72,33 @@ void ExceptionProcessor::Process() {
 }
 
 bool ExceptionProcessor::ShouldIgnoreClass(std::string method_name) {
-    return method_name.starts_with("Ljava") ||
-           method_name.starts_with("Ljavax") ||
-           method_name.starts_with("Ljdk") ||
-           method_name.starts_with("Lch/qos/") ||
-           method_name.starts_with("Lshadow/asm") ||
-           method_name.starts_with("Lnet/bytebuddy") ||
-           method_name.starts_with("Lorg/apache/catalina/loader") ||
-           method_name.starts_with("Lal/aoli/exchain/instrumentation") ||
-           method_name.starts_with("Lorg/slf4j") ||
-           method_name.starts_with("Lorg/apache/logging/log4j") ||
-           method_name.starts_with("Lsun") ||
-           method_name.starts_with("Lcom/sun") ||
-           method_name.starts_with("Lkotlin") ||
-           method_name.starts_with("Lal/aoli/exchain/instrumentation") ||
+    // return method_name.starts_with("Ljava") ||
+    //        method_name.starts_with("Ljavax") ||
+    //        method_name.starts_with("Ljdk") ||
+    //        method_name.starts_with("Lch/qos/") ||
+    //        method_name.starts_with("Lshadow/asm") ||
+    //        method_name.starts_with("Lnet/bytebuddy") ||
+    //        method_name.starts_with("Lorg/apache/catalina/loader") ||
+    //        method_name.starts_with("Lal/aoli/exchain/instrumentation") ||
+    //        method_name.starts_with("Lorg/slf4j") ||
+    //        method_name.starts_with("Lorg/apache/logging/log4j") ||
+    //        method_name.starts_with("Lsun") ||
+    //        method_name.starts_with("Lcom/sun") ||
+    //        method_name.starts_with("Lkotlin") ||
+    return method_name.starts_with("Lal/aoli/exchain/instrumentation") ||
            method_name.starts_with("Lal/aoli/exchain/phosphor") ||
            method_name.starts_with("Ledu/columbia/cs/psl/");
 }
 
 bool ExceptionProcessor::ShouldTerminateEarly(std::string method_name) {
-    return method_name.starts_with("Lorg/springframework/boot") ||
-           method_name.starts_with("Lorg/springframework/util/ClassUtils") ||
-           method_name.starts_with("Lorg.springframework.asm.ClassReader") ||
-           method_name.starts_with(
-               "Lorg/springframework/cglib/core/ClassNameReader") ||
-           method_name.starts_with(
-               "Lorg/springframework/core/io/ClassPathResource");
+    return false;
+    // return method_name.starts_with("Lorg/springframework/boot") ||
+    //        method_name.starts_with("Lorg/springframework/util/ClassUtils") ||
+    //        method_name.starts_with("Lorg.springframework.asm.ClassReader") ||
+    //        method_name.starts_with(
+    //            "Lorg/springframework/cglib/core/ClassNameReader") ||
+    //        method_name.starts_with(
+    //            "Lorg/springframework/core/io/ClassPathResource");
 }
 
 void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,

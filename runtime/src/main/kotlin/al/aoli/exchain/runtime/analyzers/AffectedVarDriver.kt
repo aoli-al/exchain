@@ -44,7 +44,7 @@ object AffectedVarDriver {
         }
         val sourceIdentified = store.exceptionSourceIdentified.getOrDefault(label, false)
 
-        val visitor = AffectedVarClassVisitor(e, throwIndex, catchIndex, isThrowInsn, sourceIdentified,
+        val visitor = AffectedVarClassVisitor(e, throwIndex, catchIndex, isThrowInsn, !sourceIdentified,
             className, method, classReader)
         classReader.accept(visitor, 0)
 
