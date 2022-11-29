@@ -10,6 +10,6 @@
 [submodule "dependencies/FlowDroid"]
 	path = dependencies/FlowDroid
 	url = git@github.com:aoli-al/FlowDroid.git
-[submodule "applications/fineract"]
-	path = applications/fineract
+[submodule "applications/fineract-1211"]
+	path = applications/fineract-1211
 	url = git@github.com:aoli-al/fineract.git

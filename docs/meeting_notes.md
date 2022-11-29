@@ -924,3 +924,183 @@ void setupInstrumented(HTTPClient client) {
     - List
     - Set
 
+# Nov 21
+
+
+- https://issues.apache.org/
+    - Filter used
+        - Type: bug
+        - Resolution: Fixed, Done, Implemented
+        - Keyword: exception handling
+        - Tag: Resolved, Closed
+    - Ordered by created
+    - Manually checked top 500 issues
+        - Only focus on Java projects
+        - Ignore issues without patches
+        - Ignore duplicate issues
+- We identified 22 issues related to chain of exception handling
+    - From 16 different applications
+    - > Not sure what causes the NPS because the exception is swallowed.
+    - > In rare case, some exceptions may happen.
+    - > As a result the original exception is swallowed and the pool never recovers from this state.
+    - The final exception of  9 / 21 issues are NPE.
+    <!-- - our proposed solution can handle 18/21 issues. (this is based on manually inspection) -->
+
+## Issue: data flow between heap objects and local variables
+
+- 3/22 issues.
+- We cannot track the source of a null pointer if it is passed from a field to a local variable.
+
+- We may want to track different types of variables differently.
+- If the affected variables are primitive values, null pointers, we use static data-flow analysis
+    - The sink and source in static data-flow analysis are both primitive values or null values.
+- If the affected variables are heap objects, class fields, we taint the heap object dynamically.
+
+
+```{.java .numberLines .lineAnchors}
+class Foo {
+    String s = null;
+    Taint s_taint = emptyTaint();
+}
+void test() {
+    Foo f = new Foo();
+    try {
+        f.s = getWithException(); // throw RuntimeException();
+        // f.s is affected variable.
+        // s belongs to a heap object.
+        // f.s_taint = "RuntimeException()";
+    } catch (Exception e) {
+    }
+    String s = f.s; // The taint information is lost here.
+    if (s.IsEmpty()) { // Throws NPE
+    // s is a local variable points to null
+    // We set s as the sink in the static taint analysis.
+    // We failed to track the source of null because the taint
+    // information is only maintained dynamically.
+    }
+}
+```
+
+- What we can handle
+
+```{.java .numberLines .lineAnchors}
+class Foo {
+    String s = null;
+    Taint s_taint = emptyTaint();
+}
+void test() {
+    Foo f = new Foo();
+    try {
+        f.s = getWithException(); // throw RuntimeException();
+        // f.s is affected variable.
+        // s belongs to a heap object.
+        // f.s_taint = "RuntimeException()";
+    } catch (Exception e) {
+    }
+    if (f.s.IsEmpty()) { // Throws NPE
+    // s is a field of a heap object
+    // we can get taint information of s from f.s_taint
+    }
+}
+```
+
+
+```{.java .numberLines .lineAnchors}
+void test() {
+    String s = null;
+    try {
+        s = getWithException(); // throw RuntimeException();
+        // s is affected variable.
+        // s is a local variable that points to null.
+        // we use static taint analysis to propagate s.
+    } catch (Exception e) {
+    }
+    String a = s;
+    if (a.IsEmpty()) { // Throws NPE
+    // a is a local variable points to null
+    }
+}
+```
+
+## Issue: control flow dependencies
+
+- 2/22 issues
+
+```{.java .numberLines .lineAnchors}
+try {
+    throw Exception1();
+} catch (Exception e) {
+    throw Exception2();
+}
+```
+
+## Issue: root cause is failure requests
+
+- 1/22 issues
+
+```{.java .numberLines .lineAnchors}
+var response = getResponse(); // 500 response
+response.getData(); // BadDataException
+```
+
+# Nov 28
+
+
+- Issue collection:
+    - https://issues.apache.org/
+        - Filter used
+            - Type: bug
+            - Resolution: Fixed, Done, Implemented
+            - Keyword: exception handling
+            - Tag: Resolved, Closed
+        - Ordered by created
+        - Manually checked top 500 issues
+            - Only focus on Java projects
+            - Ignore issues without patches
+            - Ignore duplicate issues
+    - We identified 22 issues related to chain of exception handling from 16 different applications.
+
+- Recap:
+    - We may want to track different types of variables differently.
+    - If the affected variables are primitive values, null pointers, we use static data-flow analysis
+        - The sink and source in static data-flow analysis are both primitive values or null values.
+    - If the affected variables are heap objects, class fields, we taint the heap object dynamically.
+
+- Issue:
+    - This approach has an unrealistic assumption: there is no data-flow between local variables and class fields.
+    - ~5/22 collected issues have this property
+
+For example:
+
+```{.java .numberLines .lineAnchors}
+class Foo {
+    String s = null;
+    Taint s_taint = emptyTaint();
+}
+void test() {
+    Foo f = new Foo();
+    try {
+        f.s = getWithException(); // throw RuntimeException();
+        // f.s is affected variable.
+        // s belongs to a heap object.
+        // f.s_taint = "RuntimeException()";
+    } catch (Exception e) {
+    }
+    String s = f.s; // The taint information is lost here.
+    if (s.IsEmpty()) { // Throws NPE
+    // s is a local variable points to null
+    // We set s as the sink in the static taint analysis.
+    // We failed to track the source of null because the taint
+    // information is only maintained dynamically.
+    }
+}
+```
+
+- Rohan's suggestion:
+    - Instead of providing a system that combines static and dynamic approaches, we provide two versions of the system.
+    - The static version performs a lightweight instrumentation and only collects exception information of the production system.
+    - The dynamic version does not perform any instrumentation to the production system.
+    - Once a failure occurs, there are two scenarios:
+        - If the failure can be reproduced offline: we then use the dynamic version to instrument the system and construct accurate causality chains of exceptions.
+        - If the failure cannot be reproduced offline: we then use the static version to construct the causality chains of exceptions based on the exception data collected in the production system.
+
