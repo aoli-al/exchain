@@ -13,3 +13,33 @@
 [submodule "applications/fineract-1211"]
 	path = applications/fineract-1211
 	url = git@github.com:aoli-al/fineract.git
+[submodule "applications/hadoop-17812"]
+	path = applications/hadoop-17812
+	url = https://github.com/aoli-al/hadoop
+[submodule "applications/hbase-17475"]
+	path = applications/hbase-17475
+	url = git@github.com:aoli-al/hbase.git
+[submodule "applications/hive-26288"]
+	path = applications/hive-26288
+	url = git@github.com:aoli-al/hive.git
+[submodule "applications/hdfs-4128"]
+	path = applications/hdfs-4128
+	url = https://github.com/aoli-al/hadoop
+[submodule "applications/kylin-4263"]
+	path = applications/kylin-4263
+	url = git@github.com:aoli-al/kylin.git
+[submodule "applications/mapreduce-6654"]
+	path = applications/mapreduce-6654
+	url = https://github.com/aoli-al/hadoop
+[submodule "applications/nifi-8249"]
+	path = applications/nifi-8249
+	url = git@github.com:aoli-al/nifi.git
+[submodule "applications/pool-396"]
+	path = applications/pool-396
+	url = git@github.com:aoli-al/commons-pool.git
+[submodule "applications/solr-16363"]
+	path = applications/solr-16363
+	url = git@github.com:aoli-al/solr.git
+[submodule "applications/wicket-6908"]
+	path = applications/wicket-6908
+	url = git@github.com:aoli-al/wicket.git
