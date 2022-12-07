@@ -1104,3 +1104,32 @@ void test() {
         - If the failure can be reproduced offline: we then use the dynamic version to instrument the system and construct accurate causality chains of exceptions.
         - If the failure cannot be reproduced offline: we then use the static version to construct the causality chains of exceptions based on the exception data collected in the production system.
 
+# Dec 5
+
+- 22 issues collected in total
+
+### How to Reproduce
+
+- 8 / 22 can be reproduced
+
+- If the current version does not contain the fix
+    - revert back to the commit of the fix
+- revert the fix
+- if a payload is provided in the ticket
+    - reproduce the failure with the same payload
+- else if a unit test is provided
+    - reproduce the failure with the unit test
+
+
+
+### Reason Can't Reproduce
+
+- Unknown root cause (11/22):
+    - no payload is provided
+    - no unit test is provided
+    - the root failure is unknown
+- Unable to compile (1/22)
+    - missing native dependencies
+- Hard to trigger (2/22)
+    - require long execution
+    - require unstable connection between services
