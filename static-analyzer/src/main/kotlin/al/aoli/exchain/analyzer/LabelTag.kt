@@ -3,7 +3,7 @@ package al.aoli.exchain.analyzer
 import soot.tagkit.Tag
 import java.nio.ByteBuffer
 
-class LabelTag(val label: Int): Tag {
+class LabelTag(val label: Int) : Tag {
     override fun getName(): String {
         return "LabelTag"
     }
@@ -22,5 +22,4 @@ class LabelTag(val label: Int): Tag {
 
         val tagMap = mutableMapOf<Int, LabelTag>()
     }
-
 }

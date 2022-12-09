@@ -3,13 +3,15 @@ package al.aoli.exchain.phosphor.instrumenter;
 public final class Constants {
     public static final String originMethodSuffix = "ExchainOrigin";
     public static final String instrumentedMethodSuffix = "ExchainInst";
+
     public static String methodNameMapping(String name) {
         switch (name) {
             case "<clinit>":
                 return "exchainStaticConstructor";
             case "<init>":
                 return "exchainConstructor";
-            default: return name;
+            default:
+                return name;
         }
     }
 

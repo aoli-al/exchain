@@ -1,6 +1,5 @@
 package al.aoli.exchain.demo;
 
-
 import java.util.Random;
 import java.util.zip.DataFormatException;
 
@@ -14,8 +13,7 @@ public class DataFlowTest {
     }
 
     public static class Base {
-        void bar() {
-        }
+        void bar() {}
 
         void test(Dummy d) throws DataFormatException {
             d.bar();
@@ -25,13 +23,14 @@ public class DataFlowTest {
         private void testInternal() throws DataFormatException {
             throw new DataFormatException("123");
         }
-
     }
 
     public static class Dummy extends Base {
         public String sub = null;
         public Base b = new Base();
+
         void foo() {}
+
         @Override
         void test(Dummy d) throws DataFormatException {
             super.test(d);
@@ -50,19 +49,16 @@ public class DataFlowTest {
                 if (sub == null) {
                     logError("sub is null");
                 }
-            }
-            catch (RuntimeException e) {
+            } catch (RuntimeException e) {
                 System.out.println(e.getMessage());
             }
         }
 
-        void nothing() {
-        }
+        void nothing() {}
 
         void test1() {
             throw new RuntimeException("2");
         }
-
     }
 
     public Object affectedLocalTest() {
@@ -70,8 +66,6 @@ public class DataFlowTest {
         dummy.nothing();
         return o;
     }
-
-
 
     public void scene6() {
         Dummy f = new Dummy();
@@ -88,26 +82,26 @@ public class DataFlowTest {
 
     public void functionWithParameter(int a) {}
 
-
     public void scene2() {
         int count = 0;
         while (count < 50) {
             try {
                 functionWithException();
-                count ++;
+                count++;
             } catch (Exception e) {
-                count ++;
+                count++;
             }
         }
     }
+
     int a = 0;
     int b = 0;
 
     public void scene5() {
-        //...
+        // ...
         if (a > 0) {
             if (b < 0) {
-//                foo.functionWithException(c);
+                //                foo.functionWithException(c);
             }
         }
     }
@@ -144,7 +138,6 @@ public class DataFlowTest {
         return 0;
     }
 
-
     public void scene3() {
         try {
             Random random = new Random();
@@ -153,8 +146,7 @@ public class DataFlowTest {
             } else {
                 functionWithException();
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
 
         }
     }
@@ -182,15 +174,15 @@ public class DataFlowTest {
     }
 
     public String scene1(Dummy d) {
-//        try {
-//            if (d.sub == null) {
-//                throw new RuntimeException("sub is null");
-//            }
-//        }
-//        catch (RuntimeException e) {
-//            System.out.println(e.getMessage());
-//        }
-//        return "";
+        //        try {
+        //            if (d.sub == null) {
+        //                throw new RuntimeException("sub is null");
+        //            }
+        //        }
+        //        catch (RuntimeException e) {
+        //            System.out.println(e.getMessage());
+        //        }
+        //        return "";
         try {
             o = createObjectWithException();
         } catch (Exception e) {
@@ -202,8 +194,8 @@ public class DataFlowTest {
         String s = null;
         try {
             d.test();
-//            s = o.toString();
-//            d.setSub();
+            //            s = o.toString();
+            //            d.setSub();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -218,7 +210,6 @@ public class DataFlowTest {
 
     public void test2(Dummy d, String o) {
         d.sub = o;
-
     }
 
     public void callScene1() {
@@ -227,11 +218,10 @@ public class DataFlowTest {
         d.test();
     }
 
-
-
     public void functionWithException() {
         throw new RuntimeException("exception");
     }
+
     public static Object createObjectWithException() {
         throw new RuntimeException("exception");
     }

@@ -2,7 +2,7 @@ package al.aoli.exchain.runtime.store
 
 import al.aoli.exchain.runtime.objects.AffectedVarResult
 
-class InMemoryAffectedVarStore: AffectedVarStore {
+class InMemoryAffectedVarStore : AffectedVarStore {
 
     val affectedVarResult = mutableMapOf<String, AffectedVarResult>()
     val exceptionSourceIdentified = mutableMapOf<Int, Boolean>()
@@ -28,6 +28,4 @@ class InMemoryAffectedVarStore: AffectedVarStore {
         val sig = "$clazz:$method:$throwLocation:$catchLocation:$isThrowInsn"
         affectedVarResult[sig] = result
     }
-
-
 }

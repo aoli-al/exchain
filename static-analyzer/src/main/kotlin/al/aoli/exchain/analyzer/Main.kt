@@ -12,6 +12,7 @@ import soot.options.Options
 import java.io.File
 
 private val logger = KotlinLogging.logger {}
+
 fun setupSoot(sourceDirectory: String): List<String> {
     val paths = File(sourceDirectory).readText().split(":").map { it.trim() }
     G.reset()
@@ -19,7 +20,7 @@ fun setupSoot(sourceDirectory: String): List<String> {
     Options.v().set_prepend_classpath(true)
     Options.v().set_keep_line_number(true)
     Options.v().set_keep_offset(true)
-//    Options.v().set_whole_program(true)
+    //    Options.v().set_whole_program(true)
     Options.v().set_prepend_classpath(true)
     Options.v().set_allow_phantom_refs(true)
     Options.v().set_write_local_annotations(true)
@@ -61,8 +62,10 @@ fun loadAndProcess(args: List<String>) {
         configs.enableArrayTracking = false
         configs.flowSensitiveAliasing = false
         configs.staticFieldTrackingMode = StaticFieldTrackingMode.None
-        configs.solverConfiguration.dataFlowSolver = InfoflowConfiguration.DataFlowSolver.GarbageCollecting
-        configs.pathConfiguration.pathBuildingAlgorithm = InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
+        configs.solverConfiguration.dataFlowSolver =
+            InfoflowConfiguration.DataFlowSolver.GarbageCollecting
+        configs.pathConfiguration.pathBuildingAlgorithm =
+            InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
         configs.pathConfiguration.pathReconstructionTimeout = 2 * 60
         configs.codeEliminationMode = InfoflowConfiguration.CodeEliminationMode.NoCodeElimination
         configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.None
@@ -86,14 +89,20 @@ fun loadAndProcess(args: List<String>) {
         if (result.affectedLocalName.isEmpty() && result.affectedFieldName.isEmpty()) continue
         logger.info("Start analysing ${result.label}.")
         try {
-            infoFlow.computeInfoflow(libPath, libPath, result.getSootMethodSignature(),
-                SourceSinkManager(result.getSootMethodSignature(), result, sourceVarAnalyzer))
+            infoFlow.computeInfoflow(
+                libPath,
+                libPath,
+                result.getSootMethodSignature(),
+                SourceSinkManager(result.getSootMethodSignature(), result, sourceVarAnalyzer)
+            )
         } catch (e: RuntimeException) {
             logger.warn("Failed to get method: ${result.getSootMethodSubsignature()}", e)
-            infoFlow.config.sootIntegrationMode = InfoflowConfiguration.SootIntegrationMode.UseExistingCallgraph
+            infoFlow.config.sootIntegrationMode =
+                InfoflowConfiguration.SootIntegrationMode.UseExistingCallgraph
             continue
         }
-        infoFlow.config.sootIntegrationMode = InfoflowConfiguration.SootIntegrationMode.UseExistingCallgraph
+        infoFlow.config.sootIntegrationMode =
+            InfoflowConfiguration.SootIntegrationMode.UseExistingCallgraph
         dependencies.processed.add(result.getSignature())
 
         if (!infoFlow.results.isEmpty) {
@@ -101,9 +110,10 @@ fun loadAndProcess(args: List<String>) {
                 val definition = sourceSinkInfo.o1.definition
                 if (definition is LabeledSinkDefinition) {
                     for (i in definition.label) {
-                        dependencies.exceptionGraph.getOrPut(i) { mutableSetOf() }
+                        dependencies.exceptionGraph
+                            .getOrPut(i) { mutableSetOf() }
                             .add(Pair(result.label, sourceSinkInfo.toString()))
-                        println("Dependency ${i} --------> ${result.label}")
+                        println("Dependency $i --------> ${result.label}")
                     }
                 }
             }

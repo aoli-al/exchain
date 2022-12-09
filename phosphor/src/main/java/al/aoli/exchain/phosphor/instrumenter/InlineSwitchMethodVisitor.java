@@ -1,14 +1,5 @@
 package al.aoli.exchain.phosphor.instrumenter;
 
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.AnnotationVisitor;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Attribute;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.ClassVisitor;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Label;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
-import edu.columbia.cs.psl.phosphor.struct.harmony.util.List;
-import edu.columbia.cs.psl.phosphor.struct.harmony.util.StringBuilder;
-
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_STATIC;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
@@ -16,6 +7,13 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.F_NEW;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IFEQ;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IFNE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.UNINITIALIZED_THIS;
+
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.AnnotationVisitor;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Attribute;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Label;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.List;
 
 public class InlineSwitchMethodVisitor extends MethodVisitor {
 
@@ -35,20 +33,21 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
     String name;
     boolean shouldInline;
 
-
     boolean isInterface;
-
 
     public MethodVisitor getMv() {
         return super.mv;
     }
 
-
-    public InlineSwitchMethodVisitor(MethodVisitor mv, String owner,
-                                     boolean isInterface,
-                                     int access, String name,
-                                     String descriptor, String signature,
-                                     String[] exceptions) {
+    public InlineSwitchMethodVisitor(
+            MethodVisitor mv,
+            String owner,
+            boolean isInterface,
+            int access,
+            String name,
+            String descriptor,
+            String signature,
+            String[] exceptions) {
         super(ASM9, mv);
         this.isInterface = isInterface;
         this.name = name;
@@ -58,15 +57,24 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
         this.signature = signature;
         this.exceptions = exceptions;
         String newName = methodNameMapping(name);
-        shouldInline = name.equals("<init>")
-                || name.equals("fillInStackTrace")
-                || owner.startsWith("jdk/internal/reflect/Generated");
-        originNode = new InlineSwitchMethodNode(access,
-                StringHelper.concat(newName, Constants.originMethodSuffix),
-                descriptor, signature, exceptions);
-        instrumentedNode = new InlineSwitchMethodNode(
-                access, StringHelper.concat(newName, Constants.instrumentedMethodSuffix),
-                descriptor, signature, exceptions);
+        shouldInline =
+                name.equals("<init>")
+                        || name.equals("fillInStackTrace")
+                        || owner.startsWith("jdk/internal/reflect/Generated");
+        originNode =
+                new InlineSwitchMethodNode(
+                        access,
+                        StringHelper.concat(newName, Constants.originMethodSuffix),
+                        descriptor,
+                        signature,
+                        exceptions);
+        instrumentedNode =
+                new InlineSwitchMethodNode(
+                        access,
+                        StringHelper.concat(newName, Constants.instrumentedMethodSuffix),
+                        descriptor,
+                        signature,
+                        exceptions);
     }
 
     public InlineSwitchMethodNode getOriginNode() {
@@ -84,8 +92,7 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
                     Opcodes.GETSTATIC,
                     "al/aoli/exchain/runtime/ExceptionJavaRuntime",
                     "enabled",
-                    "Z"
-            );
+                    "Z");
             if (isInstrumentedCode) {
                 super.visitJumpInsn(IFEQ, originCodeSection);
             } else {
@@ -96,7 +103,7 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
         if (isInstrumentedCode) {
             visitLabelAndFrame(instrumentedCodeSection);
         } else {
-//            visitLabelAndFrame(originCodeSection);
+            //            visitLabelAndFrame(originCodeSection);
         }
         super.visitCode();
     }
@@ -146,8 +153,7 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
 
     @Override
     public AnnotationVisitor visitAnnotation(String descriptor, boolean visible) {
-        if (descriptor.contains("CallerSensitive") ||
-                descriptor.contains("ForceInline")) {
+        if (descriptor.contains("CallerSensitive") || descriptor.contains("ForceInline")) {
             shouldInline = true;
         }
         return super.visitAnnotation(descriptor, visible);
@@ -162,5 +168,4 @@ public class InlineSwitchMethodVisitor extends MethodVisitor {
     public AnnotationVisitor visitAnnotationDefault() {
         return super.visitAnnotationDefault();
     }
-
 }

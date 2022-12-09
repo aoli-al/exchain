@@ -1,6 +1,17 @@
 package al.aoli.exchain.analyzer
 
-import soot.*
+import soot.ArrayType
+import soot.BooleanType
+import soot.ByteType
+import soot.CharType
+import soot.DoubleType
+import soot.ErroneousType
+import soot.FloatType
+import soot.IntType
+import soot.LongType
+import soot.RefType
+import soot.ShortType
+import soot.Type
 import soot.tagkit.Host
 import soot.tagkit.Tag
 
@@ -11,6 +22,7 @@ fun Host.addAll(result: Set<Tag>?) {
         }
     }
 }
+
 fun getParamTypes(descriptor: String): List<Type> {
     val types = mutableListOf<Type>()
     var currentOffset = 1
@@ -24,7 +36,7 @@ fun getParamTypes(descriptor: String): List<Type> {
             currentOffset = descriptor.indexOf(';', currentOffset)
         }
         types.add(stringToType(descriptor.substring(currentTypeBegin..currentOffset)))
-        currentOffset ++
+        currentOffset++
         currentTypeBegin = currentOffset
     }
     return types

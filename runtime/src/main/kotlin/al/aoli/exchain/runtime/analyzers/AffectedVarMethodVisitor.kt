@@ -2,18 +2,39 @@ package al.aoli.exchain.runtime.analyzers
 
 import al.aoli.exchain.runtime.objects.SourceType
 import mu.KotlinLogging
-import org.objectweb.asm.*
-import org.objectweb.asm.tree.*
+import org.objectweb.asm.ConstantDynamic
+import org.objectweb.asm.Handle
+import org.objectweb.asm.Label
+import org.objectweb.asm.Opcodes
+import org.objectweb.asm.Type
+import org.objectweb.asm.tree.AbstractInsnNode
+import org.objectweb.asm.tree.FieldInsnNode
+import org.objectweb.asm.tree.InsnNode
+import org.objectweb.asm.tree.JumpInsnNode
+import org.objectweb.asm.tree.LabelNode
+import org.objectweb.asm.tree.LineNumberNode
+import org.objectweb.asm.tree.MethodInsnNode
+import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.tree.VarInsnNode
 import org.objectweb.asm.tree.analysis.Frame
 import org.objectweb.asm.tree.analysis.SourceValue
 
 private val logger = KotlinLogging.logger {}
-class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, val catchIndex: Long,
-                               val isThrowInsn: Boolean, val findSource: Boolean, val owner: String,
-                               access: Int, name: String, descriptor: String, signature: String?,
-                               exceptions: Array<out String>?, val classReader: AffectedVarClassReader
-):
-    MethodNode(Opcodes.ASM8, access, name, descriptor, signature, exceptions) {
+
+class AffectedVarMethodVisitor(
+    val exception: Throwable,
+    val throwIndex: Long,
+    val catchIndex: Long,
+    val isThrowInsn: Boolean,
+    val findSource: Boolean,
+    val owner: String,
+    access: Int,
+    name: String,
+    descriptor: String,
+    signature: String?,
+    exceptions: Array<out String>?,
+    val classReader: AffectedVarClassReader
+) : MethodNode(Opcodes.ASM8, access, name, descriptor, signature, exceptions) {
     var byteCodeOffset = 0L
     var throwInsn: AbstractInsnNode? = null
     var catchInsn: AbstractInsnNode? = null
@@ -23,8 +44,6 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
     init {
         paramSize = Type.getArgumentTypes(descriptor).size + if (isStatic) 0 else 1
     }
-
-
 
     private fun checkThrowInsn() {
         if (byteCodeOffset == throwIndex) {
@@ -48,13 +67,14 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
     override fun visitVarInsn(opcode: Int, varIndex: Int) {
         super.visitVarInsn(opcode, varIndex)
         checkThrowInsn()
-        byteCodeOffset += if (varIndex < 4 && opcode != Opcodes.RET) {
-            1
-        } else if (varIndex > 256) {
-            4
-        } else {
-            2
-        }
+        byteCodeOffset +=
+            if (varIndex < 4 && opcode != Opcodes.RET) {
+                1
+            } else if (varIndex > 256) {
+                4
+            } else {
+                2
+            }
     }
 
     override fun visitJumpInsn(opcode: Int, label: Label?) {
@@ -93,11 +113,12 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
         super.visitMethodInsn(opcodeAndSource, owner, name, descriptor, isInterface)
         checkThrowInsn()
         val opcode = opcodeAndSource and Opcodes.SOURCE_MASK.inv()
-        byteCodeOffset += if (opcode == Opcodes.INVOKEINTERFACE) {
-            5
-        } else {
-            3
-        }
+        byteCodeOffset +=
+            if (opcode == Opcodes.INVOKEINTERFACE) {
+                5
+            } else {
+                3
+            }
     }
 
     override fun visitInvokeDynamicInsn(
@@ -120,11 +141,12 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
     override fun visitIincInsn(varIndex: Int, increment: Int) {
         super.visitIincInsn(varIndex, increment)
         checkThrowInsn()
-        byteCodeOffset += if (varIndex > 255 || increment > 127 || increment < -128) {
-            6
-        } else {
-            3
-        }
+        byteCodeOffset +=
+            if (varIndex > 255 || increment > 127 || increment < -128) {
+                6
+            } else {
+                3
+            }
     }
 
     override fun visitMultiANewArrayInsn(descriptor: String?, numDimensions: Int) {
@@ -133,27 +155,30 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
         byteCodeOffset += 4
     }
 
-
     override fun visitIntInsn(opcode: Int, operand: Int) {
         super.visitIntInsn(opcode, operand)
         checkThrowInsn()
-        byteCodeOffset += when (opcode) {
-            Opcodes.BIPUSH, Opcodes.NEWARRAY -> 2
-            else -> 3
-        }
+        byteCodeOffset +=
+            when (opcode) {
+                Opcodes.BIPUSH,
+                Opcodes.NEWARRAY -> 2
+                else -> 3
+            }
     }
 
     override fun visitLdcInsn(value: Any) {
         super.visitLdcInsn(value)
         checkThrowInsn()
-        byteCodeOffset += if (value is Long ||
-            value is Double ||
-            value is ConstantDynamic && value.size == 2 ||
-            classReader.lastReadConstIndex > 255) {
-            3
-        } else {
-            2
-        }
+        byteCodeOffset +=
+            if (value is Long ||
+                value is Double ||
+                value is ConstantDynamic && value.size == 2 ||
+                classReader.lastReadConstIndex > 255
+            ) {
+                3
+            } else {
+                2
+            }
     }
 
     val affectedVars = mutableSetOf<Triple<Int, Int, String>>()
@@ -192,7 +217,10 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
         affectedVars.add(Triple(getLineNumber(insn), insn.`var`, getLocalName(insn.`var`)))
     }
 
-    private fun processAffectedInsns(affectedInsns: Set<AbstractInsnNode>, frames: Array<Frame<SourceValue>?>) {
+    private fun processAffectedInsns(
+        affectedInsns: Set<AbstractInsnNode>,
+        frames: Array<Frame<SourceValue>?>
+    ) {
         val throwInsnIndex = instructions.indexOf(throwInsn)
         val throwInsnFrame = frames[throwInsnIndex]
         for (insn in affectedInsns) {
@@ -200,12 +228,13 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
             when (insn) {
                 is MethodInsnNode -> {
                     if (insn.opcode != Opcodes.INVOKESTATIC && insn.opcode != Opcodes.INVOKEDYNAMIC) {
-                        val value = try {
-                            frame?.getStack(frame.stackSize - Type.getArgumentTypes(insn.desc).size - 1)
-                        } catch (e: IndexOutOfBoundsException) {
-                            logger.error { "Processing instruction $insn failed." }
-                            continue
-                        } ?: continue
+                        val value =
+                            try {
+                                frame?.getStack(frame.stackSize - Type.getArgumentTypes(insn.desc).size - 1)
+                            } catch (e: IndexOutOfBoundsException) {
+                                logger.error { "Processing instruction $insn failed." }
+                                continue
+                            } ?: continue
                         for (src in value.insns) {
                             val srcFrame = frames[instructions.indexOf(src)]
                             // If a method call is called to a field the field must be from `this`.
@@ -213,7 +242,10 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
                                 val fieldValue = srcFrame?.getStack(srcFrame.stackSize - 1) ?: continue
                                 if (fieldValue.insns.size != 1) continue
                                 val fieldSrc = fieldValue.insns.first()
-                                if (fieldSrc is VarInsnNode && fieldSrc.opcode == Opcodes.ALOAD && fieldSrc.`var` == 0) {
+                                if (fieldSrc is VarInsnNode &&
+                                    fieldSrc.opcode == Opcodes.ALOAD &&
+                                    fieldSrc.`var` == 0
+                                ) {
                                     appendAffectedFields(src)
                                 }
                             }
@@ -232,31 +264,33 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
                 }
                 is FieldInsnNode -> {
                     if (insn.opcode == Opcodes.PUTFIELD) {
-                        val objRef = try {
-                            frame?.getStack(frame.stackSize - 2)
-                        } catch (e: IndexOutOfBoundsException) {
-                            logger.error { "Processing instruction $insn failed. Error: $e" }
-                            continue
-                        } ?: continue
+                        val objRef =
+                            try {
+                                frame?.getStack(frame.stackSize - 2)
+                            } catch (e: IndexOutOfBoundsException) {
+                                logger.error { "Processing instruction $insn failed. Error: $e" }
+                                continue
+                            } ?: continue
                         for (src in objRef.insns) {
                             if (src is VarInsnNode) {
                                 if (src.`var` == 0 && !isStatic) {
                                     appendAffectedFields(insn)
-                                }
-                                else {
+                                } else {
                                     appendAffectedVars(src)
                                 }
                             }
-                            if (src is FieldInsnNode) {
-
-                            }
+                            if (src is FieldInsnNode) {}
                         }
                     }
                 }
                 is VarInsnNode -> {
                     if (catchInsn == null || throwInsnFrame == null) continue
                     when (insn.opcode) {
-                        Opcodes.ISTORE, Opcodes.LSTORE, Opcodes.FSTORE, Opcodes.DSTORE, Opcodes.ASTORE -> {
+                        Opcodes.ISTORE,
+                        Opcodes.LSTORE,
+                        Opcodes.FSTORE,
+                        Opcodes.DSTORE,
+                        Opcodes.ASTORE -> {
                             if (insn.`var` < throwInsnFrame.locals) {
                                 appendAffectedVars(insn)
                             }
@@ -267,8 +301,12 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
         }
     }
 
-    fun processSourceValue(insn: AbstractInsnNode, objRef: SourceValue,
-                           frames: Array<Frame<SourceValue>?>, throwInsnFrame: Frame<SourceValue>) {
+    fun processSourceValue(
+        insn: AbstractInsnNode,
+        objRef: SourceValue,
+        frames: Array<Frame<SourceValue>?>,
+        throwInsnFrame: Frame<SourceValue>
+    ) {
         for (src in objRef.insns) {
             val srcFrame = frames[instructions.indexOf(src)] ?: return
             when (src) {
@@ -291,18 +329,60 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
                 }
                 is InsnNode -> {
                     when (src.opcode) {
-                        Opcodes.IADD, Opcodes.ISUB, Opcodes.IMUL, Opcodes.IDIV,
-                        Opcodes.LADD, Opcodes.LSUB, Opcodes.LMUL, Opcodes.LDIV,
-                        Opcodes.FADD, Opcodes.FSUB, Opcodes.FMUL, Opcodes.FDIV,
-                        Opcodes.DADD, Opcodes.DSUB, Opcodes.DMUL, Opcodes.DDIV,
-                        Opcodes.DCMPL, Opcodes.DCMPG -> {
-                            processSourceValue(src, srcFrame.getStack(srcFrame.stackSize - 1), frames, throwInsnFrame)
-                            processSourceValue(src, srcFrame.getStack(srcFrame.stackSize - 2), frames, throwInsnFrame)
+                        Opcodes.IADD,
+                        Opcodes.ISUB,
+                        Opcodes.IMUL,
+                        Opcodes.IDIV,
+                        Opcodes.LADD,
+                        Opcodes.LSUB,
+                        Opcodes.LMUL,
+                        Opcodes.LDIV,
+                        Opcodes.FADD,
+                        Opcodes.FSUB,
+                        Opcodes.FMUL,
+                        Opcodes.FDIV,
+                        Opcodes.DADD,
+                        Opcodes.DSUB,
+                        Opcodes.DMUL,
+                        Opcodes.DDIV,
+                        Opcodes.DCMPL,
+                        Opcodes.DCMPG -> {
+                            processSourceValue(
+                                src,
+                                srcFrame.getStack(srcFrame.stackSize - 1),
+                                frames,
+                                throwInsnFrame
+                            )
+                            processSourceValue(
+                                src,
+                                srcFrame.getStack(srcFrame.stackSize - 2),
+                                frames,
+                                throwInsnFrame
+                            )
                         }
-                        Opcodes.L2D, Opcodes.L2F, Opcodes.L2I, Opcodes.D2F, Opcodes.D2I, Opcodes.D2L,
-                        Opcodes.INEG, Opcodes.I2B, Opcodes.I2C, Opcodes.I2D, Opcodes.I2F, Opcodes.I2L, Opcodes.I2S,
-                        Opcodes.F2D, Opcodes.F2I, Opcodes.F2L, Opcodes.FNEG -> {
-                            processSourceValue(src, srcFrame.getStack(srcFrame.stackSize - 1), frames, throwInsnFrame)
+                        Opcodes.L2D,
+                        Opcodes.L2F,
+                        Opcodes.L2I,
+                        Opcodes.D2F,
+                        Opcodes.D2I,
+                        Opcodes.D2L,
+                        Opcodes.INEG,
+                        Opcodes.I2B,
+                        Opcodes.I2C,
+                        Opcodes.I2D,
+                        Opcodes.I2F,
+                        Opcodes.I2L,
+                        Opcodes.I2S,
+                        Opcodes.F2D,
+                        Opcodes.F2I,
+                        Opcodes.F2L,
+                        Opcodes.FNEG -> {
+                            processSourceValue(
+                                src,
+                                srcFrame.getStack(srcFrame.stackSize - 1),
+                                frames,
+                                throwInsnFrame
+                            )
                         }
                     }
                 }
@@ -310,11 +390,16 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
         }
     }
 
-    fun findSourceInsn(analyzer: AffectedVarAnalyser<SourceValue>, frames: Array<Frame<SourceValue>?>) {
+    fun findSourceInsn(
+        analyzer: AffectedVarAnalyser<SourceValue>,
+        frames: Array<Frame<SourceValue>?>
+    ) {
         val throwInsnFrame = frames[instructions.indexOf(throwInsn)] ?: return
         val throwInsnLocal = throwInsn ?: return
         try {
-            if (isThrowInsn && (exception is NullPointerException || exception is IndexOutOfBoundsException)) {
+            if (isThrowInsn &&
+                (exception is NullPointerException || exception is IndexOutOfBoundsException)
+            ) {
                 val objRef =
                     if (throwInsnLocal is FieldInsnNode) {
                         sourceLines.add(Pair(getLineNumber(throwInsnLocal), SourceType.FIELD))
@@ -325,13 +410,16 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
                             Opcodes.GETFIELD -> {
                                 throwInsnFrame.getStack(throwInsnFrame.stackSize - 1)
                             }
-
                             else -> return
                         }
                     } else if (throwInsnLocal is MethodInsnNode) {
                         sourceLines.add(Pair(getLineNumber(throwInsnLocal), SourceType.INVOKE))
-                        if (throwInsnLocal.opcode != Opcodes.INVOKEDYNAMIC && throwInsnLocal.opcode != Opcodes.INVOKESTATIC) {
-                            throwInsnFrame.getStack(throwInsnFrame.stackSize - Type.getArgumentTypes(throwInsnLocal.desc).size - 1)
+                        if (throwInsnLocal.opcode != Opcodes.INVOKEDYNAMIC &&
+                            throwInsnLocal.opcode != Opcodes.INVOKESTATIC
+                        ) {
+                            throwInsnFrame.getStack(
+                                throwInsnFrame.stackSize - Type.getArgumentTypes(throwInsnLocal.desc).size - 1
+                            )
                         } else {
                             null
                         }
@@ -345,8 +433,10 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
                 return
             }
 
-            if (exception is ClassNotFoundException && throwInsnLocal is MethodInsnNode
-                && throwInsnLocal.name.contains("forName")) {
+            if (exception is ClassNotFoundException &&
+                throwInsnLocal is MethodInsnNode &&
+                throwInsnLocal.name.contains("forName")
+            ) {
                 sourceLines.add(Pair(getLineNumber(throwInsnLocal), SourceType.INVOKE))
                 return
             }
@@ -356,12 +446,15 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
 
             // We want to find the jump instruction that leads to the throw instruction.
             while (analyzer.instructionPredecessors[currentInsn]?.size == 1 &&
-                currentInsn !is JumpInsnNode) {
+                currentInsn !is JumpInsnNode
+            ) {
                 currentInsn = analyzer.instructionPredecessors[currentInsn]?.first()
             }
 
             // If the instruction has two predecessors, we want to find the corresponding jump INSN.
-            if (currentInsn !is JumpInsnNode && analyzer.instructionPredecessors[currentInsn]?.size == 2) {
+            if (currentInsn !is JumpInsnNode &&
+                analyzer.instructionPredecessors[currentInsn]?.size == 2
+            ) {
                 for (insn in analyzer.instructionPredecessors[currentInsn]!!) {
                     if (insn is JumpInsnNode) {
                         currentInsn = insn
@@ -371,17 +464,29 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
             if (currentInsn is JumpInsnNode) {
                 sourceLines.add(Pair(getLineNumber(currentInsn), SourceType.JUMP))
                 val branchFrame = frames[instructions.indexOf(currentInsn)] ?: return
-                val objRefs = when (currentInsn.opcode) {
-                    Opcodes.IFEQ, Opcodes.IFNE, Opcodes.IFLT, Opcodes.IFGE, Opcodes.IFGT, Opcodes.IFLE -> {
-                        listOf(branchFrame.getStack(branchFrame.stackSize - 1))
+                val objRefs =
+                    when (currentInsn.opcode) {
+                        Opcodes.IFEQ,
+                        Opcodes.IFNE,
+                        Opcodes.IFLT,
+                        Opcodes.IFGE,
+                        Opcodes.IFGT,
+                        Opcodes.IFLE -> {
+                            listOf(branchFrame.getStack(branchFrame.stackSize - 1))
+                        }
+                        Opcodes.IF_ICMPEQ,
+                        Opcodes.IF_ICMPNE,
+                        Opcodes.IF_ICMPLT,
+                        Opcodes.IF_ICMPGE,
+                        Opcodes.IF_ICMPGT,
+                        Opcodes.IF_ICMPLE -> {
+                            listOf(
+                                branchFrame.getStack(branchFrame.stackSize - 1),
+                                branchFrame.getStack(branchFrame.stackSize - 2)
+                            )
+                        }
+                        else -> emptyList()
                     }
-                    Opcodes.IF_ICMPEQ, Opcodes.IF_ICMPNE, Opcodes.IF_ICMPLT, Opcodes.IF_ICMPGE, Opcodes.IF_ICMPGT,
-                    Opcodes.IF_ICMPLE -> {
-                        listOf(branchFrame.getStack(branchFrame.stackSize - 1),
-                            branchFrame.getStack(branchFrame.stackSize - 2))
-                    }
-                    else -> emptyList()
-                }
                 for (objRef in objRefs) {
                     processSourceValue(currentInsn, objRef, frames, throwInsnFrame)
                 }
@@ -398,7 +503,12 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
         val tryCatchLocations = mutableListOf<Pair<Int, Int>>()
         for (tryCatchBlock in tryCatchBlocks) {
             if (tryCatchBlock.handler == catchInsn) {
-                tryCatchLocations.add(Pair(instructions.indexOf(tryCatchBlock.start), instructions.indexOf(tryCatchBlock.end)))
+                tryCatchLocations.add(
+                    Pair(
+                        instructions.indexOf(tryCatchBlock.start),
+                        instructions.indexOf(tryCatchBlock.end)
+                    )
+                )
             }
         }
         if (throwInsn != null && (catchIndex == -1L || catchInsn != null)) {
@@ -410,10 +520,13 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
             val affectedInsns = interpreter.affectedInsns
             if (catchIndex != -1L) {
                 val normalRunInterpreter = AffectedVarInterpreter(instructions, throwInsnIndex, emptyList())
-                val normalRunAnalyzer = AffectedVarAnalyser(instructions, normalRunInterpreter, throwInsn!!, null)
+                val normalRunAnalyzer =
+                    AffectedVarAnalyser(instructions, normalRunInterpreter, throwInsn!!, null)
                 normalRunAnalyzer.analyze(owner, this)
                 for (insn in analyzer.reachableBlocks(catchInsn!!)) {
-                    if (insn in normalRunInterpreter.affectedInsns && insn !in interpreter.affectedInsnInTry) {
+                    if (insn in normalRunInterpreter.affectedInsns &&
+                        insn !in interpreter.affectedInsnInTry
+                    ) {
                         affectedInsns.remove(insn)
                     }
                 }
@@ -426,7 +539,9 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
                 findSourceInsn(analyzer, analyzer.frames)
             }
         } else {
-            logger.error { "Error finding throwInsn/catchInsn at index $throwIndex in class $owner:$name" }
+            logger.error {
+                "Error finding throwInsn/catchInsn at index $throwIndex in class $owner:$name"
+            }
         }
     }
 }

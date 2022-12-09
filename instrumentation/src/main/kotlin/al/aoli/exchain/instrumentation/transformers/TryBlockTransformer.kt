@@ -8,8 +8,13 @@ import org.objectweb.asm.Type
 import org.objectweb.asm.commons.GeneratorAdapter
 import org.objectweb.asm.commons.Method
 
-class TryBlockTransformer(private val owner: String, visitor: MethodVisitor, access: Int, methodName: String, descriptor: String):
-    GeneratorAdapter(ASM8, visitor, access, methodName, descriptor) {
+class TryBlockTransformer(
+    private val owner: String,
+    visitor: MethodVisitor,
+    access: Int,
+    methodName: String,
+    descriptor: String
+) : GeneratorAdapter(ASM8, visitor, access, methodName, descriptor) {
     private val endLabels = mutableMapOf<Label, Label>()
     private val visitedTryBlock = mutableSetOf<Pair<Label, Label>>()
 
@@ -32,9 +37,13 @@ class TryBlockTransformer(private val owner: String, visitor: MethodVisitor, acc
             storeLocal(id)
             loadLocal(id)
             push("$owner:$name")
-            invokeStatic(Type.getType(ExceptionRuntime::class.java),
-                Method("onException", Type.VOID_TYPE,
-                    arrayOf(Type.getType(Throwable::class.java), Type.getType(String::class.java)))
+            invokeStatic(
+                Type.getType(ExceptionRuntime::class.java),
+                Method(
+                    "onException",
+                    Type.VOID_TYPE,
+                    arrayOf(Type.getType(Throwable::class.java), Type.getType(String::class.java))
+                )
             )
             loadLocal(id)
             throwException()
@@ -43,7 +52,4 @@ class TryBlockTransformer(private val owner: String, visitor: MethodVisitor, acc
             super.visitLabel(label)
         }
     }
-
-
 }
-

@@ -11,11 +11,12 @@ import soot.jimple.infoflow.sourcesSinks.manager.ISourceSinkManager
 import soot.jimple.infoflow.sourcesSinks.manager.SinkInfo
 import soot.jimple.infoflow.sourcesSinks.manager.SourceInfo
 
-class SourceSinkManager(val methodSignature: String, val result: AffectedVarResult,
-                        val sourceVarAnalyzer: SourceVarAnalyzer):
-    ISourceSinkManager {
-    override fun initialize() {
-    }
+class SourceSinkManager(
+    val methodSignature: String,
+    val result: AffectedVarResult,
+    val sourceVarAnalyzer: SourceVarAnalyzer
+) : ISourceSinkManager {
+    override fun initialize() {}
 
     override fun getSourceInfo(stmt: Stmt, manager: InfoflowManager): SourceInfo? {
         val currentMethod = manager.icfg.getMethodOf(stmt) ?: return null

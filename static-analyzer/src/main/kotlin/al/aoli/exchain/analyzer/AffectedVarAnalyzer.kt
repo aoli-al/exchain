@@ -3,16 +3,23 @@ package al.aoli.exchain.analyzer
 import al.aoli.exchain.runtime.objects.AffectedVarResult
 import soot.Local
 import soot.SootMethod
-import soot.jimple.*
+import soot.jimple.AbstractJimpleValueSwitch
+import soot.jimple.InstanceFieldRef
+import soot.jimple.Stmt
 
-class AffectedVarAnalyzer(val affectedVarResult: AffectedVarResult, val method: SootMethod, val stmt: Stmt):
-    AbstractJimpleValueSwitch<Boolean>()  {
+class AffectedVarAnalyzer(
+    val affectedVarResult: AffectedVarResult,
+    val method: SootMethod,
+    val stmt: Stmt
+) : AbstractJimpleValueSwitch<Boolean>() {
 
     override fun caseInstanceFieldRef(v: InstanceFieldRef) {
         result = false
         if (v.field.declaringClass?.name == affectedVarResult.getSootClassName()) {
             val index = affectedVarResult.affectedFieldName.indexOf(v.field.name)
-            if (index != -1 && affectedVarResult.affectedFieldLine[index] == stmt.javaSourceStartLineNumber)  {
+            if (index != -1 &&
+                affectedVarResult.affectedFieldLine[index] == stmt.javaSourceStartLineNumber
+            ) {
                 result = true
             }
         }
@@ -26,12 +33,13 @@ class AffectedVarAnalyzer(val affectedVarResult: AffectedVarResult, val method: 
         return name
     }
 
-
     override fun caseLocal(v: Local) {
         result = false
         val name = getLocalName(v)
         val index = affectedVarResult.affectedLocalName.indexOf(name)
-        if (index != -1 && affectedVarResult.affectedLocalLine[index] == stmt.javaSourceStartLineNumber) {
+        if (index != -1 &&
+            affectedVarResult.affectedLocalLine[index] == stmt.javaSourceStartLineNumber
+        ) {
             result = true
         }
     }

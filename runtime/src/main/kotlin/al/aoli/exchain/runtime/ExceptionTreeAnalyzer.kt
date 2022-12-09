@@ -16,7 +16,6 @@ object ExceptionTreeAnalyzer {
         output.writeText("")
     }
 
-
     fun methodEnter(origin: String, method: Method) {
         if (origin in visitedOrigins) return
         val data = origin.split("@")
@@ -24,7 +23,6 @@ object ExceptionTreeAnalyzer {
         val exceptions = method.exceptionTypes.joinToString(",") { it.name }
         output.appendText("Enter: ${data[0]}.${data[1]}${data[2]}, throws: [$exceptions]\n")
     }
-
 
     fun push(throwable: Throwable, origin: String): Boolean {
         if (throwable == exceptionStack.last().throwable) return false

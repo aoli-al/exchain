@@ -12,8 +12,7 @@ public class AffectedVariableAnalyzerTest {
             if (true) {
                 int a = 123;
                 possibleThrown();
-            }
-            else {
+            } else {
             }
             int b = 456;
         }
@@ -44,8 +43,8 @@ public class AffectedVariableAnalyzerTest {
 
     @Test
     void testLoadClass() {
-//        AffectedVarDriver.INSTANCE.analyzeAffectedVar(
-//                Dummy.class.getName(), "scene2()V",
-//                4, -1);
+        //        AffectedVarDriver.INSTANCE.analyzeAffectedVar(
+        //                Dummy.class.getName(), "scene2()V",
+        //                4, -1);
     }
 }

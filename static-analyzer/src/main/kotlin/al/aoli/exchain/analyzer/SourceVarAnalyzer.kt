@@ -7,7 +7,8 @@ import soot.jimple.AbstractJimpleValueSwitch
 import soot.jimple.IfStmt
 import soot.jimple.Stmt
 
-class SourceVarAnalyzer(affectedVarResults: List<AffectedVarResult>): AbstractJimpleValueSwitch<MutableSet<Int>>() {
+class SourceVarAnalyzer(affectedVarResults: List<AffectedVarResult>) :
+    AbstractJimpleValueSwitch<MutableSet<Int>>() {
     val disabledLabels = mutableSetOf<Int>()
     val sourceBranches = mutableMapOf<String, MutableMap<Int, MutableSet<Pair<Int, SourceType>>>>()
 
@@ -22,11 +23,9 @@ class SourceVarAnalyzer(affectedVarResults: List<AffectedVarResult>): AbstractJi
         }
     }
 
-
     override fun defaultCase(obj: Any?) {
         result = null
     }
-
 
     fun process(stmt: Stmt, method: SootMethod): Set<Int>? {
         val tags = sourceBranches[method.signature]?.get(stmt.javaSourceStartLineNumber) ?: return null

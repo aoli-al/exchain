@@ -22,5 +22,4 @@ public class TestDebug {
     private static boolean check() {
         return true;
     }
-
 }

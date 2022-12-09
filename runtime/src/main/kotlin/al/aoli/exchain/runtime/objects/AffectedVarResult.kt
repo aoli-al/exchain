@@ -7,22 +7,23 @@ enum class SourceType {
     INVOKE
 }
 
-data class AffectedVarResult(var label: Int,
-                             val clazz: String,
-                             val method: String,
-                             val throwIndex: Long,
-                             val catchIndex: Long,
-                             val affectedLocalIndex: IntArray,
-                             val affectedLocalName: Array<String>,
-                             val affectedLocalLine: IntArray,
-                             val affectedFieldName: Array<String>,
-                             val affectedFieldLine: IntArray,
-                             val sourceLines: Array<Pair<Int, SourceType>>,
-                             val sourceLocalIndex: IntArray = intArrayOf(),
-                             val sourceLocalField: Array<String> = emptyArray()) {
+data class AffectedVarResult(
+    var label: Int,
+    val clazz: String,
+    val method: String,
+    val throwIndex: Long,
+    val catchIndex: Long,
+    val affectedLocalIndex: IntArray,
+    val affectedLocalName: Array<String>,
+    val affectedLocalLine: IntArray,
+    val affectedFieldName: Array<String>,
+    val affectedFieldLine: IntArray,
+    val sourceLines: Array<Pair<Int, SourceType>>,
+    val sourceLocalIndex: IntArray = intArrayOf(),
+    val sourceLocalField: Array<String> = emptyArray()
+) {
     fun getSootClassName(): String {
-        return clazz.substring(1, clazz.length - 1)
-            .replace("/", ".")
+        return clazz.substring(1, clazz.length - 1).replace("/", ".")
     }
 
     fun getSignature(): String {
@@ -47,10 +48,10 @@ data class AffectedVarResult(var label: Int,
                 currentOffset = method.indexOf(';', currentOffset)
             }
             parameterTypes.add(stringToType(method.substring(currentTypeBegin..currentOffset)))
-            currentOffset ++
+            currentOffset++
             currentTypeBegin = currentOffset
         }
-        currentOffset += 1;
+        currentOffset += 1
         val returnType = stringToType(method.substring(currentOffset))
         return "$returnType $methodName(${parameterTypes.joinToString(",")})"
     }

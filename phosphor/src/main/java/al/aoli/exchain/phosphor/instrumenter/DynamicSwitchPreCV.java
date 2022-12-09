@@ -1,13 +1,5 @@
 package al.aoli.exchain.phosphor.instrumenter;
 
-import edu.columbia.cs.psl.phosphor.instrumenter.TaintTrackingClassVisitor;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.ClassVisitor;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
-import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashSet;
-import edu.columbia.cs.psl.phosphor.struct.harmony.util.Set;
-
-import java.lang.reflect.Field;
-
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameReMapping;
 import static al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV.defaultInline;
@@ -15,9 +7,17 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_ABSTRAC
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_NATIVE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
 
+import edu.columbia.cs.psl.phosphor.instrumenter.TaintTrackingClassVisitor;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.ClassVisitor;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashSet;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.Set;
+import java.lang.reflect.Field;
+
 public class DynamicSwitchPreCV extends ClassVisitor {
     private String owner;
     private Set<String> aggressivelyReduceMethodSize = new HashSet<>();
+
     public DynamicSwitchPreCV(ClassVisitor cv, boolean skipFrames) {
         super(ASM9, cv);
         ClassVisitor subCV = cv;
@@ -26,8 +26,7 @@ public class DynamicSwitchPreCV extends ClassVisitor {
                 Field field = ClassVisitor.class.getDeclaredField("cv");
                 field.setAccessible(true);
                 subCV = (ClassVisitor) field.get(subCV);
-            }
-            catch (NoSuchFieldException | IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 subCV = null;
             }
         }
@@ -44,13 +43,14 @@ public class DynamicSwitchPreCV extends ClassVisitor {
                     for (String s : methodList) {
                         String[] results = s.split("\\(");
                         if (s.contains(Constants.instrumentedMethodSuffix) || !defaultInline) {
-                            newMethodList.add(StringHelper.concat(methodNameReMapping(results[0]), "(", results[1]));
+                            newMethodList.add(
+                                    StringHelper.concat(
+                                            methodNameReMapping(results[0]), "(", results[1]));
                         }
                     }
                 }
                 field.set(subCV, newMethodList);
-            }
-            catch (NoSuchFieldException | IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
             }
         }
 
@@ -59,14 +59,14 @@ public class DynamicSwitchPreCV extends ClassVisitor {
                 Field field = ClassVisitor.class.getDeclaredField("cv");
                 field.setAccessible(true);
                 subCV = (ClassVisitor) field.get(subCV);
-            }
-            catch (NoSuchFieldException | IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 subCV = null;
             }
         }
 
         if (subCV != null) {
-            ((DynamicSwitchPostCV) subCV).setAggressivelyReduceMethodSize(aggressivelyReduceMethodSize);
+            ((DynamicSwitchPostCV) subCV)
+                    .setAggressivelyReduceMethodSize(aggressivelyReduceMethodSize);
         }
     }
 
@@ -75,14 +75,20 @@ public class DynamicSwitchPreCV extends ClassVisitor {
     }
 
     @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+    public void visit(
+            int version,
+            int access,
+            String name,
+            String signature,
+            String superName,
+            String[] interfaces) {
         owner = name;
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
-    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
-                                     String[] exceptions) {
+    public MethodVisitor visitMethod(
+            int access, String name, String descriptor, String signature, String[] exceptions) {
         if (name.contains("Exchain")) {
             return null;
         }
@@ -91,9 +97,14 @@ public class DynamicSwitchPreCV extends ClassVisitor {
         if ((access & ACC_ABSTRACT) != 0 || (access & ACC_NATIVE) != 0) {
             return mv2;
         }
-        MethodVisitor mv1 = super.visitMethod(access, StringHelper.concat(newName, Constants.originMethodSuffix),
-                descriptor, signature, exceptions);
-        return new ReplayMethodVisitor(access, name, descriptor,
-                List.of(mv2), List.of(), List.of(mv1));
+        MethodVisitor mv1 =
+                super.visitMethod(
+                        access,
+                        StringHelper.concat(newName, Constants.originMethodSuffix),
+                        descriptor,
+                        signature,
+                        exceptions);
+        return new ReplayMethodVisitor(
+                access, name, descriptor, List.of(mv2), List.of(), List.of(mv1));
     }
 }

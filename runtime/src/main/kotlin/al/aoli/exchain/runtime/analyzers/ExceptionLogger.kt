@@ -18,8 +18,11 @@ object ExceptionLogger {
         for (stackTrace in e.stackTrace) {
             elements.add("${stackTrace.className}/${stackTrace.methodName}:${stackTrace.lineNumber}")
         }
-        val item = Gson().toJson(ExceptionElement(label,
-            e.javaClass.name, elements, e.message?.replace("\n", "")))
+        val item =
+            Gson()
+                .toJson(
+                    ExceptionElement(label, e.javaClass.name, elements, e.message?.replace("\n", ""))
+                )
         exceptionLog.appendText(item + "\n")
         return label
     }
@@ -29,8 +32,15 @@ object ExceptionLogger {
         affectedVarResults.appendText(item + "\n")
     }
 
-    fun logStats(e: Throwable, affectedVarResult: AffectedVarResult, numOfObjects: Int, numOfArrays: Int, numOfPrimitives: Int, numOfNulls: Int,
-                 shouldReport: Boolean) {
+    fun logStats(
+        e: Throwable,
+        affectedVarResult: AffectedVarResult,
+        numOfObjects: Int,
+        numOfArrays: Int,
+        numOfPrimitives: Int,
+        numOfNulls: Int,
+        shouldReport: Boolean
+    ) {
         if (e !in exceptionMap) {
             exceptionMap[e] = mutableListOf(0, 0, 0, 0, 0)
         }
@@ -43,8 +53,7 @@ object ExceptionLogger {
 
         if (shouldReport) {
             val label = System.identityHashCode(e)
-            exceptionStats.appendText("${label}, " +
-                    exceptionMap[e]!!.joinToString(",") + "\n")
+            exceptionStats.appendText("$label, " + exceptionMap[e]!!.joinToString(",") + "\n")
         }
     }
 

@@ -5,7 +5,11 @@ import org.objectweb.asm.tree.InsnList
 import org.objectweb.asm.tree.analysis.SourceInterpreter
 import org.objectweb.asm.tree.analysis.SourceValue
 
-class AffectedVarInterpreter(val insnList: InsnList, val throwInsnIndex: Int, val tryBlocks: List<Pair<Int, Int>>) : SourceInterpreter(ASM8) {
+class AffectedVarInterpreter(
+    val insnList: InsnList,
+    val throwInsnIndex: Int,
+    val tryBlocks: List<Pair<Int, Int>>
+) : SourceInterpreter(ASM8) {
 
     val affectedInsns = mutableSetOf<AbstractInsnNode>()
     val affectedInsnInTry = mutableSetOf<AbstractInsnNode>()
@@ -36,40 +40,55 @@ class AffectedVarInterpreter(val insnList: InsnList, val throwInsnIndex: Int, va
     override fun copyOperation(insn: AbstractInsnNode, value: SourceValue): SourceValue? {
         checkExceptionInstructionStarts(insn)
         return when (insn.opcode) {
-            DUP, DUP_X1, DUP_X2, DUP2, DUP2_X1, DUP2_X2, SWAP -> value
+            DUP,
+            DUP_X1,
+            DUP_X2,
+            DUP2,
+            DUP2_X1,
+            DUP2_X2,
+            SWAP -> value
             else -> super.copyOperation(insn, value)
         }
     }
 
-
     override fun unaryOperation(insn: AbstractInsnNode, value: SourceValue): SourceValue? {
         checkExceptionInstructionStarts(insn)
-//        if (thrownInstructionVisited && insn is FieldInsnNode && insn.opcode == PUTSTATIC) {
-//            println(insn.owner + "." + insn.name)
-//        }
+        //        if (thrownInstructionVisited && insn is FieldInsnNode && insn.opcode == PUTSTATIC) {
+        //            println(insn.owner + "." + insn.name)
+        //        }
         return super.unaryOperation(insn, value)
     }
 
-    override fun binaryOperation(insn: AbstractInsnNode, value1: SourceValue, value2: SourceValue): SourceValue? {
+    override fun binaryOperation(
+        insn: AbstractInsnNode,
+        value1: SourceValue,
+        value2: SourceValue
+    ): SourceValue? {
         checkExceptionInstructionStarts(insn)
-//        if (thrownInstructionVisited && insn is FieldInsnNode) {
-//            for (sourceInsn in value1.insns) {
-//                if (sourceInsn is VarInsnNode) {
-//                    println(sourceInsn.`var`)
-//                }
-//            }
-//        }
+        //        if (thrownInstructionVisited && insn is FieldInsnNode) {
+        //            for (sourceInsn in value1.insns) {
+        //                if (sourceInsn is VarInsnNode) {
+        //                    println(sourceInsn.`var`)
+        //                }
+        //            }
+        //        }
         return super.binaryOperation(insn, value1, value2)
     }
 
     override fun ternaryOperation(
-        insn: AbstractInsnNode, value1: SourceValue, value2: SourceValue, value3: SourceValue
+        insn: AbstractInsnNode,
+        value1: SourceValue,
+        value2: SourceValue,
+        value3: SourceValue
     ): SourceValue? {
         checkExceptionInstructionStarts(insn)
         return super.ternaryOperation(insn, value1, value2, value3)
     }
 
-    override fun naryOperation(insn: AbstractInsnNode, values: MutableList<out SourceValue>): SourceValue? {
+    override fun naryOperation(
+        insn: AbstractInsnNode,
+        values: MutableList<out SourceValue>
+    ): SourceValue? {
         checkExceptionInstructionStarts(insn)
         return super.naryOperation(insn, values)
     }
@@ -78,5 +97,4 @@ class AffectedVarInterpreter(val insnList: InsnList, val throwInsnIndex: Int, va
         checkExceptionInstructionStarts(insn)
         super.returnOperation(insn, value, expected)
     }
-
 }

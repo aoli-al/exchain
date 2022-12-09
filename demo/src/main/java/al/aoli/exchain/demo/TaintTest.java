@@ -6,8 +6,7 @@ public class TaintTest {
         public int a = 23;
     }
 
-    public void empty(byte[] a) {
-    }
+    public void empty(byte[] a) {}
 
     public void call(byte[] a) {
         System.out.println(a);
@@ -32,24 +31,21 @@ public class TaintTest {
         call(null);
     }
 
-//    public void leak() {
-//        String[] obj = new String[] {"123", "456"};
-//        call(obj, obj);
-//        call(null, (String[]) null);
-//    }
+    //    public void leak() {
+    //        String[] obj = new String[] {"123", "456"};
+    //        call(obj, obj);
+    //        call(null, (String[]) null);
+    //    }
 
     public synchronized void test() {
-//        called2( null, null);
-//        crash();
-//        leak();
+        //        called2( null, null);
+        //        crash();
+        //        leak();
     }
 
     static {
         foo();
     }
 
-    static void foo() {
-    }
-
-
+    static void foo() {}
 }

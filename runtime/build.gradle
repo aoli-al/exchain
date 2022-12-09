@@ -80,3 +80,7 @@ task createInstrumentedJDKWithDynSwitch(type: JavaExec) {
 			"-addExports", "al/aoli/exchain/runtime,kotlin/jvm/internal"
 	dependsOn mergedJar
 }
+
+jar {
+	archiveClassifier.set("slim")
+}

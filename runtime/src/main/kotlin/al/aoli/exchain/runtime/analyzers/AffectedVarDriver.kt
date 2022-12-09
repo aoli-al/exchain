@@ -12,45 +12,67 @@ import java.io.IOException
 import java.lang.Exception
 
 private val logger = KotlinLogging.logger {}
+
 object AffectedVarDriver {
     val store = InMemoryAffectedVarStore()
-    fun analyzeAffectedVar(e: Throwable, clazz: String, method: String, throwIndex: Long,
-                           catchIndex: Long, isThrowInsn: Boolean) : AffectedVarResult? {
-        val cached = store.getCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, isThrowInsn)
+    fun analyzeAffectedVar(
+        e: Throwable,
+        clazz: String,
+        method: String,
+        throwIndex: Long,
+        catchIndex: Long,
+        isThrowInsn: Boolean
+    ): AffectedVarResult? {
+        val cached =
+            store.getCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, isThrowInsn)
         val label = ExceptionLogger.logException(e)
         if (cached != null) {
             cached.label = label
             ExceptionLogger.logAffectedVarResult(cached)
             return cached
         }
-        val classPath = clazz.substring(1 until clazz.length-1)
+        val classPath = clazz.substring(1 until clazz.length - 1)
         val className = classPath.replace("/", ".")
-        logger.info { "Start processing ${className}, method: $method, throwIndex: $throwIndex, catchIndex: $catchIndex" }
-        val classReader = if (className in TransformedCodeStore.store) {
-            AffectedVarClassReader(TransformedCodeStore.store[className]!!)
-        } else {
-            try {
-                AffectedVarClassReader(className)
-            } catch (e1: IOException) {
+        logger.info {
+            "Start processing $className, method: $method, throwIndex: $throwIndex, catchIndex: $catchIndex"
+        }
+        val classReader =
+            if (className in TransformedCodeStore.store) {
+                AffectedVarClassReader(TransformedCodeStore.store[className]!!)
+            } else {
                 try {
-                    AffectedVarClassReader("BOOT-INF/classes/$classPath")
-                }
-                catch (e2: IOException) {
-                    logger.warn { "Cannot access bytecode for class $className:$method. Error: $e1, $e2" }
-                    return null;
+                    AffectedVarClassReader(className)
+                } catch (e1: IOException) {
+                    try {
+                        AffectedVarClassReader("BOOT-INF/classes/$classPath")
+                    } catch (e2: IOException) {
+                        logger.warn { "Cannot access bytecode for class $className:$method. Error: $e1, $e2" }
+                        return null
+                    }
                 }
             }
-
-        }
         val sourceIdentified = store.exceptionSourceIdentified.getOrDefault(label, false)
 
-        val visitor = AffectedVarClassVisitor(e, throwIndex, catchIndex, isThrowInsn, !sourceIdentified,
-            className, method, classReader)
+        val visitor =
+            AffectedVarClassVisitor(
+                e,
+                throwIndex,
+                catchIndex,
+                isThrowInsn,
+                !sourceIdentified,
+                className,
+                method,
+                classReader
+            )
         classReader.accept(visitor, 0)
 
         // We are going to taint class fields here and local variables in native.
-        val affectedFields = visitor.methodVisitor?.affectedFields?.filter { !it.second.contains("PHOSPHOR") }
-            ?.toTypedArray() ?: emptyArray()
+        val affectedFields =
+            visitor.methodVisitor
+                ?.affectedFields
+                ?.filter { !it.second.contains("PHOSPHOR") }
+                ?.toTypedArray()
+                ?: emptyArray()
         val (affectedFieldLine, affectedFieldName) = affectedFields.unzip()
         val affectedVars = visitor.methodVisitor?.affectedVars?.toTypedArray() ?: emptyArray()
         val (affectedLocalLine, affectedLocalIndex, affectedLocalName) = affectedVars.unzip()
@@ -58,10 +80,20 @@ object AffectedVarDriver {
         if (sourceLines.isNotEmpty()) {
             store.exceptionSourceIdentified[label] = true
         }
-        val result = AffectedVarResult(label, clazz, method, throwIndex, catchIndex,
-            affectedLocalIndex.toIntArray(), affectedLocalName.toTypedArray(), affectedLocalLine.toIntArray(),
-            affectedFieldName.toTypedArray(), affectedFieldLine.toIntArray(),
-            sourceLines)
+        val result =
+            AffectedVarResult(
+                label,
+                clazz,
+                method,
+                throwIndex,
+                catchIndex,
+                affectedLocalIndex.toIntArray(),
+                affectedLocalName.toTypedArray(),
+                affectedLocalLine.toIntArray(),
+                affectedFieldName.toTypedArray(),
+                affectedFieldLine.toIntArray(),
+                sourceLines
+            )
         ExceptionLogger.logAffectedVarResult(result)
         store.putCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, isThrowInsn, result)
         return result
@@ -83,16 +115,15 @@ object AffectedVarDriver {
                 val field = obj.javaClass.getDeclaredField(name + "PHOSPHOR_TAG")
                 field.isAccessible = true
                 val value = field.get(obj) as Taint<Int>?
-                val tag = if (value == null) {
-                    Taint.withLabel(label)
-                } else {
-                    value.union(Taint.withLabel(label))
-                }
+                val tag =
+                    if (value == null) {
+                        Taint.withLabel(label)
+                    } else {
+                        value.union(Taint.withLabel(label))
+                    }
                 field.set(obj, tag)
-            }
-            catch (e: Exception) {
-                logger.warn { "Cannot access field: $name for type: ${obj.javaClass.name}, " +
-                        "error: $e" }
+            } catch (e: Exception) {
+                logger.warn { "Cannot access field: $name for type: ${obj.javaClass.name}, " + "error: $e" }
             }
         }
     }
@@ -107,43 +138,54 @@ object AffectedVarDriver {
         }
     }
 
-    fun analyzeSourceFields(obj: Any, affectedVarResult: AffectedVarResult, exception: Any, location: String) {
+    fun analyzeSourceFields(
+        obj: Any,
+        affectedVarResult: AffectedVarResult,
+        exception: Any,
+        location: String
+    ) {
         val origin = System.identityHashCode(exception)
-//        for (name in affectedVarResult.sourceFields) {
-//            try {
-//                val field = obj.javaClass.getDeclaredField(name + "PHOSPHOR_TAG")
-//                field.isAccessible = true
-//                val taint = field.get(obj) as Taint<Int>? ?: continue
-//                for (label in taint.labels) {
-//                    if (label is Int && label in exceptionStore && label != origin) {
-//                        println(TextColors.cyan("Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"))
-//                    }
-//                }
-//            }
-//            catch (e: Exception) {
-//                logger.warn { "Cannot access field: $name for type: ${obj.javaClass.name}, " +
-//                        "error: $e" }
-//            }
-//        }
+        //        for (name in affectedVarResult.sourceFields) {
+        //            try {
+        //                val field = obj.javaClass.getDeclaredField(name + "PHOSPHOR_TAG")
+        //                field.isAccessible = true
+        //                val taint = field.get(obj) as Taint<Int>? ?: continue
+        //                for (label in taint.labels) {
+        //                    if (label is Int && label in exceptionStore && label != origin) {
+        //                        println(TextColors.cyan("Exception ${exception.javaClass.name} thrown
+        // at $location possible caused by: ${exceptionStore[label]}"))
+        //                    }
+        //                }
+        //            }
+        //            catch (e: Exception) {
+        //                logger.warn { "Cannot access field: $name for type: ${obj.javaClass.name}, " +
+        //                        "error: $e" }
+        //            }
+        //        }
     }
-
 
     fun analyzeSourceVars(obj: Any, exception: Any, location: String) {
         val origin = System.identityHashCode(exception)
-        val taint = when(obj) {
-            is Taint<*> -> obj
-            is TaintedWithObjTag -> obj.phosphoR_TAG as Taint<*>?
-            else -> null
-        } ?: return
+        val taint =
+            when (obj) {
+                is Taint<*> -> obj
+                is TaintedWithObjTag -> obj.phosphoR_TAG as Taint<*>?
+                else -> null
+            }
+                ?: return
         for (label in taint.labels) {
             if (label is Int && label in exceptionStore && label != origin) {
-                println(TextColors.cyan("Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"))
+                println(
+                    TextColors.cyan(
+                        "Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"
+                    )
+                )
             }
         }
     }
 }
 
-private fun <A, B, C> Array<out Triple<A, B, C>>.unzip(): Triple<List<A>, List<B>, List<C>>{
+private fun <A, B, C> Array<out Triple<A, B, C>>.unzip(): Triple<List<A>, List<B>, List<C>> {
     val listA = ArrayList<A>(size)
     val listB = ArrayList<B>(size)
     val listC = ArrayList<C>(size)

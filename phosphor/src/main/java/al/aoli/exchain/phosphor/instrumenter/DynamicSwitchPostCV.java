@@ -1,17 +1,5 @@
 package al.aoli.exchain.phosphor.instrumenter;
 
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.ClassVisitor;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Label;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
-import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashMap;
-import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashSet;
-import edu.columbia.cs.psl.phosphor.struct.harmony.util.Map;
-import edu.columbia.cs.psl.phosphor.struct.harmony.util.Set;
-
-import java.lang.reflect.Field;
-
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameMapping;
 import static al.aoli.exchain.phosphor.instrumenter.Constants.methodNameReMapping;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_ABSTRACT;
@@ -25,7 +13,6 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.DLOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.DRETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.FLOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.FRETURN;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.F_FULL;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.F_NEW;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.IFEQ;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ILOAD;
@@ -37,6 +24,16 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LLOAD;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.LRETURN;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.RETURN;
 
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.ClassVisitor;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Label;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashMap;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.HashSet;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.Map;
+import edu.columbia.cs.psl.phosphor.struct.harmony.util.Set;
+
 public class DynamicSwitchPostCV extends ClassVisitor {
     public static boolean defaultInline = true;
 
@@ -45,18 +42,24 @@ public class DynamicSwitchPostCV extends ClassVisitor {
     private boolean isInterface;
     private Map<String, InlineSwitchMethodVisitor> constructorVisitors = new HashMap<>();
     private Set<String> aggressivelyReduceMethodSize = new HashSet<>();
+
     public DynamicSwitchPostCV(ClassVisitor cv, boolean skipFrames, byte[] bytes) {
         super(ASM9, cv);
         ClassVisitor subCV = cv;
     }
 
-    public void setAggressivelyReduceMethodSize(
-            Set<String> aggressivelyReduceMethodSize) {
+    public void setAggressivelyReduceMethodSize(Set<String> aggressivelyReduceMethodSize) {
         this.aggressivelyReduceMethodSize = aggressivelyReduceMethodSize;
     }
 
     @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+    public void visit(
+            int version,
+            int access,
+            String name,
+            String signature,
+            String superName,
+            String[] interfaces) {
         owner = name;
         isInterface = (access & ACC_INTERFACE) != 0;
         index = (name.hashCode() % 100_000 + 100_000) % 100_000;
@@ -65,7 +68,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
 
     @Override
     public void visitEnd() {
-        for (InlineSwitchMethodVisitor visitor: constructorVisitors.values()) {
+        for (InlineSwitchMethodVisitor visitor : constructorVisitors.values()) {
             visitor.annotationOnly = false;
             if (!visitor.instrumentedNode.finished || !visitor.originNode.finished) {
                 if (visitor.instrumentedNode.finished) {
@@ -73,9 +76,10 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 } else {
                     visitor.originNode.accept(visitor.getMv());
                 }
-            }
-            else if (visitor.shouldInline ||
-                    (defaultInline && !aggressivelyReduceMethodSize.contains(StringHelper.concat(visitor.name, visitor.descriptor)))) {
+            } else if (visitor.shouldInline
+                    || (defaultInline
+                            && !aggressivelyReduceMethodSize.contains(
+                                    StringHelper.concat(visitor.name, visitor.descriptor)))) {
                 visitor.isSecondPass = false;
                 visitor.isInstrumentedCode = false;
                 visitor.originNode.accept(new ReflectionFixingMethodVisitor(visitor, owner));
@@ -83,26 +87,50 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 visitor.isSecondPass = true;
                 visitor.instrumentedNode.accept(visitor);
             } else {
-                String instrumentedMethodName = StringHelper.concat(visitor.instrumentedNode.name,
-                        Integer.toString(index));
-                MethodVisitor instrumentedMv = super.visitMethod(visitor.access,
-                        instrumentedMethodName, visitor.descriptor, visitor.signature, visitor.exceptions);
-                visitor.instrumentedNode.accept(new ReplayMethodVisitor(
-                        visitor.access, instrumentedMethodName, visitor.descriptor,
-                        List.of(), List.of(),
-                        List.of(instrumentedMv)));
+                String instrumentedMethodName =
+                        StringHelper.concat(visitor.instrumentedNode.name, Integer.toString(index));
+                MethodVisitor instrumentedMv =
+                        super.visitMethod(
+                                visitor.access,
+                                instrumentedMethodName,
+                                visitor.descriptor,
+                                visitor.signature,
+                                visitor.exceptions);
+                visitor.instrumentedNode.accept(
+                        new ReplayMethodVisitor(
+                                visitor.access,
+                                instrumentedMethodName,
+                                visitor.descriptor,
+                                List.of(),
+                                List.of(),
+                                List.of(instrumentedMv)));
 
-                String originMethodName = StringHelper.concat(visitor.originNode.name, Integer.toString(index));
-                MethodVisitor originMv = new ReflectionFixingMethodVisitor(
-                        super.visitMethod(visitor.access, originMethodName, visitor.descriptor, visitor.signature,
-                                visitor.exceptions), owner);
-                visitor.originNode.accept(new ReplayMethodVisitor(
-                        visitor.access, originMethodName, visitor.descriptor,
-                        List.of(), List.of(),
-                        List.of(originMv)));
+                String originMethodName =
+                        StringHelper.concat(visitor.originNode.name, Integer.toString(index));
+                MethodVisitor originMv =
+                        new ReflectionFixingMethodVisitor(
+                                super.visitMethod(
+                                        visitor.access,
+                                        originMethodName,
+                                        visitor.descriptor,
+                                        visitor.signature,
+                                        visitor.exceptions),
+                                owner);
+                visitor.originNode.accept(
+                        new ReplayMethodVisitor(
+                                visitor.access,
+                                originMethodName,
+                                visitor.descriptor,
+                                List.of(),
+                                List.of(),
+                                List.of(originMv)));
                 visitor.getMv().visitCode();
-                addSwitch(visitor.getMv(), instrumentedMethodName, originMethodName,
-                        visitor.descriptor, (visitor.access & ACC_STATIC) != 0);
+                addSwitch(
+                        visitor.getMv(),
+                        instrumentedMethodName,
+                        originMethodName,
+                        visitor.descriptor,
+                        (visitor.access & ACC_STATIC) != 0);
                 visitor.getMv().visitEnd();
             }
         }
@@ -110,14 +138,16 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         super.visitEnd();
     }
 
-    void addBranch(MethodVisitor mv, Label label, String name, String descriptor, boolean isStatic) {
+    void addBranch(
+            MethodVisitor mv, Label label, String name, String descriptor, boolean isStatic) {
         mv.visitLabel(label);
         Type[] argumentTypes = Type.getArgumentTypes(descriptor);
-        edu.columbia.cs.psl.phosphor.struct.harmony.util.List<Object> locals = Utils.descriptorToLocals(descriptor);
+        edu.columbia.cs.psl.phosphor.struct.harmony.util.List<Object> locals =
+                Utils.descriptorToLocals(descriptor);
         if (!isStatic) {
             locals.add(0, owner);
         }
-        mv.visitFrame(F_NEW, locals.size(), locals.toArray(), 0, new String[]{});
+        mv.visitFrame(F_NEW, locals.size(), locals.toArray(), 0, new String[] {});
         int offset;
         int insn;
         if (!isStatic) {
@@ -141,23 +171,24 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                 case Type.SHORT:
                     mv.visitVarInsn(ILOAD, i + offset);
                     break;
-                case Type.LONG: {
-                    mv.visitVarInsn(LLOAD, i + offset);
-                    offset += 1;
-                    break;
-                }
+                case Type.LONG:
+                    {
+                        mv.visitVarInsn(LLOAD, i + offset);
+                        offset += 1;
+                        break;
+                    }
                 case Type.FLOAT:
                     mv.visitVarInsn(FLOAD, i + offset);
                     break;
-                case Type.DOUBLE: {
-                    mv.visitVarInsn(DLOAD, i + offset);
-                    offset += 1;
-                    break;
-                }
+                case Type.DOUBLE:
+                    {
+                        mv.visitVarInsn(DLOAD, i + offset);
+                        offset += 1;
+                        break;
+                    }
                 default:
                     mv.visitVarInsn(ALOAD, i + offset);
                     break;
-
             }
         }
         mv.visitMethodInsn(insn, owner, name, descriptor, isInterface);
@@ -190,17 +221,17 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         }
     }
 
-    void addSwitch(MethodVisitor mv, String instrumentedMethodName, String originMethodName,
-                   String descriptor, boolean isStatic) {
+    void addSwitch(
+            MethodVisitor mv,
+            String instrumentedMethodName,
+            String originMethodName,
+            String descriptor,
+            boolean isStatic) {
         Label enter = new Label();
         mv.visitLabel(enter);
         mv.visitLineNumber(50111, enter);
         mv.visitFieldInsn(
-                Opcodes.GETSTATIC,
-                "al/aoli/exchain/runtime/ExceptionJavaRuntime",
-                "enabled",
-                "Z"
-        );
+                Opcodes.GETSTATIC, "al/aoli/exchain/runtime/ExceptionJavaRuntime", "enabled", "Z");
         Label falseLabel = new Label();
         Label trueLabel = new Label();
 
@@ -213,12 +244,12 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         if (isStatic) {
             locals += 1;
         }
-        for (Type type: Type.getArgumentTypes(descriptor)) {
+        for (Type type : Type.getArgumentTypes(descriptor)) {
             switch (type.getSort()) {
                 case Type.DOUBLE:
                 case Type.LONG:
-                        locals += 2;
-                        break;
+                    locals += 2;
+                    break;
                 default:
                     locals += 1;
                     break;
@@ -227,10 +258,9 @@ public class DynamicSwitchPostCV extends ClassVisitor {
         mv.visitMaxs(Integer.max(locals, 1), locals);
     }
 
-
     @Override
-    public MethodVisitor visitMethod(int access, String name, String descriptor, String signature,
-                                     String[] exceptions) {
+    public MethodVisitor visitMethod(
+            int access, String name, String descriptor, String signature, String[] exceptions) {
         if (name.endsWith("PHOSPHOR_TAG")
                 || (access & ACC_ABSTRACT) != 0
                 || (access & ACC_NATIVE) != 0) {
@@ -241,22 +271,30 @@ public class DynamicSwitchPostCV extends ClassVisitor {
 
         String key = StringHelper.concat(methodNameReMapping(newName), descriptor);
         if (!constructorVisitors.containsKey(key)) {
-            constructorVisitors.put(key,
+            constructorVisitors.put(
+                    key,
                     new InlineSwitchMethodVisitor(
-                            super.visitMethod(access, methodNameReMapping(newName), descriptor, signature, exceptions),
-                            owner, isInterface,
-                            access, methodNameReMapping(newName), descriptor, signature, exceptions));
+                            super.visitMethod(
+                                    access,
+                                    methodNameReMapping(newName),
+                                    descriptor,
+                                    signature,
+                                    exceptions),
+                            owner,
+                            isInterface,
+                            access,
+                            methodNameReMapping(newName),
+                            descriptor,
+                            signature,
+                            exceptions));
         }
         InlineSwitchMethodVisitor mv = constructorVisitors.get(key);
         if (name.contains(Constants.originMethodSuffix)) {
-            return new ReplayMethodVisitor(access, name, descriptor, List.of(),
-                            List.of(),
-                            List.of(mv.originNode));
+            return new ReplayMethodVisitor(
+                    access, name, descriptor, List.of(), List.of(), List.of(mv.originNode));
         } else {
-            return new ReplayMethodVisitor(access, name, descriptor, List.of(),
-                    List.of(mv),
-                    List.of(mv.instrumentedNode));
+            return new ReplayMethodVisitor(
+                    access, name, descriptor, List.of(), List.of(mv), List.of(mv.instrumentedNode));
         }
     }
-
 }

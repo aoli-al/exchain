@@ -5,8 +5,8 @@ import java.lang.reflect.Method
 import kotlin.random.Random
 
 object ExceptionInjector {
-//    private const val generatorThreshold = 1
-//    private const val generatorThreshold = 0.05
+    //    private const val generatorThreshold = 1
+    //    private const val generatorThreshold = 0.05
     private const val generatorThreshold = 0
     private var exceptionThrown = false
     val caughtExceptions = mutableSetOf<Throwable>()
@@ -21,17 +21,20 @@ object ExceptionInjector {
 
     fun methodEnter(origin: String, method: Method) {
         if (exceptionThrown) return
-        val generators = method.exceptionTypes
-            .filter { it in Generators.generators }
-            .map { Generators.generators[it]!! }
-            .toList()
+        val generators =
+            method.exceptionTypes
+                .filter { it in Generators.generators }
+                .map { Generators.generators[it]!! }
+                .toList()
 
         if (generators.isEmpty()) return
         if (random.nextDouble() < generatorThreshold) {
             exceptionThrown = true
 
             val exception = generators.random(random).generate()
-            injectionLog.writeText("Exception injected: $exception at ${stackTraceToString(Thread.currentThread().stackTrace)}")
+            injectionLog.writeText(
+                "Exception injected: $exception at ${stackTraceToString(Thread.currentThread().stackTrace)}"
+            )
             throw exception
         }
     }

@@ -13,6 +13,7 @@ public class SimpleTest {
 
     public abstract class Foo {
         private String s2;
+
         Foo() {
             if (s != null) {
                 s2 = s;

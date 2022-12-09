@@ -1,19 +1,14 @@
 package al.aoli.exchain.demo;
 
-import al.aoli.exchain.runtime.ExceptionJavaRuntime;
-import edu.columbia.cs.psl.phosphor.instrumenter.TaintTagFactory;
 import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
-import edu.columbia.cs.psl.phosphor.runtime.Taint;
 
 public class TestEnableExchainDynamically {
     Object a = new int[3];
-    int[] b= new int[3];
+    int[] b = new int[3];
     Foo c = new Foo();
     int o = 0;
 
-    private static class Foo {
-
-    }
+    private static class Foo {}
 
     void test() {
         int a = MultiTainter.taintedInt(1, "bar");
@@ -29,8 +24,7 @@ public class TestEnableExchainDynamically {
         c = MultiTainter.taintedReference(null, "bar");
         System.out.println(MultiTainter.getTaint(c));
         a = MultiTainter.taintedReference(b, "123");
-        System.out.println(MultiTainter.getTaint(((int[])a)[1]));
-
+        System.out.println(MultiTainter.getTaint(((int[]) a)[1]));
     }
 
     void test2() {
@@ -38,11 +32,10 @@ public class TestEnableExchainDynamically {
     }
 
     void test4() {
-        assert(update(new Foo()));
+        assert (update(new Foo()));
     }
 
     static boolean update(Foo f) {
         return true;
     }
-
 }

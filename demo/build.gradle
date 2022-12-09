@@ -1,109 +1,109 @@
 
 plugins {
-    id 'java'
-    id 'application'
+	id 'java'
+	id 'application'
 }
 
 group 'al.aoli.exchain.demo'
 version '1.0-SNAPSHOT'
 
 repositories {
-    mavenCentral()
-    mavenLocal()
+	mavenCentral()
+	mavenLocal()
 }
 
 dependencies {
-    compileOnly  'edu.gmu.swe.phosphor:Phosphor:0.1.0-SNAPSHOT'
-    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.3'
-    compileOnly project(path: ":runtime", configuration: "shadow")
+	compileOnly  'edu.gmu.swe.phosphor:Phosphor:0.1.0-SNAPSHOT'
+	implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.3'
+	compileOnly project(path: ":runtime", configuration: "shadow")
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
 application {
-    mainClass = 'al.aoli.exchain.demo.Main'
+	mainClass = 'al.aoli.exchain.demo.Main'
 }
 
 run {
 }
 
 task instrumentJarWithDynSwitch(type: JavaExec) {
-    // This looks hacky...
-    var phosphor = project(":phosphor")
-    classpath "$phosphor.buildDir/libs/${phosphor.name}.jar"
-    mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
-    var jarPath = "${project.rootProject.projectDir}/dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
-    classpath jarPath
-    var src= jar.getArchiveFile().get().asFile.absolutePath
-    var dst = "${buildDir}/libs/instrumented-dyn-switch"
-    args src, dst,
-            "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
-            "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
-            "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV"
-    dependsOn jar
-    dependsOn ":phosphor:jar"
+	// This looks hacky...
+	var phosphor = project(":phosphor")
+	classpath "$phosphor.buildDir/libs/${phosphor.name}.jar"
+	mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
+	var jarPath = "${project.rootProject.projectDir}/dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
+	classpath jarPath
+	var src= jar.getArchiveFile().get().asFile.absolutePath
+	var dst = "${buildDir}/libs/instrumented-dyn-switch"
+	args src, dst,
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
+			"-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
+			"-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV"
+	dependsOn jar
+	dependsOn ":phosphor:jar"
 }
 
 task instrumentJarOrigin(type: JavaExec) {
-    // This looks hacky...
-    var phosphor = project(":phosphor")
-    classpath "$phosphor.buildDir/libs/${phosphor.name}.jar"
-    mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
-    var jarPath = "${project.rootProject.projectDir}/dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
-    classpath jarPath
-    var src= jar.getArchiveFile().get().asFile.absolutePath
-    var dst = "${buildDir}/libs/instrumented-origin"
-    args src, dst
-    dependsOn jar
+	// This looks hacky...
+	var phosphor = project(":phosphor")
+	classpath "$phosphor.buildDir/libs/${phosphor.name}.jar"
+	mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
+	var jarPath = "${project.rootProject.projectDir}/dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
+	classpath jarPath
+	var src= jar.getArchiveFile().get().asFile.absolutePath
+	var dst = "${buildDir}/libs/instrumented-origin"
+	args src, dst
+	dependsOn jar
 }
 
 task runOriginJar(type: JavaExec) {
-    var runtime = project(":runtime")
-    classpath "${buildDir}/libs/${project.name}-${version}.jar"
-    classpath "${runtime.buildDir}/libs/runtime-shadow.jar"
-    mainClass = "al.aoli.exchain.demo.Main"
-    var nat= project(":native")
-    jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=stats"
-    var instrumentation = project(":instrumentation")
-    jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
-    dependsOn jar
+	var runtime = project(":runtime")
+	classpath "${buildDir}/libs/${project.name}-${version}.jar"
+	classpath "${runtime.buildDir}/libs/runtime-shadow.jar"
+	mainClass = "al.aoli.exchain.demo.Main"
+	var nat= project(":native")
+	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=stats"
+	var instrumentation = project(":instrumentation")
+	jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
+	dependsOn jar
 }
 
 
 
 task runNaiveTaintAnalysis(type: JavaExec) {
-    var runtime = project(":runtime")
-    executable = "${runtime.buildDir}/jre-inst/bin/java"
-    classpath "${buildDir}/libs/instrumented-origin/${project.name}-${version}.jar"
-    classpath "${runtime.buildDir}/libs/runtime-shadow.jar"
+	var runtime = project(":runtime")
+	executable = "${runtime.buildDir}/jre-inst/bin/java"
+	classpath "${buildDir}/libs/instrumented-origin/${project.name}-${version}.jar"
+	classpath "${runtime.buildDir}/libs/runtime-shadow.jar"
 
-    mainClass = "al.aoli.exchain.demo.Main"
-    jvmArgs "-javaagent:${project.rootProject.projectDir}/" +
-            "dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
-            "phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
-    var nat= project(":native")
-    jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=taint"
-    var instrumentation = project(":instrumentation")
-    jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
+	mainClass = "al.aoli.exchain.demo.Main"
+	jvmArgs "-javaagent:${project.rootProject.projectDir}/" +
+			"dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
+			"phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
+	var nat= project(":native")
+	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=taint"
+	var instrumentation = project(":instrumentation")
+	jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
 }
 
 task runTaintAnalysisWithDynSwitch(type: JavaExec) {
-    var runtime = project(":runtime")
-    executable = "${runtime.buildDir}/jre-inst-dyn-switch/bin/java"
-    classpath "${buildDir}/libs/instrumented/${project.name}-${version}.jar"
-    mainClass = "al.aoli.exchain.demo.Main"
-    var instrumentation = project(":instrumentation")
-    jvmArgs "--patch-module=java.base=/Users/aoli/repos/exchain/phosphor/build/libs/phosphor.jar"
-    jvmArgs "-javaagent:${project.rootProject.projectDir}/" +
-            "dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
-            "phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
-    var nat= project(":native")
-    jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib"
+	var runtime = project(":runtime")
+	executable = "${runtime.buildDir}/jre-inst-dyn-switch/bin/java"
+	classpath "${buildDir}/libs/instrumented/${project.name}-${version}.jar"
+	mainClass = "al.aoli.exchain.demo.Main"
+	var instrumentation = project(":instrumentation")
+	jvmArgs "--patch-module=java.base=/Users/aoli/repos/exchain/phosphor/build/libs/phosphor.jar"
+	jvmArgs "-javaagent:${project.rootProject.projectDir}/" +
+			"dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
+			"phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
+	var nat= project(":native")
+	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib"
 
-    dependsOn ":instrumentation:shadowJar"
-    dependsOn ":native:build"
+	dependsOn ":instrumentation:shadowJar"
+	dependsOn ":native:build"
 }
 
 
@@ -112,17 +112,17 @@ runNaiveTaintAnalysis.dependsOn instrumentJarOrigin
 //runInstrumentedJar.dependsOn ":runtime:createInstrumentedJDK"
 
 jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
-    manifest {
-        attributes "Main-Class": "al.aoli.exchain.demo.Main"
-    }
+	manifest {
+		attributes "Main-Class": "al.aoli.exchain.demo.Main"
+	}
 
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
 
-    dependsOn ":instrumentation:jar"
-    dependsOn ":runtime:createShadow"
-    dependsOn ":native:build"
+	dependsOn ":instrumentation:jar"
+	dependsOn ":runtime:createShadow"
+	dependsOn ":native:build"
 }

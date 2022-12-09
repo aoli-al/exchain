@@ -1,8 +1,8 @@
 package al.aoli.exchain.runtime
 
 import al.aoli.exchain.runtime.analyzers.AffectedVarDriver
-import al.aoli.exchain.runtime.objects.AffectedVarResult
 import al.aoli.exchain.runtime.analyzers.ExceptionLogger
+import al.aoli.exchain.runtime.objects.AffectedVarResult
 import al.aoli.exchain.runtime.objects.exceptions.ExceptionInjector
 import al.aoli.exchain.runtime.server.ExceptionServiceImpl
 import edu.columbia.cs.psl.phosphor.runtime.Taint
@@ -15,27 +15,27 @@ object ExceptionRuntime {
     fun onException(e: Throwable, origin: String) {
         if (!ExceptionServiceImpl.started) return
         ExceptionInjector.thrownExceptions(e)
-//        ExceptionTreeAnalyzer.push(e, origin)
+        //        ExceptionTreeAnalyzer.push(e, origin)
     }
 
     @JvmStatic
     fun onCatch() {
         if (!ExceptionServiceImpl.started) return
-//        ExceptionTreeAnalyzer.catchEnd()
+        //        ExceptionTreeAnalyzer.catchEnd()
     }
 
     @JvmStatic
     fun onCatchBegin(e: Throwable) {
         if (!ExceptionServiceImpl.started) return
         ExceptionInjector.thrownExceptions(e)
-//        ExceptionTreeAnalyzer.exceptionCaught(e)
+        //        ExceptionTreeAnalyzer.exceptionCaught(e)
     }
 
     @JvmStatic
     fun onCatchWithException(e: Throwable, origin: String) {
         if (!ExceptionServiceImpl.started) return
         ExceptionInjector.thrownExceptions(e)
-//        ExceptionTreeAnalyzer.catchWithException(e, origin)
+        //        ExceptionTreeAnalyzer.catchWithException(e, origin)
     }
 
     @JvmStatic
@@ -44,17 +44,43 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
-    fun onExceptionStats(e: Throwable, affectedVarResult: AffectedVarResult,
-                         numOfObjects: Int, numOfArrays: Int, numOfPrimitives: Int,
-                         numOfNulls: Int,
-                         shouldReport: Boolean) {
-        ExceptionLogger.logStats(e, affectedVarResult, numOfObjects, numOfArrays, numOfPrimitives, numOfNulls, shouldReport)
+    fun onExceptionStats(
+        e: Throwable,
+        affectedVarResult: AffectedVarResult,
+        numOfObjects: Int,
+        numOfArrays: Int,
+        numOfPrimitives: Int,
+        numOfNulls: Int,
+        shouldReport: Boolean
+    ) {
+        ExceptionLogger.logStats(
+            e,
+            affectedVarResult,
+            numOfObjects,
+            numOfArrays,
+            numOfPrimitives,
+            numOfNulls,
+            shouldReport
+        )
     }
 
     @JvmStatic
-    fun onExceptionStackInfo(e: Throwable, clazz: String, method: String, throwLocation: Long, catchLocation: Long,
-                             isThrowInsn: Boolean): AffectedVarResult? {
-        return AffectedVarDriver.analyzeAffectedVar(e, clazz, method, throwLocation, catchLocation, isThrowInsn)
+    fun onExceptionStackInfo(
+        e: Throwable,
+        clazz: String,
+        method: String,
+        throwLocation: Long,
+        catchLocation: Long,
+        isThrowInsn: Boolean
+    ): AffectedVarResult? {
+        return AffectedVarDriver.analyzeAffectedVar(
+            e,
+            clazz,
+            method,
+            throwLocation,
+            catchLocation,
+            isThrowInsn
+        )
     }
 
     @JvmStatic
@@ -84,7 +110,12 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
-    fun analyzeSourceFields(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any, location: String) {
+    fun analyzeSourceFields(
+        obj: Any?,
+        affectedVarResult: AffectedVarResult,
+        exception: Any,
+        location: String
+    ) {
         if (obj == null) return
         AffectedVarDriver.analyzeSourceFields(obj, affectedVarResult, exception, location)
     }

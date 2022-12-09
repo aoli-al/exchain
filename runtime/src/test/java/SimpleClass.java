@@ -2,6 +2,7 @@ public class SimpleClass {
     public void dummyMethod() {
         System.out.println("dummy");
     }
+
     public SimpleClass foo = null;
     public int a;
 
