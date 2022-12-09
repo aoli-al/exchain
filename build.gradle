@@ -11,6 +11,8 @@ java {
 	}
 }
 
+println(subprojects)
+
 configure(allprojects - project(":native")) {
 	repositories {
 		mavenCentral()
@@ -32,10 +34,14 @@ configure(allprojects - project(":native")) {
 		java {
 			googleJavaFormat('1.8').aosp().reflowLongStrings()
 			importOrder()
+			removeUnusedImports()
+			endWithNewline()
 			formatAnnotations()
+			trimTrailingWhitespace()
 		}
 		kotlin {
 			ktfmt()
+			ktlint()
 			diktat()
 			prettier()
 		}
