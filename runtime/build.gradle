@@ -2,6 +2,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
     id "com.github.johnrengelman.shadow" version "7.1.2"
     id 'org.javamodularity.moduleplugin' version '1.8.12'
+    id "com.diffplug.spotless" version "6.12.0"
 }
 
 group 'al.aoli.exchain.runtime'
