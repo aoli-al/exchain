@@ -15,6 +15,10 @@ java {
 	}
 }
 
+apply plugin: 'com.diffplug.spotless'
+subprojects {
+	apply plugin: 'com.diffplug.spotless'
+}
 spotless {
 	// optional: limit format enforcement to just the files changed by this feature branch
 	ratchetFrom 'origin/main'
@@ -27,6 +31,7 @@ spotless {
 	}
 	java {
 		googleJavaFormat('1.8').aosp().reflowLongStrings()
+		importOrder()
 		formatAnnotations()
 	}
 	kotlin {
