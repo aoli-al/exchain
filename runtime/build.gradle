@@ -1,87 +1,82 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm'
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+	id 'org.jetbrains.kotlin.jvm'
+	id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
 group 'al.aoli.exchain.runtime'
 version 'unspecified'
 
-repositories {
-    mavenCentral()
-    mavenLocal()
-}
-
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
-    implementation group: 'org.ow2.asm', name: 'asm', version: '9.3'
-    implementation group: 'org.ow2.asm', name: 'asm-commons', version: '9.3'
-    implementation group: 'org.ow2.asm', name: 'asm-analysis', version: '9.3'
-    implementation group: 'io.github.microutils', name: 'kotlin-logging-jvm', version: '3.0.2'
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.1'
-    implementation("com.github.ajalt.mordant:mordant:2.0.0-beta7")
-    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.5'
-    compileOnly 'edu.gmu.swe.phosphor:phosphor-instrument-jigsaw:0.1.0-SNAPSHOT'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+	implementation group: 'org.ow2.asm', name: 'asm', version: '9.3'
+	implementation group: 'org.ow2.asm', name: 'asm-commons', version: '9.3'
+	implementation group: 'org.ow2.asm', name: 'asm-analysis', version: '9.3'
+	implementation group: 'io.github.microutils', name: 'kotlin-logging-jvm', version: '3.0.2'
+	implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.1'
+	implementation("com.github.ajalt.mordant:mordant:2.0.0-beta7")
+	implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.5'
+	compileOnly 'edu.gmu.swe.phosphor:phosphor-instrument-jigsaw:0.1.0-SNAPSHOT'
 }
 
 test {
-    useJUnitPlatform()
+	useJUnitPlatform()
 }
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 task createShadow(type: ShadowJar) {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    archiveBaseName.set('runtime-shadow')
-    archiveClassifier.set('')
-    archiveVersion.set('')
-    relocate 'org.objectweb.asm', 'al.aoli.exchain.instrumentation.asm'
-    dependsOn ':native:linkDebug'
-    exclude "module-info.class"
-    from sourceSets.main.output
-    from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	archiveBaseName.set('runtime-shadow')
+	archiveClassifier.set('')
+	archiveVersion.set('')
+	relocate 'org.objectweb.asm', 'al.aoli.exchain.instrumentation.asm'
+	dependsOn ':native:linkDebug'
+	exclude "module-info.class"
+	from sourceSets.main.output
+	from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 
 task mergedJar(type: Jar) {
-    archiveBaseName.set("runtime-merged")
-    archiveClassifier.set("")
-    var phosphor = project(":phosphor")
-    from zipTree("$phosphor.buildDir/libs/phosphor-merged.jar")
-    from zipTree("${project.buildDir}/libs/runtime-shadow.jar")
-    manifest {
-        attributes "Main-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
-        attributes "Premain-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.JLinkRegistrationAgent"
-    }
-    dependsOn ":phosphor:mergedJar"
-    dependsOn createShadow
+	archiveBaseName.set("runtime-merged")
+	archiveClassifier.set("")
+	var phosphor = project(":phosphor")
+	from zipTree("$phosphor.buildDir/libs/phosphor-merged.jar")
+	from zipTree("${project.buildDir}/libs/runtime-shadow.jar")
+	manifest {
+		attributes "Main-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
+		attributes "Premain-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.JLinkRegistrationAgent"
+	}
+	dependsOn ":phosphor:mergedJar"
+	dependsOn createShadow
 }
 
 task buildPhosphor(type: Exec) {
-    commandLine "./mvnw", "-DskipTests", "install"
-    workingDir "${project.rootProject.projectDir}/dependencies/phosphor/"
+	commandLine "./mvnw", "-DskipTests", "install"
+	workingDir "${project.rootProject.projectDir}/dependencies/phosphor/"
 }
 
 import org.gradle.internal.jvm.Jvm
 task createInstrumentedJDK(type: JavaExec) {
-    var phosphor = project(":phosphor")
-    classpath "$phosphor.buildDir/libs/phosphor-merged.jar"
-    mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
-    var src = Jvm.current().javaHome
-    var dst = "$buildDir/jre-inst"
-    args src, dst, "--jvmModules", "ALL-MODULE-PATH",
-            "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
-    dependsOn ":phosphor:mergedJar"
+	var phosphor = project(":phosphor")
+	classpath "$phosphor.buildDir/libs/phosphor-merged.jar"
+	mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
+	var src = Jvm.current().javaHome
+	var dst = "$buildDir/jre-inst"
+	args src, dst, "--jvmModules", "ALL-MODULE-PATH",
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
+	dependsOn ":phosphor:mergedJar"
 }
 
 task createInstrumentedJDKWithDynSwitch(type: JavaExec) {
-    var jarPath = "$buildDir/libs/${project.name}.jar"
-    classpath jarPath
-    mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
-    var src = Jvm.current().javaHome
-    var dst = "$buildDir/jre-inst-dyn-switch"
-    args src, dst, "--jvmModules", "ALL-MODULE-PATH",
-            "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
-            "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
-            "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV",
-            "-addExports", "al/aoli/exchain/runtime,kotlin/jvm/internal"
-    dependsOn mergedJar
+	var jarPath = "$buildDir/libs/${project.name}.jar"
+	classpath jarPath
+	mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
+	var src = Jvm.current().javaHome
+	var dst = "$buildDir/jre-inst-dyn-switch"
+	args src, dst, "--jvmModules", "ALL-MODULE-PATH",
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
+			"-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
+			"-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV",
+			"-addExports", "al/aoli/exchain/runtime,kotlin/jvm/internal"
+	dependsOn mergedJar
 }
