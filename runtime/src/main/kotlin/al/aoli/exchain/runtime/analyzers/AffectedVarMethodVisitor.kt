@@ -159,7 +159,8 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
     val affectedVars = mutableSetOf<Triple<Int, Int, String>>()
     val affectedFields = mutableSetOf<Pair<Int, String>>()
     val sourceLines = mutableSetOf<Pair<Int, SourceType>>()
-//    val sourceFields = mutableSetOf<Pair>()
+    val sourceFields = mutableSetOf<String>()
+    val sourceVars = mutableSetOf<Int>()
 
     // This is not the right way to get local variable names.
     // However, this is the implementation of Soot and we
@@ -207,7 +208,7 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
                         } ?: continue
                         for (src in value.insns) {
                             val srcFrame = frames[instructions.indexOf(src)]
-                            // If a method call is declared in a field the field must be from `this`.
+                            // If a method call is called to a field the field must be from `this`.
                             if (src is FieldInsnNode && src.opcode == Opcodes.GETFIELD && !isStatic) {
                                 val fieldValue = srcFrame?.getStack(srcFrame.stackSize - 1) ?: continue
                                 if (fieldValue.insns.size != 1) continue
@@ -246,6 +247,9 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
                                     appendAffectedVars(src)
                                 }
                             }
+                            if (src is FieldInsnNode) {
+
+                            }
                         }
                     }
                 }
@@ -263,49 +267,130 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
         }
     }
 
-    fun findSourceInsn(analyzer: AffectedVarAnalyser<SourceValue>) {
-        if (isThrowInsn && (exception is NullPointerException || exception is IndexOutOfBoundsException)) {
-            if (throwInsn is FieldInsnNode) {
-                sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.FIELD))
-            } else if (throwInsn is MethodInsnNode) {
-                sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.INVOKE))
-            }
-            // TODO: handle array here
-            return
-        }
-
-        if (exception is ClassNotFoundException && throwInsn is MethodInsnNode
-            && (throwInsn as MethodInsnNode).name.contains("forName")) {
-            sourceLines.add(Pair(getLineNumber(throwInsn!!), SourceType.INVOKE))
-            return
-        }
-
-        // this is default behavior
-        var currentInsn = throwInsn
-
-        // We want to find the jump instruction that leads to the throw instruction.
-        while (analyzer.instructionPredecessors[currentInsn]?.size == 1 &&
-            currentInsn !is JumpInsnNode) {
-            currentInsn = analyzer.instructionPredecessors[currentInsn]?.first()
-        }
-
-        // If the instruction has two predecessors, we want to find the corresponding jump INSN.
-        if (currentInsn !is JumpInsnNode && analyzer.instructionPredecessors[currentInsn]?.size == 2) {
-            for (insn in analyzer.instructionPredecessors[currentInsn]!!) {
-                if (insn is JumpInsnNode) {
-                    currentInsn = insn
+    fun processSourceValue(insn: AbstractInsnNode, objRef: SourceValue,
+                           frames: Array<Frame<SourceValue>?>, throwInsnFrame: Frame<SourceValue>) {
+        for (src in objRef.insns) {
+            val srcFrame = frames[instructions.indexOf(src)] ?: return
+            when (src) {
+                is VarInsnNode -> {
+                    if (src.`var` == 0 && !isStatic) {
+                        if (insn is FieldInsnNode) {
+                            sourceFields.add(insn.name)
+                        } else {
+                            sourceVars.add(src.`var`)
+                        }
+                    } else {
+                        if (throwInsnFrame.getLocal(src.`var`) == srcFrame.getLocal(src.`var`)) {
+                            sourceVars.add(src.`var`)
+                        }
+                    }
+                }
+                is FieldInsnNode -> {
+                    val srcRef = srcFrame.getStack(srcFrame.stackSize - 1)
+                    processSourceValue(src, srcRef, frames, throwInsnFrame)
+                }
+                is InsnNode -> {
+                    when (src.opcode) {
+                        Opcodes.IADD, Opcodes.ISUB, Opcodes.IMUL, Opcodes.IDIV,
+                        Opcodes.LADD, Opcodes.LSUB, Opcodes.LMUL, Opcodes.LDIV,
+                        Opcodes.FADD, Opcodes.FSUB, Opcodes.FMUL, Opcodes.FDIV,
+                        Opcodes.DADD, Opcodes.DSUB, Opcodes.DMUL, Opcodes.DDIV,
+                        Opcodes.DCMPL, Opcodes.DCMPG -> {
+                            processSourceValue(src, srcFrame.getStack(srcFrame.stackSize - 1), frames, throwInsnFrame)
+                            processSourceValue(src, srcFrame.getStack(srcFrame.stackSize - 2), frames, throwInsnFrame)
+                        }
+                        Opcodes.L2D, Opcodes.L2F, Opcodes.L2I, Opcodes.D2F, Opcodes.D2I, Opcodes.D2L,
+                        Opcodes.INEG, Opcodes.I2B, Opcodes.I2C, Opcodes.I2D, Opcodes.I2F, Opcodes.I2L, Opcodes.I2S,
+                        Opcodes.F2D, Opcodes.F2I, Opcodes.F2L, Opcodes.FNEG -> {
+                            processSourceValue(src, srcFrame.getStack(srcFrame.stackSize - 1), frames, throwInsnFrame)
+                        }
+                    }
                 }
             }
         }
-        if (currentInsn is JumpInsnNode) {
-            sourceLines.add(Pair(getLineNumber(currentInsn), SourceType.JUMP))
+    }
+
+    fun findSourceInsn(analyzer: AffectedVarAnalyser<SourceValue>, frames: Array<Frame<SourceValue>?>) {
+        val throwInsnFrame = frames[instructions.indexOf(throwInsn)] ?: return
+        val throwInsnLocal = throwInsn ?: return
+        try {
+            if (isThrowInsn && (exception is NullPointerException || exception is IndexOutOfBoundsException)) {
+                val objRef =
+                    if (throwInsnLocal is FieldInsnNode) {
+                        sourceLines.add(Pair(getLineNumber(throwInsnLocal), SourceType.FIELD))
+                        when (throwInsnLocal.opcode) {
+                            Opcodes.PUTFIELD -> {
+                                throwInsnFrame.getStack(throwInsnFrame.stackSize - 2)
+                            }
+                            Opcodes.GETFIELD -> {
+                                throwInsnFrame.getStack(throwInsnFrame.stackSize - 1)
+                            }
+
+                            else -> return
+                        }
+                    } else if (throwInsnLocal is MethodInsnNode) {
+                        sourceLines.add(Pair(getLineNumber(throwInsnLocal), SourceType.INVOKE))
+                        if (throwInsnLocal.opcode != Opcodes.INVOKEDYNAMIC && throwInsnLocal.opcode != Opcodes.INVOKESTATIC) {
+                            throwInsnFrame.getStack(throwInsnFrame.stackSize - Type.getArgumentTypes(throwInsnLocal.desc).size - 1)
+                        } else {
+                            null
+                        }
+                    } else {
+                        // TODO: handle array here
+                        null
+                    }
+                if (objRef != null) {
+                    processSourceValue(throwInsnLocal, objRef, frames, throwInsnFrame)
+                }
+                return
+            }
+
+            if (exception is ClassNotFoundException && throwInsnLocal is MethodInsnNode
+                && throwInsnLocal.name.contains("forName")) {
+                sourceLines.add(Pair(getLineNumber(throwInsnLocal), SourceType.INVOKE))
+                return
+            }
+
+            // this is default behavior
+            var currentInsn: AbstractInsnNode? = throwInsnLocal
+
+            // We want to find the jump instruction that leads to the throw instruction.
+            while (analyzer.instructionPredecessors[currentInsn]?.size == 1 &&
+                currentInsn !is JumpInsnNode) {
+                currentInsn = analyzer.instructionPredecessors[currentInsn]?.first()
+            }
+
+            // If the instruction has two predecessors, we want to find the corresponding jump INSN.
+            if (currentInsn !is JumpInsnNode && analyzer.instructionPredecessors[currentInsn]?.size == 2) {
+                for (insn in analyzer.instructionPredecessors[currentInsn]!!) {
+                    if (insn is JumpInsnNode) {
+                        currentInsn = insn
+                    }
+                }
+            }
+            if (currentInsn is JumpInsnNode) {
+                sourceLines.add(Pair(getLineNumber(currentInsn), SourceType.JUMP))
+                val branchFrame = frames[instructions.indexOf(currentInsn)] ?: return
+                val objRefs = when (currentInsn.opcode) {
+                    Opcodes.IFEQ, Opcodes.IFNE, Opcodes.IFLT, Opcodes.IFGE, Opcodes.IFGT, Opcodes.IFLE -> {
+                        listOf(branchFrame.getStack(branchFrame.stackSize - 1))
+                    }
+                    Opcodes.IF_ICMPEQ, Opcodes.IF_ICMPNE, Opcodes.IF_ICMPLT, Opcodes.IF_ICMPGE, Opcodes.IF_ICMPGT,
+                    Opcodes.IF_ICMPLE -> {
+                        listOf(branchFrame.getStack(branchFrame.stackSize - 1),
+                            branchFrame.getStack(branchFrame.stackSize - 2))
+                    }
+                    else -> emptyList()
+                }
+                for (objRef in objRefs) {
+                    processSourceValue(currentInsn, objRef, frames, throwInsnFrame)
+                }
+            }
+        } catch (e: IndexOutOfBoundsException) {
+            logger.error { "Failed to process throwInsn: $throwInsnLocal, $e" }
+            return
         }
     }
-
-    fun findSourceVars() {
-    }
-
-
 
     override fun visitEnd() {
         super.visitEnd()
@@ -317,7 +402,7 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
             }
         }
         if (throwInsn != null && (catchIndex == -1L || catchInsn != null)) {
-            logger.info { "Identified thrown instruction: $throwInsn" }
+            logger.info { "Identified thrown instruction: ${throwInsn?.opcode}" }
             val throwInsnIndex = instructions.indexOf(throwInsn)
             val interpreter = AffectedVarInterpreter(instructions, throwInsnIndex, tryCatchLocations)
             val analyzer = AffectedVarAnalyser(instructions, interpreter, throwInsn!!, catchInsn)
@@ -338,7 +423,7 @@ class AffectedVarMethodVisitor(val exception: Throwable, val throwIndex: Long, v
             }
             processAffectedInsns(affectedInsns, analyzer.frames)
             if (findSource && !Constants.exceptionHelpers.contains(name + desc)) {
-                findSourceInsn(analyzer)
+                findSourceInsn(analyzer, analyzer.frames)
             }
         } else {
             logger.error { "Error finding throwInsn/catchInsn at index $throwIndex in class $owner:$name" }

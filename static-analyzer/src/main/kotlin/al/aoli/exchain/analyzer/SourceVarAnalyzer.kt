@@ -48,6 +48,11 @@ class SourceVarAnalyzer(affectedVarResults: List<AffectedVarResult>): AbstractJi
                         result.add(tag.first)
                     }
                 }
+                SourceType.ARRAY -> {
+                    if (stmt.containsArrayRef()) {
+                        result.add(tag.first)
+                    }
+                }
             }
         }
         result.removeAll(disabledLabels)

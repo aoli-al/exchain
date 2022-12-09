@@ -16,6 +16,20 @@ dependencies {
     compileOnly 'edu.gmu.swe.phosphor:Phosphor:0.1.0-SNAPSHOT'
 }
 
+task mergedJar(type: Jar) {
+    archiveBaseName.set("phosphor-merged")
+    archiveClassifier.set("")
+    var phosphor = project(":phosphor")
+    from sourceSets.main.output
+    from zipTree("${project.rootProject.projectDir}/dependencies/phosphor/" +
+            "phosphor-instrument-jigsaw/target/phosphor-instrument-jigsaw-0.1.0-SNAPSHOT.jar")
+    manifest {
+        attributes "Main-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
+        attributes "Premain-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.JLinkRegistrationAgent"
+    }
+    dependsOn ":phosphor:jar"
+}
+
 test {
     useJUnitPlatform()
 }

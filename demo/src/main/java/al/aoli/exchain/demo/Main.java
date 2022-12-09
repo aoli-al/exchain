@@ -7,6 +7,8 @@ package al.aoli.exchain.demo;
 import al.aoli.exchain.runtime.ExceptionJavaRuntime;
 import edu.columbia.cs.psl.phosphor.runtime.MultiTainter;
 import edu.columbia.cs.psl.phosphor.runtime.PhosphorStackFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
