@@ -80,6 +80,8 @@ object AffectedVarDriver {
         if (sourceLines.isNotEmpty()) {
             store.exceptionSourceIdentified[label] = true
         }
+        val sourceLocalVariable = visitor.methodVisitor?.sourceLocalVariable?.toIntArray() ?: intArrayOf()
+        val sourceField = visitor.methodVisitor?.sourceField?.toTypedArray() ?: emptyArray()
         val result =
             AffectedVarResult(
                 label,
@@ -92,10 +94,13 @@ object AffectedVarDriver {
                 affectedLocalLine.toIntArray(),
                 affectedFieldName.toTypedArray(),
                 affectedFieldLine.toIntArray(),
-                sourceLines
+                sourceLines,
+                sourceLocalVariable,
+                sourceField
             )
         ExceptionLogger.logAffectedVarResult(result)
         store.putCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, isThrowInsn, result)
+        logger.info { "Affected analyzer result: $result" }
         return result
     }
 
@@ -145,23 +150,22 @@ object AffectedVarDriver {
         location: String
     ) {
         val origin = System.identityHashCode(exception)
-        //        for (name in affectedVarResult.sourceFields) {
-        //            try {
-        //                val field = obj.javaClass.getDeclaredField(name + "PHOSPHOR_TAG")
-        //                field.isAccessible = true
-        //                val taint = field.get(obj) as Taint<Int>? ?: continue
-        //                for (label in taint.labels) {
-        //                    if (label is Int && label in exceptionStore && label != origin) {
-        //                        println(TextColors.cyan("Exception ${exception.javaClass.name} thrown
-        // at $location possible caused by: ${exceptionStore[label]}"))
-        //                    }
-        //                }
-        //            }
-        //            catch (e: Exception) {
-        //                logger.warn { "Cannot access field: $name for type: ${obj.javaClass.name}, " +
-        //                        "error: $e" }
-        //            }
-        //        }
+        for (name in affectedVarResult.sourceField) {
+            try {
+                val field = obj.javaClass.getDeclaredField(name + "PHOSPHOR_TAG")
+                field.isAccessible = true
+                val taint = field.get(obj) as Taint<Int>? ?: continue
+                for (label in taint.labels) {
+                    if (label is Int && label in exceptionStore && label != origin) {
+                        println(TextColors.cyan("Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"))
+                    }
+                }
+            }
+            catch (e: Exception) {
+                logger.warn { "Cannot access field: $name for type: ${obj.javaClass.name}, " +
+                        "error: $e" }
+            }
+        }
     }
 
     fun analyzeSourceVars(obj: Any, exception: Any, location: String) {

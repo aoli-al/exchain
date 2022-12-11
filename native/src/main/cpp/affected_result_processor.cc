@@ -74,7 +74,7 @@ void AffectedResultProcessor::ProcessSourceVars() {
         jni_->GetStaticMethodID(runtime_class_, kAnalyzeSourceVarsMethodName,
                                 kAnalyzeSourceVarsMethodDescriptor);
     auto source_vars_field_id =
-        jni_->GetFieldID(result_class_, "sourceVars", "[I");
+        jni_->GetFieldID(result_class_, "sourceLocalVariable", "[I");
     jintArray source_vars =
         (jintArray)jni_->GetObjectField(result_, source_vars_field_id);
 
@@ -196,6 +196,7 @@ void AffectedResultProcessor::ProcessAffectedVars() {
         }
         local_variable_map_.emplace_back(entry->slot, entry->name);
         if (Configuration::GetInstance().mode() == TAINT) {
+            PLOG_INFO << "Look for taint objects for slot: " << slot;
             // We only taint primitive types if the exception is
             // caught by the current frame.
             jint taint_slot = GetCorrespondingTaintObjectSlot(slot);

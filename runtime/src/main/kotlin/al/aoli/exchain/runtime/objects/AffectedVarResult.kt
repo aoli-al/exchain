@@ -1,5 +1,8 @@
 package al.aoli.exchain.runtime.objects
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
+
 enum class SourceType {
     JUMP,
     FIELD,
@@ -19,9 +22,13 @@ data class AffectedVarResult(
     val affectedFieldName: Array<String>,
     val affectedFieldLine: IntArray,
     val sourceLines: Array<Pair<Int, SourceType>>,
-    val sourceLocalIndex: IntArray = intArrayOf(),
-    val sourceLocalField: Array<String> = emptyArray()
+    val sourceLocalVariable: IntArray,
+    val sourceField: Array<String>
 ) {
+    override fun toString(): String {
+        val gson = GsonBuilder().setPrettyPrinting().create()
+        return gson.toJson(this)
+    }
     fun getSootClassName(): String {
         return clazz.substring(1, clazz.length - 1).replace("/", ".")
     }

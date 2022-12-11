@@ -51,8 +51,8 @@ internal class AffectedVarClassReaderTest {
                 cr
             )
         cr.accept(visitor, 0)
-        assert(visitor.methodVisitor!!.sourceFields.isEmpty())
-        assert(visitor.methodVisitor!!.sourceVars.contains(1))
+        assert(visitor.methodVisitor!!.sourceField.isEmpty())
+        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(1))
         assert(visitor.methodVisitor!!.sourceLines.contains(Pair(14, SourceType.INVOKE)))
     }
 
@@ -77,8 +77,8 @@ internal class AffectedVarClassReaderTest {
                 cr
             )
         cr.accept(visitor, 0)
-        assert(visitor.methodVisitor!!.sourceFields.contains("foo"))
-        assert(visitor.methodVisitor!!.sourceVars.isEmpty())
+        assert(visitor.methodVisitor!!.sourceField.contains("foo"))
+        assert(visitor.methodVisitor!!.sourceLocalVariable.isEmpty())
         assert(visitor.methodVisitor!!.sourceLines.contains(Pair(9, SourceType.INVOKE)))
     }
 
@@ -103,8 +103,8 @@ internal class AffectedVarClassReaderTest {
                 cr
             )
         cr.accept(visitor, 0)
-        assert(visitor.methodVisitor!!.sourceFields.contains("foo"))
-        assert(visitor.methodVisitor!!.sourceVars.isEmpty())
+        assert(visitor.methodVisitor!!.sourceField.contains("foo"))
+        assert(visitor.methodVisitor!!.sourceLocalVariable.isEmpty())
         assert(visitor.methodVisitor!!.sourceLines.contains(Pair(18, SourceType.FIELD)))
     }
 
@@ -129,8 +129,8 @@ internal class AffectedVarClassReaderTest {
                 cr
             )
         cr.accept(visitor, 0)
-        assert(visitor.methodVisitor!!.sourceFields.isEmpty())
-        assert(visitor.methodVisitor!!.sourceVars.contains(1))
+        assert(visitor.methodVisitor!!.sourceField.isEmpty())
+        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(1))
         assert(visitor.methodVisitor!!.sourceLines.contains(Pair(23, SourceType.FIELD)))
     }
 
@@ -155,9 +155,9 @@ internal class AffectedVarClassReaderTest {
                 cr
             )
         cr.accept(visitor, 0)
-        assert(visitor.methodVisitor!!.sourceFields.contains("a"))
-        assert(visitor.methodVisitor!!.sourceFields.contains("foo"))
-        assert(visitor.methodVisitor!!.sourceVars.contains(1))
+        assert(visitor.methodVisitor!!.sourceField.contains("a"))
+        assert(visitor.methodVisitor!!.sourceField.contains("foo"))
+        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(1))
         assert(visitor.methodVisitor!!.sourceLines.contains(Pair(29, SourceType.JUMP)))
     }
 }

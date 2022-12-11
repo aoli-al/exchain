@@ -184,8 +184,8 @@ class AffectedVarMethodVisitor(
     val affectedVars = mutableSetOf<Triple<Int, Int, String>>()
     val affectedFields = mutableSetOf<Pair<Int, String>>()
     val sourceLines = mutableSetOf<Pair<Int, SourceType>>()
-    val sourceFields = mutableSetOf<String>()
-    val sourceVars = mutableSetOf<Int>()
+    val sourceField = mutableSetOf<String>()
+    val sourceLocalVariable = mutableSetOf<Int>()
 
     // This is not the right way to get local variable names.
     // However, this is the implementation of Soot and we
@@ -214,7 +214,9 @@ class AffectedVarMethodVisitor(
     }
 
     fun appendAffectedVars(insn: VarInsnNode) {
-        affectedVars.add(Triple(getLineNumber(insn), insn.`var`, getLocalName(insn.`var`)))
+        val name = getLocalName(insn.`var`)
+        if (name.startsWith("phosphor")) return
+        affectedVars.add(Triple(getLineNumber(insn), insn.`var`, name))
     }
 
     private fun processAffectedInsns(
@@ -313,13 +315,13 @@ class AffectedVarMethodVisitor(
                 is VarInsnNode -> {
                     if (src.`var` == 0 && !isStatic) {
                         if (insn is FieldInsnNode) {
-                            sourceFields.add(insn.name)
+                            sourceField.add(insn.name)
                         } else {
-                            sourceVars.add(src.`var`)
+                            sourceLocalVariable.add(src.`var`)
                         }
                     } else {
                         if (throwInsnFrame.getLocal(src.`var`) == srcFrame.getLocal(src.`var`)) {
-                            sourceVars.add(src.`var`)
+                            sourceLocalVariable.add(src.`var`)
                         }
                     }
                 }
