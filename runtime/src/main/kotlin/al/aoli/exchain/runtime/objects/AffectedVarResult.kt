@@ -1,6 +1,5 @@
 package al.aoli.exchain.runtime.objects
 
-import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 
 enum class SourceType {

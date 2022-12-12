@@ -1133,3 +1133,55 @@ void test() {
 - Hard to trigger (2/22)
     - require long execution
     - require unstable connection between services
+
+# Dec 12
+
+- Major task:
+    - Complete the story and have a timeline
+
+- Problem:
+    - (TOFIX:) Stateful failures are hard to debug
+        - Failures contains at least two exceptions
+        - The first exception leads the system into a bad state
+        - The second exception causes failures
+        - (TOFIX:) program failures
+            - crash
+            - failures that can be observed by end users
+- Input:
+    - source code of the production system
+    - a trace of exceptions and the final exception causes a program failure
+- Output:
+    - a chain of exceptions from the trace that may cause the failure
+- Insight:
+    - Tracking the state changes of each exception allows us to construct the causality chain among exceptions. The causality chain is useful to identify the root cause of the failure.
+    - (TOFIX: ) why is causality chain is useful?
+- Solution:
+    - Step 1: identify the affected variables of each exception
+    - Step 2: identify the responsible variables of each exception
+    - Step 3: identify the propagation of affected variables
+- Challenge:
+    - Tracking the propagation of affected variables dynamically is expensive in production system.
+    - Tracking the propagation of affected variables statically is in accurate.
+- Naive Solution 1:
+    - Production system with full taint analysis
+    - Problem:
+        - High overhead
+- Naive Solution 2:
+    - Analyze causality chain using data-flow analysis
+    - Problem:
+        - Inaccurate
+        - Also slow (need to process all exception in the production system)
+- (TOFIX) Solution 1:
+    - Insight: tracking heap objects dynamically is cheap, tracking local objects statically is accurate
+    - Dynamic heap + static local
+- (TOFIX) Solution 2:
+    - Insight: failures occurs repetitively in the production system
+    - When the first failure occurs, replace the system with an instrumented system
+- Evaluation
+    - (TOFIX) 8 issues from open source projects
+    - Reproduce each issue
+    - Use naive solutions to analyze each issue.
+    - Use proposed solution to analyze each issue.
+
+
+

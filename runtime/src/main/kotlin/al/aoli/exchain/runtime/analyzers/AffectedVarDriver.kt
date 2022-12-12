@@ -80,7 +80,8 @@ object AffectedVarDriver {
         if (sourceLines.isNotEmpty()) {
             store.exceptionSourceIdentified[label] = true
         }
-        val sourceLocalVariable = visitor.methodVisitor?.sourceLocalVariable?.toIntArray() ?: intArrayOf()
+        val sourceLocalVariable =
+            visitor.methodVisitor?.sourceLocalVariable?.toIntArray() ?: intArrayOf()
         val sourceField = visitor.methodVisitor?.sourceField?.toTypedArray() ?: emptyArray()
         val result =
             AffectedVarResult(
@@ -157,13 +158,15 @@ object AffectedVarDriver {
                 val taint = field.get(obj) as Taint<Int>? ?: continue
                 for (label in taint.labels) {
                     if (label is Int && label in exceptionStore && label != origin) {
-                        println(TextColors.cyan("Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"))
+                        println(
+                            TextColors.cyan(
+                                "Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"
+                            )
+                        )
                     }
                 }
-            }
-            catch (e: Exception) {
-                logger.warn { "Cannot access field: $name for type: ${obj.javaClass.name}, " +
-                        "error: $e" }
+            } catch (e: Exception) {
+                logger.warn { "Cannot access field: $name for type: ${obj.javaClass.name}, " + "error: $e" }
             }
         }
     }
