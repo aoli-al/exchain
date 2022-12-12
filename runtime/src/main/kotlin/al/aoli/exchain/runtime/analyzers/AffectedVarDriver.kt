@@ -169,6 +169,7 @@ object AffectedVarDriver {
     }
 
     fun analyzeSourceVars(obj: Any, exception: Any, location: String) {
+        logger.info { "Start processing source var: $obj at $location" }
         val origin = System.identityHashCode(exception)
         val taint =
             when (obj) {

@@ -11,7 +11,8 @@ void AffectedResultProcessor::Process() {
             "get local variable table " + location_string_)) {
         return;
     }
-    PLOG_INFO << "Start processing affected result!";
+    PLOG_INFO << "Start processing frame: " << location_string_
+              << " at frame: " << frame_.location;
 
     ProcessSourceVars();
     ProcessAffectedVars();
@@ -133,10 +134,10 @@ jint AffectedResultProcessor::GetCorrespondingTaintObjectSlot(int slot) {
                               "XX")) {
             continue;
         }
-        if (entry.start_location > frame_.location ||
-            entry.start_location + entry.length < frame_.location) {
-            continue;
-        }
+        // if (entry.start_location > frame_.location ||
+        //     entry.start_location + entry.length < frame_.location) {
+        //     continue;
+        // }
         LOG_INFO << "Found taint tag: " << entry.name << " for slot: " << slot;
         return entry.slot;
     }
@@ -196,7 +197,7 @@ void AffectedResultProcessor::ProcessAffectedVars() {
         }
         local_variable_map_.emplace_back(entry->slot, entry->name);
         if (Configuration::GetInstance().mode() == TAINT) {
-            PLOG_INFO << "Look for taint objects for slot: " << slot;
+            PLOG_INFO << "Looking for taint for slot: " << slot;
             // We only taint primitive types if the exception is
             // caught by the current frame.
             jint taint_slot = GetCorrespondingTaintObjectSlot(slot);

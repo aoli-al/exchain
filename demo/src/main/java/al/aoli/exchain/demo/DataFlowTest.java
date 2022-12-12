@@ -163,14 +163,14 @@ public class DataFlowTest {
     }
 
     public void sceneLocal() {
-        Object s = null;
+        Object thisisalongname = null;
         try {
-            s = createObjectWithException();
+            thisisalongname = createObjectWithException();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
-        System.out.println(s.toString());
+        System.out.println(thisisalongname.toString());
     }
 
     public String scene1(Dummy d) {
