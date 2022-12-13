@@ -6,8 +6,8 @@
 #include <string_view>
 
 #include "affected_result_processor.hpp"
-#include "constants.hpp"
 #include "configuration.hpp"
+#include "constants.hpp"
 #include "plog/Log.h"
 #include "utils.hpp"
 
@@ -21,7 +21,6 @@ void ExceptionProcessor::FullPass() {
             "failed to get stack trace.")) {
         PLOG_INFO << "Stack count: " << count;
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
-
             auto class_signature = GetClassSignature(frames[stack_idx].method);
             if (ShouldIgnoreClass(class_signature)) {
                 if (frames[stack_idx].method == catch_method_) {
@@ -34,7 +33,9 @@ void ExceptionProcessor::FullPass() {
             if (flags & JVM_ACC_NATIVE) {
                 continue;
             }
-            if (ShouldTerminateEarly(class_signature)) {
+            std::string method_name =
+                GetMethodSignature(frames[stack_idx].method);
+            if (ShouldTerminateEarly(class_signature, method_name)) {
                 return;
             }
             ProcessStackFrameInfo(frames[stack_idx], stack_idx);
@@ -49,16 +50,16 @@ void ExceptionProcessor::FullPass() {
 void ExceptionProcessor::LoggingPass() {
     PLOG_INFO << "Logging pass started!!!";
     auto clazz = jni_->FindClass(kRuntimeClassName);
-    auto method_id = jni_->GetStaticMethodID(
-        clazz, kOnExceptionCaughtMethodName, kOnExceptionCaughtMethodDescriptor);
+    auto method_id =
+        jni_->GetStaticMethodID(clazz, kOnExceptionCaughtMethodName,
+                                kOnExceptionCaughtMethodDescriptor);
     PLOG_INFO << "Class found: " << clazz;
     PLOG_INFO << "Method found: " << method_id;
     jni_->CallStaticVoidMethod(clazz, method_id, exception_);
 }
 
 void ExceptionProcessor::Process() {
-    switch (Configuration::GetInstance().mode())
-    {
+    switch (Configuration::GetInstance().mode()) {
         case LOGGING:
             LoggingPass();
             break;
@@ -71,7 +72,7 @@ void ExceptionProcessor::Process() {
     }
 }
 
-bool ExceptionProcessor::ShouldIgnoreClass(std::string method_name) {
+bool ExceptionProcessor::ShouldIgnoreClass(std::string class_name) {
     // return method_name.starts_with("Ljava") ||
     //        method_name.starts_with("Ljavax") ||
     //        method_name.starts_with("Ljdk") ||
@@ -85,13 +86,18 @@ bool ExceptionProcessor::ShouldIgnoreClass(std::string method_name) {
     //        method_name.starts_with("Lsun") ||
     //        method_name.starts_with("Lcom/sun") ||
     //        method_name.starts_with("Lkotlin") ||
-    return method_name.starts_with("Lal/aoli/exchain/instrumentation") ||
-           method_name.starts_with("Lal/aoli/exchain/phosphor") ||
-           method_name.starts_with("Ledu/columbia/cs/psl/");
+    return class_name.starts_with("Lal/aoli/exchain/instrumentation") ||
+           class_name.starts_with("Lal/aoli/exchain/phosphor") ||
+           class_name.starts_with("Ledu/columbia/cs/psl/");
 }
 
-bool ExceptionProcessor::ShouldTerminateEarly(std::string method_name) {
-    return false;
+bool ExceptionProcessor::ShouldTerminateEarly(std::string class_name,
+                                              std::string method_name) {
+    return method_name.starts_with(
+               "findClass(Ljava/lang/String;)Ljava/lang/Class;") ||
+           method_name.starts_with("loadClass(Ljava/lang/String") ||
+           method_name.starts_with("getField(Ljava/lang/String;)Ljava/lang/reflect/Field;");
+    // return false;
     // return method_name.starts_with("Lorg/springframework/boot") ||
     //        method_name.starts_with("Lorg/springframework/util/ClassUtils") ||
     //        method_name.starts_with("Lorg.springframework.asm.ClassReader") ||
@@ -127,9 +133,8 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
         catch_method_ == frame.method ? catch_location_ : -1;
     jboolean is_throw_insn = depth == 0;
     jobject result = (jintArray)jni_->CallStaticObjectMethod(
-        clazz, method_id, exception_,
-        class_jstring, method_jstring, frame.location,
-        catch_current_method, is_throw_insn);
+        clazz, method_id, exception_, class_jstring, method_jstring,
+        frame.location, catch_current_method, is_throw_insn);
     jni_->DeleteLocalRef(method_jstring);
     jni_->DeleteLocalRef(class_jstring);
     if (result == NULL) {

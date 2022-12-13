@@ -14,6 +14,7 @@ dependencies {
 	implementation group: 'org.ow2.asm', name: 'asm-analysis', version: '9.3'
 	implementation group: 'io.github.microutils', name: 'kotlin-logging-jvm', version: '3.0.2'
 	implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.1'
+	implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.3'
 	implementation("com.github.ajalt.mordant:mordant:2.0.0-beta7")
 	implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.5'
 	compileOnly 'edu.gmu.swe.phosphor:phosphor-instrument-jigsaw:0.1.0-SNAPSHOT'
@@ -56,6 +57,17 @@ task buildPhosphor(type: Exec) {
 }
 
 import org.gradle.internal.jvm.Jvm
+task createInstrumentedJDKOrigin(type: JavaExec) {
+	var phosphor = project(":phosphor")
+	classpath "$phosphor.buildDir/libs/phosphor-merged.jar"
+	mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
+	var src = Jvm.current().javaHome
+	var dst = "$buildDir/jre-inst-origin"
+	args src, dst, "--jvmModules", "ALL-MODULE-PATH",
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
+	dependsOn ":phosphor:mergedJar"
+}
+
 task createInstrumentedJDK(type: JavaExec) {
 	var phosphor = project(":phosphor")
 	classpath "$phosphor.buildDir/libs/phosphor-merged.jar"
@@ -64,6 +76,19 @@ task createInstrumentedJDK(type: JavaExec) {
 	var dst = "$buildDir/jre-inst"
 	args src, dst, "--jvmModules", "ALL-MODULE-PATH",
 			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
+	dependsOn ":phosphor:mergedJar"
+}
+
+task createInstrumentedJDKDebug(type: JavaExec) {
+	var phosphor = project(":phosphor")
+	classpath "$phosphor.buildDir/libs/phosphor-merged.jar"
+	mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
+	var src = Jvm.current().javaHome
+	var dst = "$buildDir/jre-inst"
+	args src, dst, "--jvmModules", "ALL-MODULE-PATH",
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
+			"-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPreCV",
+			"-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV"
 	dependsOn ":phosphor:mergedJar"
 }
 

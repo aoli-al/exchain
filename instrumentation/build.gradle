@@ -11,7 +11,7 @@ group 'al.aoli.exchain.instrumentation'
 version 'unspecified'
 
 dependencies {
-	compileOnly project(path: ":runtime", configuration: "shadow")
+	implementation project(path: ":runtime", configuration: "shadow")
 	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
 	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
 	implementation group: 'net.bytebuddy', name: 'byte-buddy-dep', version: '1.12.12'
@@ -24,18 +24,22 @@ test {
 }
 
 jar {
-	duplicatesStrategy = DuplicatesStrategy.INCLUDE
-	var runtime = project(":runtime")
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 	manifest {
 		attributes 'Premain-Class': "al.aoli.exchain.instrumentation.MainKt"
 		attributes 'Can-Redefine-Classes': true
 		attributes 'Can-Retransform-Classes': true
-		attributes 'Class-Path': "${runtime.buildDir}/libs/out.jar"
 	}
 }
 
 shadowJar {
 	archiveBaseName.set('instrumentation')
+	archiveClassifier.set('')
+	archiveVersion.set('')
+	relocate 'org.objectweb.asm', 'al.aoli.exchain.instrumentation.asm'
+	dependsOn ':native:linkDebug'
+	exclude "module-info.class"
+	from sourceSets.main.output
 	from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
 }
 

@@ -1137,14 +1137,15 @@ void test() {
 # Dec 12
 
 - Major task:
-    - Complete the story and have a timeline
+    - Complete the story
+    - Have a timeline
 
 - Problem:
-    - (TOFIX:) Stateful failures are hard to debug
+    - (TOFIX) Stateful failures are hard to debug
         - Failures contains at least two exceptions
         - The first exception leads the system into a bad state
         - The second exception causes failures
-        - (TOFIX:) program failures
+        - (TOFIX) program failures
             - crash
             - failures that can be observed by end users
 - Input:
@@ -1153,8 +1154,8 @@ void test() {
 - Output:
     - a chain of exceptions from the trace that may cause the failure
 - Insight:
-    - Tracking the state changes of each exception allows us to construct the causality chain among exceptions. The causality chain is useful to identify the root cause of the failure.
-    - (TOFIX: ) why is causality chain is useful?
+    - (TOFIX) Tracking the state changes of each exception allows us to construct the causality chain among exceptions. The causality chain is useful to identify the root cause of the failure. (Is this an insight? why or why not?)
+    - (TOFIX) why is causality chain is useful?
 - Solution:
     - Step 1: identify the affected variables of each exception
     - Step 2: identify the responsible variables of each exception
@@ -1184,4 +1185,31 @@ void test() {
     - Use proposed solution to analyze each issue.
 
 
+```
+ZooKeeper-2247
+
+ZooKeeper-3157
+
+ZooKeeper-4203
+
+ZooKeeper-3006
+
+HDFS-4233
+
+HDFS-12248
+
+HDFS-12070
+
+HDFS-13039
+
+HBase-18137
+
+HBase-19608
+
+HBase-19876
+
+Kafka-12508
+
+Kafka-9374
+```
 

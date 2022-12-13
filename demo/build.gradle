@@ -14,7 +14,6 @@ repositories {
 
 dependencies {
 	compileOnly  'edu.gmu.swe.phosphor:Phosphor:0.1.0-SNAPSHOT'
-	implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.3'
 	compileOnly project(path: ":runtime", configuration: "shadow")
 }
 
@@ -39,9 +38,7 @@ task instrumentJarWithDynSwitch(type: JavaExec) {
 	var src= jar.getArchiveFile().get().asFile.absolutePath
 	var dst = "${buildDir}/libs/instrumented-dyn-switch"
 	args src, dst,
-			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
-			"-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPreCV",
-			"-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchPostCV"
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
 	dependsOn jar
 	dependsOn ":phosphor:jar"
 }
@@ -49,13 +46,31 @@ task instrumentJarWithDynSwitch(type: JavaExec) {
 task instrumentJarOrigin(type: JavaExec) {
 	// This looks hacky...
 	var phosphor = project(":phosphor")
-	classpath "$phosphor.buildDir/libs/${phosphor.name}.jar"
+	classpath "$phosphor.buildDir/libs/${phosphor.name}-merged.jar"
+	mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
+	var src= jar.getArchiveFile().get().asFile.absolutePath
+	var dst = "${buildDir}/libs/instrumented-origin"
+	args src, dst,
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
+	dependsOn jar
+}
+
+task instrumentCustomJarOriginDebug(type: JavaExec) {
+	// This looks hacky...
+	var phosphor = project(":phosphor")
+	classpath "$phosphor.buildDir/libs/${phosphor.name}-merged.jar"
 	mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
 	var jarPath = "${project.rootProject.projectDir}/dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
 	classpath jarPath
+//	jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:5005"
+//	var src= "/Users/aoli/tests/classes"
 	var src= jar.getArchiveFile().get().asFile.absolutePath
-	var dst = "${buildDir}/libs/instrumented-origin"
-	args src, dst
+	var dst = "/tmp"
+	jvmArgs "-DPhosphor.DEBUG=true"
+	args src, dst,
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
+//			"-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPreCV",
+//			"-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV"
 	dependsOn jar
 }
 
@@ -77,8 +92,6 @@ task runNaiveTaintAnalysis(type: JavaExec) {
 	var runtime = project(":runtime")
 	executable = "${runtime.buildDir}/jre-inst/bin/java"
 	classpath "${buildDir}/libs/instrumented-origin/${project.name}-${version}.jar"
-	classpath "${runtime.buildDir}/libs/runtime-shadow.jar"
-
 	mainClass = "al.aoli.exchain.demo.Main"
 	jvmArgs "-javaagent:${project.rootProject.projectDir}/" +
 			"dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
@@ -122,7 +135,8 @@ jar {
 		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
 	}
 
-	dependsOn ":instrumentation:jar"
+	dependsOn ":instrumentation:shadowJar"
 	dependsOn ":runtime:createShadow"
 	dependsOn ":native:build"
+	dependsOn ":phosphor:mergedJar"
 }

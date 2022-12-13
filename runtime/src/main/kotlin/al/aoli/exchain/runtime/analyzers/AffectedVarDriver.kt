@@ -3,7 +3,6 @@ package al.aoli.exchain.runtime.analyzers
 import al.aoli.exchain.runtime.objects.AffectedVarResult
 import al.aoli.exchain.runtime.store.InMemoryAffectedVarStore
 import al.aoli.exchain.runtime.store.TransformedCodeStore
-import com.github.ajalt.mordant.rendering.TextColors
 import edu.columbia.cs.psl.phosphor.runtime.Taint
 import edu.columbia.cs.psl.phosphor.struct.PowerSetTree
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
@@ -159,9 +158,7 @@ object AffectedVarDriver {
                 for (label in taint.labels) {
                     if (label is Int && label in exceptionStore && label != origin) {
                         println(
-                            TextColors.cyan(
-                                "Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"
-                            )
+                            "Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"
                         )
                     }
                 }
@@ -184,9 +181,7 @@ object AffectedVarDriver {
         for (label in taint.labels) {
             if (label is Int && label in exceptionStore && label != origin) {
                 println(
-                    TextColors.cyan(
-                        "Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"
-                    )
+                    "Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"
                 )
             }
         }

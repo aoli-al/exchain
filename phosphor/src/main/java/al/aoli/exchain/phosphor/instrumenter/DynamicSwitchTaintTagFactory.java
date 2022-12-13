@@ -17,6 +17,8 @@ public class DynamicSwitchTaintTagFactory extends DataAndControlFlowTagFactory {
         if (className.startsWith("al/aoli/exchain/instrumentation")
                 || className.startsWith("al/aoli/exchain/runtime")
                 || className.startsWith("al/aoli/exchain/phosphor")
+                || className.startsWith("mu/")
+                || className.startsWith("kotlin")
                 || className.startsWith("net/bytebuddy")) {
             return true;
         }
