@@ -1,7 +1,7 @@
 package al.aoli.exchain.runtime.analyzers
 
+import al.aoli.exchain.runtime.logger.Logger
 import al.aoli.exchain.runtime.objects.SourceType
-import mu.KotlinLogging
 import org.objectweb.asm.ConstantDynamic
 import org.objectweb.asm.Handle
 import org.objectweb.asm.Label
@@ -19,7 +19,7 @@ import org.objectweb.asm.tree.VarInsnNode
 import org.objectweb.asm.tree.analysis.Frame
 import org.objectweb.asm.tree.analysis.SourceValue
 
-private val logger = KotlinLogging.logger {}
+private val logger = Logger()
 
 class AffectedVarMethodVisitor(
     val exception: Throwable,
@@ -339,10 +339,13 @@ class AffectedVarMethodVisitor(
                         Opcodes.LSUB,
                         Opcodes.LMUL,
                         Opcodes.LDIV,
+                        Opcodes.LCMP,
                         Opcodes.FADD,
                         Opcodes.FSUB,
                         Opcodes.FMUL,
                         Opcodes.FDIV,
+                        Opcodes.FCMPG,
+                        Opcodes.FCMPL,
                         Opcodes.DADD,
                         Opcodes.DSUB,
                         Opcodes.DMUL,

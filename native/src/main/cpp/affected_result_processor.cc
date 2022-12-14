@@ -87,13 +87,14 @@ void AffectedResultProcessor::ProcessSourceVars() {
         jint taint_slot = GetCorrespondingTaintObjectSlot(slot);
         if (taint_slot != -1) {
             jobject taint;
-            jvmti_->GetLocalObject(thread_, depth_, taint_slot, &taint);
-            if (taint != NULL) {
+            if (CheckJvmTIError(
+                    jvmti_->GetLocalObject(thread_, depth_, taint_slot, &taint),
+                    "get local object failed: " + std::to_string(taint_slot)) && taint != NULL) {
                 jni_->CallStaticVoidMethod(runtime_class_,
                                            analyze_source_method_id, taint,
                                            exception_, location_jstring_);
+                jni_->DeleteLocalRef(taint);
             }
-            jni_->DeleteLocalRef(taint);
         }
 
         auto *entry = GetLocalVariableEntry(slot);
@@ -134,10 +135,10 @@ jint AffectedResultProcessor::GetCorrespondingTaintObjectSlot(int slot) {
                               "XX")) {
             continue;
         }
-        // if (entry.start_location > frame_.location ||
-        //     entry.start_location + entry.length < frame_.location) {
-        //     continue;
-        // }
+        if (entry.start_location > frame_.location ||
+            entry.start_location + entry.length < frame_.location) {
+            continue;
+        }
         LOG_INFO << "Found taint tag: " << entry.name << " for slot: " << slot;
         return entry.slot;
     }

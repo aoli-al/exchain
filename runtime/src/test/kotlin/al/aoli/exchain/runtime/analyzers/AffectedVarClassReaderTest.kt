@@ -160,4 +160,31 @@ internal class AffectedVarClassReaderTest {
         assert(visitor.methodVisitor!!.sourceLocalVariable.contains(1))
         assert(visitor.methodVisitor!!.sourceLines.contains(Pair(29, SourceType.JUMP)))
     }
+
+    @Test
+    fun testSourceVarFSEditLogLoader() {
+        val resource =
+            AffectedVarClassReader::class
+                .java
+                .getResourceAsStream("/bytecode/FSEditLogLoader.class")!!
+                .readAllBytes()
+        val cr = AffectedVarClassReader(resource)
+        val e = RuntimeException("dummy exception")
+        val visitor =
+            AffectedVarClassVisitor(
+                e,
+                2645,
+                6223,
+                false,
+                true,
+                "Lorg/apache/hadoop/hdfs/server/namenode/FSEditLogLoader;",
+                "loadEditRecords(Lorg/apache/hadoop/hdfs/server/namenode/EditLogInputStream;" +
+                        "ZJJLorg/apache/hadoop/hdfs/server/common/HdfsServerConstants\$StartupOption;Lorg/apache/hadoop/hdfs/server/namenode/MetaRecoveryContext;)J",
+                cr
+            )
+        cr.accept(visitor, 0)
+        assert(visitor.methodVisitor!!.sourceField.isEmpty())
+        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(51))
+        assert(visitor.methodVisitor!!.sourceLines.contains(Pair(296, SourceType.JUMP)))
+    }
 }

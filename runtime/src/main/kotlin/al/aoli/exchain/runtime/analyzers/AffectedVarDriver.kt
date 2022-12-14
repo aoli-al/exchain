@@ -1,16 +1,16 @@
 package al.aoli.exchain.runtime.analyzers
 
+import al.aoli.exchain.runtime.logger.Logger
 import al.aoli.exchain.runtime.objects.AffectedVarResult
 import al.aoli.exchain.runtime.store.InMemoryAffectedVarStore
 import al.aoli.exchain.runtime.store.TransformedCodeStore
 import edu.columbia.cs.psl.phosphor.runtime.Taint
 import edu.columbia.cs.psl.phosphor.struct.PowerSetTree
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
-import mu.KotlinLogging
 import java.io.IOException
 import java.lang.Exception
 
-private val logger = KotlinLogging.logger {}
+private val logger = Logger()
 
 object AffectedVarDriver {
     val store = InMemoryAffectedVarStore()

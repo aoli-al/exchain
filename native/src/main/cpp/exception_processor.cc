@@ -22,6 +22,11 @@ void ExceptionProcessor::FullPass() {
         PLOG_INFO << "Stack count: " << count;
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
             auto class_signature = GetClassSignature(frames[stack_idx].method);
+            std::string method_name =
+                GetMethodSignature(frames[stack_idx].method);
+            if (ShouldTerminateEarly(class_signature, method_name)) {
+                return;
+            }
             if (ShouldIgnoreClass(class_signature)) {
                 if (frames[stack_idx].method == catch_method_) {
                     break;
@@ -32,11 +37,6 @@ void ExceptionProcessor::FullPass() {
             jvmti_->GetMethodModifiers(frames[stack_idx].method, &flags);
             if (flags & JVM_ACC_NATIVE) {
                 continue;
-            }
-            std::string method_name =
-                GetMethodSignature(frames[stack_idx].method);
-            if (ShouldTerminateEarly(class_signature, method_name)) {
-                return;
             }
             ProcessStackFrameInfo(frames[stack_idx], stack_idx);
             if (frames[stack_idx].method == catch_method_) {
@@ -96,7 +96,13 @@ bool ExceptionProcessor::ShouldTerminateEarly(std::string class_name,
     return method_name.starts_with(
                "findClass(Ljava/lang/String;)Ljava/lang/Class;") ||
            method_name.starts_with("loadClass(Ljava/lang/String") ||
-           method_name.starts_with("getField(Ljava/lang/String;)Ljava/lang/reflect/Field;");
+           method_name.starts_with(
+               "getField(Ljava/lang/String;)Ljava/lang/reflect/Field;") ||
+           class_name.starts_with("Lmu/") ||
+           class_name.starts_with("Lkotlin/") ||
+           class_name.starts_with("Lal/aoli/exchain/instrumentation") ||
+           class_name.starts_with("Lal/aoli/exchain/phosphor") ||
+           class_name.starts_with("Ledu/columbia/cs/psl/");
     // return false;
     // return method_name.starts_with("Lorg/springframework/boot") ||
     //        method_name.starts_with("Lorg/springframework/util/ClassUtils") ||
@@ -126,6 +132,7 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
 
     PLOG_INFO << "Calling JAVA method at address: " << method_id
               << ", class: " << clazz;
+    PLOG_INFO << "location: " << location_string_;
 
     jstring method_jstring = jni_->NewStringUTF(method.c_str());
     jstring class_jstring = jni_->NewStringUTF(class_signature.c_str());
