@@ -9,8 +9,10 @@ INSTRUMENTED_JAVA_HOME = os.path.join(BASE_FOLDER, "..", "runtime/build/jre-inst
 PHOSPHOR_AGENT_PATH = os.path.join(BASE_FOLDER, "..", "dependencies/phosphor/phosphor-jigsaw-javaagent/target/phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar")
 PHOSPHOR_JAR_PATH = os.path.join(BASE_FOLDER, "..", "dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar")
 
-INSTRUMENTATION_AGENT_PATH = os.path.join(BASE_FOLDER, "..", "instrumentation/build/libs/instrumentation.jar")
 RUNTIME_JAR_PATH = os.path.join(BASE_FOLDER, "..", "runtime/build/libs/runtime-shadow.jar")
+
+INSTRUMENTATION_FOLDER_NAME = os.path.realpath("instrumented")
+INSTRUMENTATION_CLASSPATH = os.path.realpath("instrumented_classes")
 
 
 

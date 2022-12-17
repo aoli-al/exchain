@@ -7,6 +7,7 @@ import al.aoli.exchain.runtime.store.TransformedCodeStore
 import edu.columbia.cs.psl.phosphor.runtime.Taint
 import edu.columbia.cs.psl.phosphor.struct.PowerSetTree
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
+import java.io.File
 import java.io.IOException
 import java.lang.Exception
 
@@ -14,6 +15,7 @@ private val logger = Logger()
 
 object AffectedVarDriver {
     val store = InMemoryAffectedVarStore()
+    var instrumentedClassPath: String? = null
     fun analyzeAffectedVar(
         e: Throwable,
         clazz: String,
@@ -36,18 +38,17 @@ object AffectedVarDriver {
             "Start processing $className, method: $method, throwIndex: $throwIndex, catchIndex: $catchIndex"
         }
         val classReader =
-            if (className in TransformedCodeStore.store) {
-                AffectedVarClassReader(TransformedCodeStore.store[className]!!)
-            } else {
+            try {
+                AffectedVarClassReader(className)
+            } catch (e1: IOException) {
                 try {
-                    AffectedVarClassReader(className)
-                } catch (e1: IOException) {
-                    try {
-                        AffectedVarClassReader("BOOT-INF/classes/$classPath")
-                    } catch (e2: IOException) {
-                        logger.warn { "Cannot access bytecode for class $className:$method. Error: $e1, $e2" }
-                        return null
+                    val path = instrumentedClassPath ?: return null
+                    AffectedVarClassReader(File("$path/$classPath.class").readBytes())
+                } catch (e2: Throwable) {
+                    logger.error {
+                        "Failed to get class file $className"
                     }
+                    return null
                 }
             }
         val sourceIdentified = store.exceptionSourceIdentified.getOrDefault(label, false)
@@ -157,9 +158,7 @@ object AffectedVarDriver {
                 val taint = field.get(obj) as Taint<Int>? ?: continue
                 for (label in taint.labels) {
                     if (label is Int && label in exceptionStore && label != origin) {
-                        println(
-                            "Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"
-                        )
+                        ExceptionLogger.logDependency(label, origin)
                     }
                 }
             } catch (e: Exception) {
@@ -167,6 +166,7 @@ object AffectedVarDriver {
             }
         }
     }
+
 
     fun analyzeSourceVars(obj: Any, exception: Any, location: String) {
         logger.info { "Start processing source var: $obj at $location" }
@@ -180,9 +180,7 @@ object AffectedVarDriver {
                 ?: return
         for (label in taint.labels) {
             if (label is Int && label in exceptionStore && label != origin) {
-                println(
-                    "Exception ${exception.javaClass.name} thrown at $location possible caused by: ${exceptionStore[label]}"
-                )
+                ExceptionLogger.logDependency(label, origin)
             }
         }
     }

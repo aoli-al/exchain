@@ -50,6 +50,7 @@ task instrumentJarOrigin(type: JavaExec) {
 	mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
 	var src= jar.getArchiveFile().get().asFile.absolutePath
 	var dst = "${buildDir}/libs/instrumented-origin"
+	jvmArgs "-DPhosphor.INSTRUMENTED_CLASSPATH=${buildDir}/libs/instrumented_classes"
 	args src, dst,
 			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
 	dependsOn jar
@@ -90,16 +91,18 @@ task runOriginJar(type: JavaExec) {
 
 task runNaiveTaintAnalysis(type: JavaExec) {
 	var runtime = project(":runtime")
-	executable = "${runtime.buildDir}/jre-inst/bin/java"
+	executable = "${runtime.buildDir}/jre-inst-origin/bin/java"
 	classpath "${buildDir}/libs/instrumented-origin/${project.name}-${version}.jar"
 	mainClass = "al.aoli.exchain.demo.Main"
+	jvmArgs "-DPhosphor.INSTRUMENTED_CLASSPATH=clz"
+	jvmArgs "-DPhosphor.DEBUG=true"
 	jvmArgs "-javaagent:${project.rootProject.projectDir}/" +
 			"dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
 			"phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
 	var nat= project(":native")
 	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=taint"
 	var instrumentation = project(":instrumentation")
-	jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
+	jvmArgs "-javaagent:${runtime.buildDir}/libs/${runtime.name}-shadow.jar=${buildDir}/libs/instrumented_classes"
 }
 
 task runTaintAnalysisWithDynSwitch(type: JavaExec) {
@@ -135,7 +138,6 @@ jar {
 		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
 	}
 
-	dependsOn ":instrumentation:shadowJar"
 	dependsOn ":runtime:createShadow"
 	dependsOn ":native:build"
 	dependsOn ":phosphor:mergedJar"

@@ -27,6 +27,10 @@ object ExceptionLogger {
         return label
     }
 
+    fun logDependency(e1: Int, e2: Int) {
+        dynamicDependencyLog.appendText("$e1, $e2")
+    }
+
     fun logAffectedVarResult(result: AffectedVarResult) {
         val item = Gson().toJson(result)
         affectedVarResults.appendText(item + "\n")
@@ -61,6 +65,7 @@ object ExceptionLogger {
     private val exceptionMap = mutableMapOf<Throwable, MutableList<Int>>()
     private val exceptionLog: File
     private val exceptionStats: File
+    private val dynamicDependencyLog: File
     private val affectedVarResults: File
     init {
         val basePath = "results"
@@ -77,5 +82,6 @@ object ExceptionLogger {
         exceptionLog = File("$basePath/$path/exception.json")
         exceptionStats = File("$basePath/$path/stats.csv")
         affectedVarResults = File("$basePath/$path/affected-var-results.json")
+        dynamicDependencyLog = File("$basePath/$path/dynamic_dependency.json")
     }
 }
