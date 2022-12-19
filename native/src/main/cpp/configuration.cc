@@ -3,9 +3,12 @@
 namespace exchain {
 
 void Configuration::Init(std::string args) {
-    if (args == "logging") {
+    std::string delimiter = ":";
+    std::string type = args.substr(0, args.find(delimiter));
+    application_ = args.substr(args.find(delimiter) + 1, args.length());
+    if (type == "logging") {
         mode_ = LOGGING;
-    } else if (args == "stats") {
+    } else if (type == "stats") {
         mode_ = STAT;
     }
 }

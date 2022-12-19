@@ -2,23 +2,22 @@
 #include <jvmti.h>
 
 #include <iostream>
-#include <vector>
+#include <mutex>
 #include <set>
 #include <thread>
-#include <mutex>
+#include <vector>
 
-#include "runtime.hpp"
-#include "utils.hpp"
-#include "exception_processor.hpp"
 #include "configuration.hpp"
-#include "plog/Init.h"
-#include "plog/Log.h"
+#include "exception_processor.hpp"
 #include "plog/Appenders/ColorConsoleAppender.h"
 #include "plog/Formatters/FuncMessageFormatter.h"
+#include "plog/Init.h"
+#include "plog/Log.h"
+#include "runtime.hpp"
+#include "utils.hpp"
 
-
-
-// void GetLocalVariables(jvmtiEnv *jvmti, jlocation current_location, jmethodID method, std::string method_name) {
+// void GetLocalVariables(jvmtiEnv *jvmti, jlocation current_location, jmethodID
+// method, std::string method_name) {
 //     jvmtiLocalVariableEntry *table_ptr;
 //     jint entry_count;
 //     if (CheckJvmTIError(
@@ -33,7 +32,6 @@
 //     }
 //     jvmti->Deallocate((unsigned char *)table_ptr);
 // }
-
 
 static std::mutex processing_threads_mutex;
 static std::set<jlong> processing_threads;
@@ -70,11 +68,9 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
             return;
         }
 
-
-        PLOG_INFO << "Start processing: " << thread;
-
         auto cls = jni->FindClass("java/lang/Thread");
-        auto mid = jni->GetStaticMethodID(cls, "currentThread", "()Ljava/lang/Thread;");
+        auto mid = jni->GetStaticMethodID(cls, "currentThread",
+                                          "()Ljava/lang/Thread;");
         jthread current_thread = jni->CallStaticObjectMethod(cls, mid);
         jlong current_thread_id = GetThreadId(current_thread, jni);
         jni->DeleteLocalRef(current_thread);
@@ -82,7 +78,6 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
         processing_threads_mutex.lock();
         processing_threads.insert(current_thread_id);
         processing_threads_mutex.unlock();
-
 
         exchain::ExceptionProcessor processor(jvmti, jni, thread, method,
                                               location, catch_method,
@@ -96,7 +91,6 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
         jvm->DetachCurrentThread();
     });
     new_thread.join();
-    PLOG_INFO << "Finish processing: " << thread;
 }
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
@@ -118,10 +112,14 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
     jvmti->SetEventCallbacks(&callbacks, sizeof(callbacks));
     jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_EXCEPTION, NULL);
 
-    static plog::ColorConsoleAppender<plog::FuncMessageFormatter> console_appender;
-    plog::init(plog::fatal, &console_appender);
+    static plog::ColorConsoleAppender<plog::FuncMessageFormatter>
+        console_appender;
+    plog::init(plog::info, &console_appender);
 
-    PLOG_INFO << "Agent initialization done!";
+    PLOG_INFO << "Agent initialization done!"
+              << " mode: " << exchain::Configuration::GetInstance().mode()
+              << " application: "
+              << exchain::Configuration::GetInstance().application();
 
     return 0;
 }

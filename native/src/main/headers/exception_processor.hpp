@@ -42,6 +42,7 @@ class ExceptionProcessor: ProcessorBase {
     bool CheckJvmTIError(jvmtiError error, std::string msg);
     bool ShouldIgnoreClass(std::string signature);
     bool ShouldTerminateEarly(std::string signature, std::string method_name);
+    bool ContainsApplicationCode(std::string signature);
     int ComputeExceptionId(jobject obj);
     void FullPass();
     void LoggingPass();

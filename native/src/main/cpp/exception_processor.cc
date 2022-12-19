@@ -19,20 +19,23 @@ void ExceptionProcessor::FullPass() {
     if (ProcessorBase::CheckJvmTIError(
             jvmti_->GetStackTrace(thread_, 0, kMaxStackDepth, frames, &count),
             "failed to get stack trace.")) {
-        PLOG_INFO << "Stack count: " << count;
+        // PLOG_INFO << "Stack count: " << count;
+        bool is_application_code_visited = false;
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
             auto class_signature = GetClassSignature(frames[stack_idx].method);
-            std::string method_name =
-                GetMethodSignature(frames[stack_idx].method);
-            if (ShouldTerminateEarly(class_signature, method_name)) {
-                return;
+            if (class_signature.starts_with(Configuration::GetInstance().application())) {
+                is_application_code_visited = true;
             }
-            if (ShouldIgnoreClass(class_signature)) {
-                if (frames[stack_idx].method == catch_method_) {
-                    break;
-                }
-                continue;
+            if (frames[stack_idx].method == catch_method_) {
+                break;
             }
+        }
+
+        if (!is_application_code_visited) {
+            return;
+        }
+
+        for (int stack_idx = 0; stack_idx < count; stack_idx++) {
             jint flags;
             jvmti_->GetMethodModifiers(frames[stack_idx].method, &flags);
             if (flags & JVM_ACC_NATIVE) {
@@ -91,6 +94,7 @@ bool ExceptionProcessor::ShouldIgnoreClass(std::string class_name) {
            class_name.starts_with("Ledu/columbia/cs/psl/");
 }
 
+
 bool ExceptionProcessor::ShouldTerminateEarly(std::string class_name,
                                               std::string method_name) {
     return method_name.starts_with(
@@ -102,7 +106,14 @@ bool ExceptionProcessor::ShouldTerminateEarly(std::string class_name,
            class_name.starts_with("Lkotlin/") ||
            class_name.starts_with("Lal/aoli/exchain/instrumentation") ||
            class_name.starts_with("Lal/aoli/exchain/phosphor") ||
-           class_name.starts_with("Ledu/columbia/cs/psl/");
+           class_name.starts_with("Ledu/columbia/cs/psl/") ||
+           class_name.starts_with("Lorg/springframework/boot/loader/jar/JarURLConnection") ||
+           class_name.starts_with("Lorg/springframework/util/ClassUtils") ||
+           class_name.starts_with("Lorg/springframework/asm/ClassReader") ||
+           class_name.starts_with("Lorg/springframework/core/io/ClassPathResource") ||
+           class_name.starts_with("Ljavax/naming/spi/NamingManager") ||
+           class_name.starts_with("Ljava/lang/Class");
+
     // return false;
     // return method_name.starts_with("Lorg/springframework/boot") ||
     //        method_name.starts_with("Lorg/springframework/util/ClassUtils") ||
@@ -118,8 +129,8 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
     auto class_signature = GetClassSignature(frame.method);
     auto method = GetMethodSignature(frame.method);
 
-    PLOG_INFO << "Throw class: " << class_signature << ", method: " << method
-              << ", location: " << frame.location;
+    PLOG_INFO << "Depth: " << depth << ", Throw class: " << class_signature
+              << ", method: " << method << ", location: " << frame.location;
 
     auto clazz = jni_->FindClass(kRuntimeClassName);
     auto method_id = jni_->GetStaticMethodID(

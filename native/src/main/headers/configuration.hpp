@@ -21,6 +21,7 @@ class Configuration {
    public:
     void Init(std::string args);
     ExceptionMode mode() { return mode_; };
+    std::string application() { return application_; };
 
    public:
     Configuration() {}
@@ -29,6 +30,7 @@ class Configuration {
 
    private:
     ExceptionMode mode_ = TAINT;
+    std::string application_;
 };
 
 }  // namespace exchain
