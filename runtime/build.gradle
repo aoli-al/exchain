@@ -62,6 +62,7 @@ task createInstrumentedJDKOrigin(type: JavaExec) {
 	classpath "$phosphor.buildDir/libs/phosphor-merged.jar"
 	mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
 	jvmArgs "-DPhosphor.INSTRUMENTED_CLASSPATH=./instrumented_classes"
+	jvmArgs "-DPhosphor.ORIGIN_CLASSPATH=./origin_classes"
 	var src = Jvm.current().javaHome
 	var dst = "$buildDir/jre-inst-origin"
 	args src, dst, "--jvmModules", "ALL-MODULE-PATH",

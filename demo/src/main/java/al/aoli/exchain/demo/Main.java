@@ -38,9 +38,9 @@ public class Main {
 
     public static void main(String[] args)
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        testAnnotation();
-//        DataFlowTest test = new DataFlowTest();
-//        test.sceneLocal();
+//        testAnnotation();
+        DataFlowTest test = new DataFlowTest();
+        test.sceneLocal();
 //        ArrayInterface i = (ArrayInterface) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
 //                new Class[] {ArrayInterface.class},
 //                new DynamicInvocationHandler());

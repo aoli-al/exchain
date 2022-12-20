@@ -77,19 +77,7 @@ fun loadAndProcess(args: List<String>) {
         configs.dataFlowTimeout = 10 * 60
     }
 
-    val libPath = libs.joinToString(File.pathSeparator)
-    val sourceVarAnalyzer = SourceVarAnalyzer(results)
-    val dependencyFile = File("$dataDirectory/$path/dependency.json")
-    val dependencies =
-        if (dependencyFile.exists()) {
-            Gson().fromJson(dependencyFile.readText(), Dependencies::class.java)
-        } else {
-            Dependencies()
-        }
-
-    for (origin in results) {
-        sourceVarAnalyzer.disabledLabels.add(origin.label)
-        if (dependencies.processed.contains(origin.getSignature())) continue
+    val processedResults = results.map { origin ->
         val dummyException = if ("ClassNotFoundException" in origin.exceptionType) {
             ClassNotFoundException()
         }
@@ -102,15 +90,29 @@ fun loadAndProcess(args: List<String>) {
         else {
             java.lang.RuntimeException()
         }
-
-        val result = AffectedVarDriver.analyzeAffectedVar(
+        AffectedVarDriver.analyzeAffectedVar(
             dummyException,
             origin.clazz,
             origin.method,
             origin.throwIndex,
             origin.catchIndex,
             origin.isThrownInsn
-        ) ?: continue
+        )
+    }.filterNotNull()
+    val libPath = libs.joinToString(File.pathSeparator)
+    val sourceVarAnalyzer = SourceVarAnalyzer(processedResults)
+    val dependencyFile = File("$dataDirectory/$path/dependency.json")
+    val dependencies =
+        if (dependencyFile.exists()) {
+            Gson().fromJson(dependencyFile.readText(), Dependencies::class.java)
+        } else {
+            Dependencies()
+        }
+
+    for (result in processedResults) {
+        sourceVarAnalyzer.disabledLabels.add(result.label)
+        if (dependencies.processed.contains(result.getSignature())) continue
+
 
         if (result.affectedLocalName.isEmpty() && result.affectedFieldName.isEmpty()) continue
         logger.info("Start analysing ${result.label}.")

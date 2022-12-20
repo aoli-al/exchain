@@ -50,7 +50,8 @@ task instrumentJarOrigin(type: JavaExec) {
 	mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
 	var src= jar.getArchiveFile().get().asFile.absolutePath
 	var dst = "${buildDir}/libs/instrumented-origin"
-	jvmArgs "-DPhosphor.INSTRUMENTED_CLASSPATH=${buildDir}/libs/instrumented_classes"
+	jvmArgs "-DPhosphor.INSTRUMENTATION_CLASSPATH=${buildDir}/libs/instrumented_classes"
+	jvmArgs "-DPhosphor.ORIGIN_CLASSPATH=${buildDir}/libs/origin_classes"
 	args src, dst,
 			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
 	dependsOn jar
@@ -78,12 +79,12 @@ task instrumentCustomJarOriginDebug(type: JavaExec) {
 task runOriginJar(type: JavaExec) {
 	var runtime = project(":runtime")
 	classpath "${buildDir}/libs/${project.name}-${version}.jar"
-	classpath "${runtime.buildDir}/libs/runtime-shadow.jar"
+	jvmArgs "-javaagent:${runtime.buildDir}/libs/runtime-shadow." +
+			"jar=static:/Users/aoli/repos/exchain/demo/build/libs/origin_classes"
 	mainClass = "al.aoli.exchain.demo.Main"
 	var nat= project(":native")
-	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=stats"
+	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=exchain:Lal/aoli/exchain/demo"
 	var instrumentation = project(":instrumentation")
-	jvmArgs "-javaagent:${instrumentation.buildDir}/libs/${instrumentation.name}.jar"
 	dependsOn jar
 }
 
@@ -94,7 +95,8 @@ task runNaiveTaintAnalysis(type: JavaExec) {
 	executable = "${runtime.buildDir}/jre-inst-origin/bin/java"
 	classpath "${buildDir}/libs/instrumented-origin/${project.name}-${version}.jar"
 	mainClass = "al.aoli.exchain.demo.Main"
-	jvmArgs "-DPhosphor.INSTRUMENTED_CLASSPATH=clz"
+	jvmArgs "-DPhosphor.INSTRUMENTATION_CLASSPATH=instrumented_classes"
+	jvmArgs "-DPhosphor.ORIGIN_CLASSPATH=origin_classes"
 	jvmArgs "-DPhosphor.DEBUG=true"
 	jvmArgs "-javaagent:${project.rootProject.projectDir}/" +
 			"dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
