@@ -56,8 +56,6 @@ void ExceptionProcessor::LoggingPass() {
     auto method_id =
         jni_->GetStaticMethodID(clazz, kOnExceptionCaughtMethodName,
                                 kOnExceptionCaughtMethodDescriptor);
-    PLOG_INFO << "Class found: " << clazz;
-    PLOG_INFO << "Method found: " << method_id;
     jni_->CallStaticVoidMethod(clazz, method_id, exception_);
 }
 
@@ -66,8 +64,7 @@ void ExceptionProcessor::Process() {
         case LOGGING:
             LoggingPass();
             break;
-        case TAINT:
-        case STAT:
+        case EXCHAIN:
             FullPass();
             break;
         default:
@@ -132,17 +129,16 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
     PLOG_INFO << "Depth: " << depth << ", Throw class: " << class_signature
               << ", method: " << method << ", location: " << frame.location;
 
-    auto clazz = jni_->FindClass(kRuntimeClassName);
     auto method_id = jni_->GetStaticMethodID(
-        clazz, kExceptionStackInfoMethodName, kExceptionStackInfoDescriptor);
+        runtime_class_, kExceptionStackInfoMethodName, kExceptionStackInfoDescriptor);
 
-    if (method_id == NULL || clazz == NULL) {
+    if (method_id == NULL || runtime_class_ == NULL) {
         PLOG_WARNING << "Cannot load JAVA method, abort.";
         return;
     }
 
     PLOG_INFO << "Calling JAVA method at address: " << method_id
-              << ", class: " << clazz;
+              << ", class: " << runtime_class_;
     PLOG_INFO << "location: " << location_string_;
 
     jstring method_jstring = jni_->NewStringUTF(method.c_str());
@@ -151,10 +147,12 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
         catch_method_ == frame.method ? catch_location_ : -1;
     jboolean is_throw_insn = depth == 0;
     jobject result = (jintArray)jni_->CallStaticObjectMethod(
-        clazz, method_id, exception_, class_jstring, method_jstring,
+        runtime_class_, method_id, exception_, class_jstring, method_jstring,
         frame.location, catch_current_method, is_throw_insn);
     jni_->DeleteLocalRef(method_jstring);
     jni_->DeleteLocalRef(class_jstring);
+
+    // When the result is null, dynamic tracing is not enabled.
     if (result == NULL) {
         return;
     }

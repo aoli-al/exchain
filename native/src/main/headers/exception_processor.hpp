@@ -1,12 +1,16 @@
 #pragma once
 
 #include <jvmti.h>
+
 #include <string>
+
+#include "plog/Log.h"
 #include "processor_base.hpp"
+#include "constants.hpp"
 
 namespace exchain {
 
-class ExceptionProcessor: ProcessorBase {
+class ExceptionProcessor : ProcessorBase {
    private:
     jmethodID throw_method_;
     jlocation throw_location_;
@@ -16,6 +20,7 @@ class ExceptionProcessor: ProcessorBase {
     int exception_id_;
     jobject exception_;
     std::string location_string_;
+    jclass runtime_class_;
 
     static const int kMaxStackDepth = 100;
 
@@ -32,6 +37,10 @@ class ExceptionProcessor: ProcessorBase {
           thread_(thread),
           exception_(exception) {
         // exception_id_ = ComputeExceptionId(exception);
+        runtime_class_ = jni_->FindClass(kRuntimeClassName);
+        if (runtime_class_ == nullptr) {
+            PLOG_ERROR << "Failed to find Runtime class";
+        }
         location_string_ = GetClassSignature(throw_method_) + ":" +
                            GetMethodSignature(throw_method_) + ":" +
                            std::to_string(throw_location_);

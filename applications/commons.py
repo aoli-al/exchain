@@ -13,6 +13,7 @@ RUNTIME_JAR_PATH = os.path.join(BASE_FOLDER, "..", "runtime/build/libs/runtime-s
 
 INSTRUMENTATION_FOLDER_NAME = os.path.realpath("instrumented")
 INSTRUMENTATION_CLASSPATH = os.path.realpath("instrumented_classes")
+ORIGIN_CLASSPATH = os.path.realpath("origin_classes")
 
 
 

@@ -2,6 +2,7 @@ package al.aoli.exchain.runtime.analyzers
 
 import al.aoli.exchain.runtime.objects.AffectedVarResult
 import al.aoli.exchain.runtime.objects.ExceptionElement
+import al.aoli.exchain.runtime.objects.Type
 import com.google.gson.Gson
 import java.io.File
 import java.time.LocalDateTime
@@ -68,7 +69,11 @@ object ExceptionLogger {
     private val dynamicDependencyLog: File
     private val affectedVarResults: File
     init {
-        val basePath = "results"
+        val basePath = if (AffectedVarDriver.type == Type.Static) {
+            "static-results"
+        } else {
+            "dynamic-results"
+        }
         val baseFolder = File(basePath)
         if (!baseFolder.isDirectory) {
             baseFolder.mkdir()

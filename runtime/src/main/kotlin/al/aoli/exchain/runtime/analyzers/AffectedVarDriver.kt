@@ -2,6 +2,8 @@ package al.aoli.exchain.runtime.analyzers
 
 import al.aoli.exchain.runtime.logger.Logger
 import al.aoli.exchain.runtime.objects.AffectedVarResult
+import al.aoli.exchain.runtime.objects.SourceType
+import al.aoli.exchain.runtime.objects.Type
 import al.aoli.exchain.runtime.store.InMemoryAffectedVarStore
 import al.aoli.exchain.runtime.store.TransformedCodeStore
 import edu.columbia.cs.psl.phosphor.runtime.Taint
@@ -16,6 +18,7 @@ private val logger = Logger()
 object AffectedVarDriver {
     val store = InMemoryAffectedVarStore()
     var instrumentedClassPath: String? = null
+    var type = Type.Dynamic
     fun analyzeAffectedVar(
         e: Throwable,
         clazz: String,
@@ -24,9 +27,30 @@ object AffectedVarDriver {
         catchIndex: Long,
         isThrowInsn: Boolean
     ): AffectedVarResult? {
+        val label = ExceptionLogger.logException(e)
+        if (type == Type.Static) {
+            val result = AffectedVarResult(
+                label,
+                e.javaClass.name,
+                clazz,
+                method,
+                throwIndex,
+                catchIndex,
+                isThrowInsn,
+                intArrayOf(),
+                emptyArray(),
+                intArrayOf(),
+                emptyArray(),
+                intArrayOf(),
+                emptyArray(),
+                intArrayOf(),
+                emptyArray()
+            )
+            ExceptionLogger.logAffectedVarResult(result)
+            return null
+        }
         val cached =
             store.getCachedAffectedVarResult(clazz, method, throwIndex, catchIndex, isThrowInsn)
-        val label = ExceptionLogger.logException(e)
         if (cached != null) {
             cached.label = label
             ExceptionLogger.logAffectedVarResult(cached)
@@ -86,10 +110,12 @@ object AffectedVarDriver {
         val result =
             AffectedVarResult(
                 label,
+                e.javaClass.name,
                 clazz,
                 method,
                 throwIndex,
                 catchIndex,
+                isThrowInsn,
                 affectedLocalIndex.toIntArray(),
                 affectedLocalName.toTypedArray(),
                 affectedLocalLine.toIntArray(),

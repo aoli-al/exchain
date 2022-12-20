@@ -1,6 +1,8 @@
 package al.aoli.exchain.analyzer
 
+import al.aoli.exchain.runtime.analyzers.AffectedVarDriver
 import al.aoli.exchain.runtime.objects.AffectedVarResult
+import al.aoli.exchain.runtime.objects.Type
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import mu.KotlinLogging
@@ -10,11 +12,12 @@ import soot.jimple.infoflow.InfoflowConfiguration
 import soot.jimple.infoflow.InfoflowConfiguration.StaticFieldTrackingMode
 import soot.options.Options
 import java.io.File
+import java.lang.NullPointerException
 
 private val logger = KotlinLogging.logger {}
 
 fun setupSoot(sourceDirectory: String): List<String> {
-    val paths = File(sourceDirectory).readText().split(":").map { it.trim() }
+    val paths = listOf(sourceDirectory)
     G.reset()
     Options.v().set_process_dir(paths)
     Options.v().set_prepend_classpath(true)
@@ -31,6 +34,8 @@ fun setupSoot(sourceDirectory: String): List<String> {
 fun loadAndProcess(args: List<String>) {
     val libs = setupSoot(args[0])
     val dataDirectory = args[1]
+    AffectedVarDriver.instrumentedClassPath = args[2]
+    AffectedVarDriver.type = Type.Dynamic
 
     val path = File("$dataDirectory/latest").readText().trim()
     val data = File("$dataDirectory/$path/affected-var-results.json").readText()
@@ -82,9 +87,30 @@ fun loadAndProcess(args: List<String>) {
             Dependencies()
         }
 
-    for (result in results) {
-        sourceVarAnalyzer.disabledLabels.add(result.label)
-        if (dependencies.processed.contains(result.getSignature())) continue
+    for (origin in results) {
+        sourceVarAnalyzer.disabledLabels.add(origin.label)
+        if (dependencies.processed.contains(origin.getSignature())) continue
+        val dummyException = if ("ClassNotFoundException" in origin.exceptionType) {
+            ClassNotFoundException()
+        }
+        else if ("NullPointerException" in origin.exceptionType) {
+            NullPointerException()
+        }
+        else if ("IndexOutOfBoundsException" in origin.exceptionType) {
+            IndexOutOfBoundsException()
+        }
+        else {
+            java.lang.RuntimeException()
+        }
+
+        val result = AffectedVarDriver.analyzeAffectedVar(
+            dummyException,
+            origin.clazz,
+            origin.method,
+            origin.throwIndex,
+            origin.catchIndex,
+            origin.isThrownInsn
+        ) ?: continue
 
         if (result.affectedLocalName.isEmpty() && result.affectedFieldName.isEmpty()) continue
         logger.info("Start analysing ${result.label}.")

@@ -51,3 +51,5 @@ lastClass.txt
 
 instrumented/
 instrumented_classes/
+dynamic-results/
+static-results/

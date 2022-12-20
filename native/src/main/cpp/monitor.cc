@@ -16,23 +16,6 @@
 #include "runtime.hpp"
 #include "utils.hpp"
 
-// void GetLocalVariables(jvmtiEnv *jvmti, jlocation current_location, jmethodID
-// method, std::string method_name) {
-//     jvmtiLocalVariableEntry *table_ptr;
-//     jint entry_count;
-//     if (CheckJvmTIError(
-//             jvmti,
-//             jvmti->GetLocalVariableTable(method, &entry_count, &table_ptr),
-//             "get local variable table failed.")) {
-//         for (int i = 0; i < entry_count; i++) {
-//             if (table_ptr[i].start_location >= current_location) {
-//                 continue;
-//             }
-//         }
-//     }
-//     jvmti->Deallocate((unsigned char *)table_ptr);
-// }
-
 static std::mutex processing_threads_mutex;
 static std::set<jlong> processing_threads;
 static JavaVM *jvm = nullptr;

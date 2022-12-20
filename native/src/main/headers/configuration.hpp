@@ -6,9 +6,7 @@ namespace exchain {
 
 enum ExceptionMode {
     LOGGING,
-    STAT,
-    TAINT,
-    STATIC,
+    EXCHAIN,
 };
 
 class Configuration {
@@ -29,7 +27,7 @@ class Configuration {
     void operator=(Configuration const &) = delete;
 
    private:
-    ExceptionMode mode_ = TAINT;
+    ExceptionMode mode_ = EXCHAIN;
     std::string application_;
 };
 

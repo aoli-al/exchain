@@ -8,8 +8,8 @@ void Configuration::Init(std::string args) {
     application_ = args.substr(args.find(delimiter) + 1, args.length());
     if (type == "logging") {
         mode_ = LOGGING;
-    } else if (type == "stats") {
-        mode_ = STAT;
+    } else {
+        mode_ = EXCHAIN;
     }
 }
 

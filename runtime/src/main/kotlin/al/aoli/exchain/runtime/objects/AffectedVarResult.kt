@@ -11,10 +11,12 @@ enum class SourceType {
 
 data class AffectedVarResult(
     var label: Int,
+    val exceptionType: String,
     val clazz: String,
     val method: String,
     val throwIndex: Long,
     val catchIndex: Long,
+    val isThrownInsn: Boolean,
     val affectedLocalIndex: IntArray,
     val affectedLocalName: Array<String>,
     val affectedLocalLine: IntArray,
