@@ -69,10 +69,10 @@ object ExceptionLogger {
     private val dynamicDependencyLog: File
     private val affectedVarResults: File
     init {
-        val basePath = if (AffectedVarDriver.type == Type.Static) {
-            "static-results"
-        } else {
-            "dynamic-results"
+        val basePath = when (AffectedVarDriver.type) {
+            Type.Static -> "static-results"
+            Type.Dynamic -> "dynamic-results"
+            Type.Hybrid -> "hybrid-results"
         }
         val baseFolder = File(basePath)
         if (!baseFolder.isDirectory) {

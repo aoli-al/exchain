@@ -13,6 +13,8 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
         AffectedVarDriver.instrumentedClassPath = classPath
         if (type == "static") {
             AffectedVarDriver.type = Type.Static
+        } else if (type == "hybrid") {
+            AffectedVarDriver.type = Type.Hybrid
         }
     }
 }

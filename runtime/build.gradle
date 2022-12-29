@@ -81,6 +81,17 @@ task createInstrumentedJDK(type: JavaExec) {
 	dependsOn ":phosphor:mergedJar"
 }
 
+task createFieldOnlyInstrumentedJDK(type: JavaExec) {
+	var phosphor = project(":phosphor")
+	classpath "$phosphor.buildDir/libs/phosphor-merged.jar"
+	mainClass = "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
+	var src = Jvm.current().javaHome
+	var dst = "$buildDir/jre-inst-field-only"
+	args src, dst, "--jvmModules", "ALL-MODULE-PATH",
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory"
+	dependsOn ":phosphor:mergedJar"
+}
+
 task createInstrumentedJDKDebug(type: JavaExec) {
 	var phosphor = project(":phosphor")
 	classpath "$phosphor.buildDir/libs/phosphor-merged.jar"

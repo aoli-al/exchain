@@ -57,6 +57,20 @@ task instrumentJarOrigin(type: JavaExec) {
 	dependsOn jar
 }
 
+task instrumentJarHybrid(type: JavaExec) {
+	// This looks hacky...
+	var phosphor = project(":phosphor")
+	classpath "$phosphor.buildDir/libs/${phosphor.name}-merged.jar"
+	mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
+	var src= jar.getArchiveFile().get().asFile.absolutePath
+	var dst = "${buildDir}/libs/instrumented-hybrid"
+	jvmArgs "-DPhosphor.INSTRUMENTATION_CLASSPATH=${buildDir}/libs/hybrid_instrumented_classes"
+	jvmArgs "-DPhosphor.ORIGIN_CLASSPATH=${buildDir}/libs/hybrid_origin_classes"
+	args src, dst,
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory"
+	dependsOn jar
+}
+
 task instrumentCustomJarOriginDebug(type: JavaExec) {
 	// This looks hacky...
 	var phosphor = project(":phosphor")
@@ -102,9 +116,26 @@ task runNaiveTaintAnalysis(type: JavaExec) {
 			"dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
 			"phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
 	var nat= project(":native")
-	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=taint"
+	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=exchain:Lal/aoli/exchain/demo"
 	var instrumentation = project(":instrumentation")
-	jvmArgs "-javaagent:${runtime.buildDir}/libs/${runtime.name}-shadow.jar=${buildDir}/libs/instrumented_classes"
+	jvmArgs "-javaagent:${runtime.buildDir}/libs/${runtime.name}-shadow." +
+			"jar=dynamic:${buildDir}/libs/instrumented_classes"
+}
+
+task runHybridTaintAnalysis(type: JavaExec) {
+	var runtime = project(":runtime")
+	executable = "${runtime.buildDir}/jre-inst-field-only/bin/java"
+	classpath "${buildDir}/libs/instrumented-hybrid/${project.name}-${version}.jar"
+	mainClass = "al.aoli.exchain.demo.Main"
+	jvmArgs "-DPhosphor.INSTRUMENTATION_CLASSPATH=hybrid_instrumented_classes"
+	jvmArgs "-DPhosphor.ORIGIN_CLASSPATH=hybrid_origin_classes"
+	jvmArgs "-javaagent:${project.rootProject.projectDir}/" +
+			"dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
+			"phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
+	var nat= project(":native")
+	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=exchain:Lal/aoli/exchain/demo"
+	jvmArgs "-javaagent:${runtime.buildDir}/libs/${runtime.name}-shadow." +
+			"jar=hybrid:${buildDir}/libs/instrumented_classes"
 }
 
 task runTaintAnalysisWithDynSwitch(type: JavaExec) {
@@ -127,6 +158,7 @@ task runTaintAnalysisWithDynSwitch(type: JavaExec) {
 
 runTaintAnalysisWithDynSwitch.dependsOn instrumentJarWithDynSwitch
 runNaiveTaintAnalysis.dependsOn instrumentJarOrigin
+runHybridTaintAnalysis.dependsOn instrumentJarHybrid
 //runInstrumentedJar.dependsOn ":runtime:createInstrumentedJDK"
 
 jar {

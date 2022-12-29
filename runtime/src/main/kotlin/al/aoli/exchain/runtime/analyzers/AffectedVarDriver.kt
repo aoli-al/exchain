@@ -98,14 +98,16 @@ object AffectedVarDriver {
                 ?.toTypedArray()
                 ?: emptyArray()
         val (affectedFieldLine, affectedFieldName) = affectedFields.unzip()
+
         val affectedVars = visitor.methodVisitor?.affectedVars?.toTypedArray() ?: emptyArray()
+        val sourceLocalVariable =
+            visitor.methodVisitor?.sourceLocalVariable?.toIntArray() ?: intArrayOf()
+
         val (affectedLocalLine, affectedLocalIndex, affectedLocalName) = affectedVars.unzip()
         val sourceLines = visitor.methodVisitor?.sourceLines?.toTypedArray() ?: emptyArray()
         if (sourceLines.isNotEmpty()) {
             store.exceptionSourceIdentified[label] = true
         }
-        val sourceLocalVariable =
-            visitor.methodVisitor?.sourceLocalVariable?.toIntArray() ?: intArrayOf()
         val sourceField = visitor.methodVisitor?.sourceField?.toTypedArray() ?: emptyArray()
         val result =
             AffectedVarResult(
@@ -116,13 +118,13 @@ object AffectedVarDriver {
                 throwIndex,
                 catchIndex,
                 isThrowInsn,
-                affectedLocalIndex.toIntArray(),
+                if (type == Type.Hybrid) { intArrayOf() } else { affectedLocalIndex.toIntArray() },
                 affectedLocalName.toTypedArray(),
                 affectedLocalLine.toIntArray(),
                 affectedFieldName.toTypedArray(),
                 affectedFieldLine.toIntArray(),
                 sourceLines,
-                sourceLocalVariable,
+                if (type == Type.Hybrid) { intArrayOf() } else { sourceLocalVariable },
                 sourceField
             )
         ExceptionLogger.logAffectedVarResult(result)

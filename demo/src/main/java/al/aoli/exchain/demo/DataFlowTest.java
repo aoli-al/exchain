@@ -162,8 +162,9 @@ public class DataFlowTest {
         }
     }
 
+    Object thisisalongname = null;
+
     public void sceneLocal() {
-        Object thisisalongname = null;
         try {
             thisisalongname = createObjectWithException();
         } catch (Exception e) {
