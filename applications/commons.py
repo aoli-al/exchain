@@ -5,15 +5,19 @@ from sys import platform
 BASE_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
 INSTRUMENTED_JAVA_EXEC = os.path.join(BASE_FOLDER, "..", "runtime/build/jre-inst/bin/java")
-INSTRUMENTED_JAVA_HOME = os.path.join(BASE_FOLDER, "..", "runtime/build/jre-inst/")
+HYBRID_JAVA_EXEC = os.path.join(BASE_FOLDER, "..", "runtime/build/jre-inst-field-only/bin/java")
+HYBRID_JAVA_HOME = os.path.join(BASE_FOLDER, "..", "runtime/build/jre-inst-field-only/")
 PHOSPHOR_AGENT_PATH = os.path.join(BASE_FOLDER, "..", "dependencies/phosphor/phosphor-jigsaw-javaagent/target/phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar")
-PHOSPHOR_JAR_PATH = os.path.join(BASE_FOLDER, "..", "dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar")
+PHOSPHOR_JAR_PATH = os.path.join(BASE_FOLDER, "..", "phosphor/build/libs/phosphor.jar") + ":" + os.path.join(
+    BASE_FOLDER, "..", "dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar")
 
 RUNTIME_JAR_PATH = os.path.join(BASE_FOLDER, "..", "runtime/build/libs/runtime-shadow.jar")
 
 INSTRUMENTATION_FOLDER_NAME = os.path.realpath("instrumented")
+HYBRID_FOLDER_NAME = os.path.realpath("hybrid")
 INSTRUMENTATION_CLASSPATH = os.path.realpath("instrumented_classes")
 ORIGIN_CLASSPATH = os.path.realpath("origin_classes")
+HYBRID_CLASSPATH = os.path.realpath("hybrid_classes")
 
 
 

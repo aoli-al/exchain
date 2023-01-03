@@ -43,3 +43,6 @@
 [submodule "applications/wicket-6908"]
 	path = applications/wicket-6908
 	url = git@github.com:aoli-al/wicket.git
+[submodule "applications/zookeeper-2247"]
+	path = applications/zookeeper-2247
+	url = git@github.com:aoli-al/zookeeper.git

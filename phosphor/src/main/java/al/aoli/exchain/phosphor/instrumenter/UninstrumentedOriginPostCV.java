@@ -14,19 +14,17 @@ public class UninstrumentedOriginPostCV extends ClassVisitor {
         super(ASM9, cv);
     }
 
+    private String owner = null;
+    @Override
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        super.visit(version, access, name, signature, superName, interfaces);
+        owner = name;
+    }
+
     @Override
     public MethodVisitor visitMethod(
             int access, String name, String descriptor, String signature, String[] exceptions) {
-        if ((access & ACC_ABSTRACT) != 0
-                || (access & ACC_NATIVE) != 0
-                || descriptor.contains(
-                        "Ledu/columbia/cs/psl/phosphor/runtime/PhosphorStackFrame;")) {
-            return super.visitMethod(access, name, descriptor, signature, exceptions);
-        }
-        if (name.contains(Constants.originMethodSuffix)) {
-            String originName = Constants.methodNameReMapping(name);
-            return super.visitMethod(access, originName, descriptor, signature, exceptions);
-        }
-        return new MethodNode(access, name, descriptor, signature, exceptions);
+        MethodVisitor mv = super.visitMethod(access, name, descriptor, signature, exceptions);
+        return new ReflectionFixingMethodVisitor(mv, owner);
     }
 }
