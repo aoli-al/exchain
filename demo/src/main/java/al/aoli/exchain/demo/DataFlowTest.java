@@ -208,6 +208,7 @@ public class DataFlowTest {
             throw new RuntimeException(s);
         }
     }
+    static boolean test = true;
 
     public void test2(Dummy d, String o) {
         d.sub = o;
@@ -224,7 +225,11 @@ public class DataFlowTest {
     }
 
     public static Object createObjectWithException() {
-        throw new RuntimeException("exception");
+        if (test) {
+            throw new RuntimeException("exception");
+        }
+        System.out.println("WOWOWOWOW!!!");
+        return new Object();
     }
 
     public void methodWithException() {

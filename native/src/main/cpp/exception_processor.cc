@@ -23,7 +23,8 @@ void ExceptionProcessor::FullPass() {
         bool is_application_code_visited = false;
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
             auto class_signature = GetClassSignature(frames[stack_idx].method);
-            if (class_signature.starts_with(Configuration::GetInstance().application())) {
+            if (class_signature.starts_with(
+                    Configuration::GetInstance().application())) {
                 is_application_code_visited = true;
             }
             if (frames[stack_idx].method == catch_method_) {
@@ -91,7 +92,6 @@ bool ExceptionProcessor::ShouldIgnoreClass(std::string class_name) {
            class_name.starts_with("Ledu/columbia/cs/psl/");
 }
 
-
 bool ExceptionProcessor::ShouldTerminateEarly(std::string class_name,
                                               std::string method_name) {
     return method_name.starts_with(
@@ -104,10 +104,12 @@ bool ExceptionProcessor::ShouldTerminateEarly(std::string class_name,
            class_name.starts_with("Lal/aoli/exchain/instrumentation") ||
            class_name.starts_with("Lal/aoli/exchain/phosphor") ||
            class_name.starts_with("Ledu/columbia/cs/psl/") ||
-           class_name.starts_with("Lorg/springframework/boot/loader/jar/JarURLConnection") ||
+           class_name.starts_with(
+               "Lorg/springframework/boot/loader/jar/JarURLConnection") ||
            class_name.starts_with("Lorg/springframework/util/ClassUtils") ||
            class_name.starts_with("Lorg/springframework/asm/ClassReader") ||
-           class_name.starts_with("Lorg/springframework/core/io/ClassPathResource") ||
+           class_name.starts_with(
+               "Lorg/springframework/core/io/ClassPathResource") ||
            class_name.starts_with("Ljavax/naming/spi/NamingManager") ||
            class_name.starts_with("Ljava/lang/Class");
 
@@ -129,8 +131,9 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
     PLOG_INFO << "Depth: " << depth << ", Throw class: " << class_signature
               << ", method: " << method << ", location: " << frame.location;
 
-    auto method_id = jni_->GetStaticMethodID(
-        runtime_class_, kExceptionStackInfoMethodName, kExceptionStackInfoDescriptor);
+    auto method_id =
+        jni_->GetStaticMethodID(runtime_class_, kExceptionStackInfoMethodName,
+                                kExceptionStackInfoDescriptor);
 
     if (method_id == NULL || runtime_class_ == NULL) {
         PLOG_WARNING << "Cannot load JAVA method, abort.";

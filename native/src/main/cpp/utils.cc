@@ -14,4 +14,10 @@ void PrintObject(JNIEnv *env, jobject object) {
     env->CallVoidMethod(out, mid, object);
 }
 
+jlong GetThreadId(jthread thread, JNIEnv *env) {
+    auto clazz = env->FindClass("java/lang/Thread");
+    auto method_id = env->GetMethodID(clazz, "getId", "()J");
+    return env->CallLongMethod(thread, method_id);
+}
+
 }  // namespace exchain

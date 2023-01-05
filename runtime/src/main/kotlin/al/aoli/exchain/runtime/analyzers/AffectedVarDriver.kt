@@ -2,10 +2,10 @@ package al.aoli.exchain.runtime.analyzers
 
 import al.aoli.exchain.runtime.logger.Logger
 import al.aoli.exchain.runtime.objects.AffectedVarResult
-import al.aoli.exchain.runtime.objects.SourceType
 import al.aoli.exchain.runtime.objects.Type
+import al.aoli.exchain.runtime.store.AffectedVarStore
+import al.aoli.exchain.runtime.store.CachedAffectedVarStore
 import al.aoli.exchain.runtime.store.InMemoryAffectedVarStore
-import al.aoli.exchain.runtime.store.TransformedCodeStore
 import edu.columbia.cs.psl.phosphor.runtime.Taint
 import edu.columbia.cs.psl.phosphor.struct.PowerSetTree
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
@@ -16,9 +16,16 @@ import java.lang.Exception
 private val logger = Logger()
 
 object AffectedVarDriver {
-    val store = InMemoryAffectedVarStore()
     var instrumentedClassPath: String? = null
     var type = Type.Dynamic
+    val store: AffectedVarStore by lazy {
+        if (type == Type.Dynamic) {
+            InMemoryAffectedVarStore()
+        } else {
+            CachedAffectedVarStore()
+        }
+    }
+    val exceptionSourceIdentified = mutableMapOf<Int, Boolean>()
     fun analyzeAffectedVar(
         e: Throwable,
         clazz: String,
@@ -75,7 +82,7 @@ object AffectedVarDriver {
                     return null
                 }
             }
-        val sourceIdentified = store.exceptionSourceIdentified.getOrDefault(label, false)
+        val sourceIdentified = exceptionSourceIdentified.getOrDefault(label, false)
 
         val visitor =
             AffectedVarClassVisitor(
@@ -106,7 +113,7 @@ object AffectedVarDriver {
         val (affectedLocalLine, affectedLocalIndex, affectedLocalName) = affectedVars.unzip()
         val sourceLines = visitor.methodVisitor?.sourceLines?.toTypedArray() ?: emptyArray()
         if (sourceLines.isNotEmpty()) {
-            store.exceptionSourceIdentified[label] = true
+            exceptionSourceIdentified[label] = true
         }
         val sourceField = visitor.methodVisitor?.sourceField?.toTypedArray() ?: emptyArray()
         val result =

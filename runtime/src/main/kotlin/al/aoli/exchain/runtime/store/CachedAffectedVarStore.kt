@@ -1,10 +1,30 @@
 package al.aoli.exchain.runtime.store
 
 import al.aoli.exchain.runtime.objects.AffectedVarResult
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.File
+import java.io.IOException
 
-class InMemoryAffectedVarStore : AffectedVarStore {
+class CachedAffectedVarStore: AffectedVarStore {
 
-    val affectedVarResult = mutableMapOf<String, AffectedVarResult>()
+
+    val affectedVarResult: MutableMap<String, AffectedVarResult>
+    var storeType = object : TypeToken<MutableMap<String, AffectedVarResult>>() {}.type
+    val storeFileName = "cached_affected_var_store.json"
+
+    init {
+        affectedVarResult = try {
+            val f = File(storeFileName)
+            if (f.isFile) {
+                Gson().fromJson(f.readText(), storeType)
+            } else {
+                mutableMapOf()
+            }
+        } catch (e: IOException) {
+            mutableMapOf()
+        }
+    }
     override fun getCachedAffectedVarResult(
         clazz: String,
         method: String,
@@ -26,5 +46,6 @@ class InMemoryAffectedVarStore : AffectedVarStore {
     ) {
         val sig = "$clazz:$method:$throwLocation:$catchLocation:$isThrowInsn"
         affectedVarResult[sig] = result
+        File(storeFileName).writeText(Gson().toJson(affectedVarResult))
     }
 }

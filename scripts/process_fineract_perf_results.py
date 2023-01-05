@@ -25,6 +25,8 @@ for key in origin_result:
     origin_avg = sum(origin_result[key]) / len(origin_result[key])
     instrumented_avg = sum(instrumented_result[key]) / len(instrumented_result[key])
     increase.append((instrumented_avg - origin_avg) / origin_avg)
+print(origin_result)
+print(instrumented_result)
 print(increase)
 
 print(sum(increase) / len(increase))

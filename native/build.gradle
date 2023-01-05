@@ -11,6 +11,8 @@ library {
     binaries.configureEach { CppBinary binary ->
         def compileTask = binary.compileTask.get()
         compileTask.compilerArgs.add("-std=c++2a")
+        compileTask.compilerArgs.add("-O2")
+        compileTask.compilerArgs.add("-g")
         compileTask.includes.from("${Jvm.current().javaHome}/include")
         compileTask.includes.from("$projectDir/dependencies/plog/include")
         def osFamily = binary.targetPlatform.targetMachine.operatingSystemFamily

@@ -3,11 +3,14 @@ package al.aoli.exchain.runtime
 import al.aoli.exchain.runtime.analyzers.AffectedVarDriver
 import al.aoli.exchain.runtime.analyzers.ExceptionLogger
 import al.aoli.exchain.runtime.objects.AffectedVarResult
+import al.aoli.exchain.runtime.objects.Type
 import al.aoli.exchain.runtime.objects.exceptions.ExceptionInjector
 import al.aoli.exchain.runtime.server.ExceptionServiceImpl
 import edu.columbia.cs.psl.phosphor.runtime.Taint
 import edu.columbia.cs.psl.phosphor.struct.PowerSetTree.SetNode
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 object ExceptionRuntime {
 
@@ -73,6 +76,7 @@ object ExceptionRuntime {
         catchLocation: Long,
         isThrowInsn: Boolean
     ): AffectedVarResult? {
+
         return AffectedVarDriver.analyzeAffectedVar(
             e,
             clazz,

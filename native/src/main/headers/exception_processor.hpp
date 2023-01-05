@@ -40,7 +40,9 @@ class ExceptionProcessor : ProcessorBase {
         runtime_class_ = jni_->FindClass(kRuntimeClassName);
         if (runtime_class_ == nullptr) {
             PLOG_ERROR << "Failed to find Runtime class";
+            return;
         }
+
         location_string_ = GetClassSignature(throw_method_) + ":" +
                            GetMethodSignature(throw_method_) + ":" +
                            std::to_string(throw_location_);
