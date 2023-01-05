@@ -9,8 +9,6 @@ import al.aoli.exchain.runtime.server.ExceptionServiceImpl
 import edu.columbia.cs.psl.phosphor.runtime.Taint
 import edu.columbia.cs.psl.phosphor.struct.PowerSetTree.SetNode
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 
 object ExceptionRuntime {
 
