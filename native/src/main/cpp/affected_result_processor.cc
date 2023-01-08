@@ -5,6 +5,9 @@
 
 namespace exchain {
 
+jclass AffectedResultProcessor::runtime_class_ = nullptr;
+jclass AffectedResultProcessor::result_class_ = nullptr;
+
 void AffectedResultProcessor::Process() {
     if (!ProcessorBase::CheckJvmTIError(
             jvmti_->GetLocalVariableTable(frame_.method, &table_size_, &table_),
@@ -39,7 +42,7 @@ void AffectedResultProcessor::ReportStats() {
 
 void AffectedResultProcessor::ProcessAffectedFields() {
     PLOG_INFO << "Start processing affected fields.";
-    auto taint_fields_method_id = jni_->GetStaticMethodID(
+    static auto taint_fields_method_id = jni_->GetStaticMethodID(
         runtime_class_, kTaintFieldsMethodName, kTaintFieldsMethodDescriptor);
     jobject obj = NULL;
     jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
@@ -51,7 +54,7 @@ void AffectedResultProcessor::ProcessAffectedFields() {
 
 void AffectedResultProcessor::ProcessSourceFields() {
     PLOG_INFO << "Start processing source fields.";
-    auto analyze_source_method_id =
+    static auto analyze_source_method_id =
         jni_->GetStaticMethodID(runtime_class_, kAnalyzeSourceFieldsMethodName,
                                 kAnalyzeSourceFieldsMethodDescriptor);
     jobject obj = NULL;
@@ -64,10 +67,10 @@ void AffectedResultProcessor::ProcessSourceFields() {
 
 void AffectedResultProcessor::ProcessSourceVars() {
     PLOG_INFO << "Start analyzing exception sources!";
-    auto analyze_source_method_id =
+    static auto analyze_source_method_id =
         jni_->GetStaticMethodID(runtime_class_, kAnalyzeSourceVarsMethodName,
                                 kAnalyzeSourceVarsMethodDescriptor);
-    auto source_vars_field_id =
+    static auto source_vars_field_id =
         jni_->GetFieldID(result_class_, "sourceLocalVariable", "[I");
     jintArray source_vars =
         (jintArray)jni_->GetObjectField(result_, source_vars_field_id);
@@ -141,7 +144,7 @@ jint AffectedResultProcessor::GetCorrespondingTaintObjectSlot(int slot) {
 
 void AffectedResultProcessor::ProcessAffectedVars() {
     PLOG_INFO << "Start processing affected variables!";
-    auto affected_vars_field_id =
+    static auto affected_vars_field_id =
         jni_->GetFieldID(result_class_, "affectedLocalIndex", "[I");
     if (affected_vars_field_id == 0) {
         PLOG_ERROR << "Affected vars field ID is NULL!";
@@ -152,9 +155,9 @@ void AffectedResultProcessor::ProcessAffectedVars() {
     const auto affected_vars_length = jni_->GetArrayLength(affected_vars);
     auto affected_vars_cpy = jni_->GetIntArrayElements(affected_vars, NULL);
 
-    auto taint_object_method_id = jni_->GetStaticMethodID(
+    static auto taint_object_method_id = jni_->GetStaticMethodID(
         runtime_class_, kTaintObjectMethodName, kTaintObjectMethodDescriptor);
-    auto update_taint_method_id = jni_->GetStaticMethodID(
+    static auto update_taint_method_id = jni_->GetStaticMethodID(
         runtime_class_, kUpdateTaintMethodName, kUpdateTaintMethodDescriptor);
 
     PLOG_INFO << "Affected var size: " << affected_vars_length;

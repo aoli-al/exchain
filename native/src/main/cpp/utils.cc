@@ -15,8 +15,8 @@ void PrintObject(JNIEnv *env, jobject object) {
 }
 
 jlong GetThreadId(jthread thread, JNIEnv *env) {
-    auto clazz = env->FindClass("java/lang/Thread");
-    auto method_id = env->GetMethodID(clazz, "getId", "()J");
+    static auto clazz = env->FindClass("java/lang/Thread");
+    static auto method_id = env->GetMethodID(clazz, "getId", "()J");
     return env->CallLongMethod(thread, method_id);
 }
 

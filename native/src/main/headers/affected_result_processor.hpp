@@ -13,8 +13,8 @@ namespace exchain {
 
 class AffectedResultProcessor: ProcessorBase {
    private:
-    jclass result_class_;
-    jclass runtime_class_;
+    static jclass result_class_;
+    static jclass runtime_class_;
     jvmtiFrameInfo frame_;
     int depth_;
     jobject result_;
@@ -43,8 +43,10 @@ class AffectedResultProcessor: ProcessorBase {
           location_string_(location_string),
           exception_(exception),
           thread_(thread) {
-        result_class_ = jni_->FindClass(kAffectedVarResultClassName);
-        runtime_class_ = jni_->FindClass(kRuntimeClassName);
+        if (result_class_ == nullptr) {
+            result_class_ = jni_->FindClass(kAffectedVarResultClassName);
+            runtime_class_ = jni_->FindClass(kRuntimeClassName);
+        }
         location_jstring_ =
             jni_->NewStringUTF(location_string_.c_str());
     }

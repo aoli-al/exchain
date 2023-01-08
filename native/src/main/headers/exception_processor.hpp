@@ -20,7 +20,8 @@ class ExceptionProcessor : ProcessorBase {
     int exception_id_;
     jobject exception_;
     std::string location_string_;
-    jclass runtime_class_;
+
+    static jclass runtime_class_;
 
     static const int kMaxStackDepth = 100;
 
@@ -37,10 +38,12 @@ class ExceptionProcessor : ProcessorBase {
           thread_(thread),
           exception_(exception) {
         // exception_id_ = ComputeExceptionId(exception);
-        runtime_class_ = jni_->FindClass(kRuntimeClassName);
         if (runtime_class_ == nullptr) {
-            PLOG_ERROR << "Failed to find Runtime class";
-            return;
+            runtime_class_ = jni_->FindClass(kRuntimeClassName);
+            if (runtime_class_ == nullptr) {
+                PLOG_ERROR << "Failed to find Runtime class";
+                return;
+            }
         }
 
         location_string_ = GetClassSignature(throw_method_) + ":" +

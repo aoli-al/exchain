@@ -13,6 +13,8 @@
 
 namespace exchain {
 
+jclass ExceptionProcessor::runtime_class_ = nullptr;
+
 void ExceptionProcessor::FullPass() {
     jvmtiFrameInfo frames[kMaxStackDepth];
     int count;
@@ -131,17 +133,10 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
     PLOG_INFO << "Depth: " << depth << ", Throw class: " << class_signature
               << ", method: " << method << ", location: " << frame.location;
 
-    auto method_id =
+    static auto method_id =
         jni_->GetStaticMethodID(runtime_class_, kExceptionStackInfoMethodName,
                                 kExceptionStackInfoDescriptor);
 
-    if (method_id == NULL || runtime_class_ == NULL) {
-        PLOG_WARNING << "Cannot load JAVA method, abort.";
-        return;
-    }
-
-    PLOG_INFO << "Calling JAVA method at address: " << method_id
-              << ", class: " << runtime_class_;
     PLOG_INFO << "location: " << location_string_;
 
     jstring method_jstring = jni_->NewStringUTF(method.c_str());
