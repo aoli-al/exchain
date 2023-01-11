@@ -63,6 +63,9 @@ object AffectedVarDriver {
             ExceptionLogger.logAffectedVarResult(cached)
             return cached
         }
+        if (type == Type.Hybrid) {
+            return null
+        }
         val classPath = clazz.substring(1 until clazz.length - 1)
         val className = classPath.replace("/", ".")
         logger.info {
