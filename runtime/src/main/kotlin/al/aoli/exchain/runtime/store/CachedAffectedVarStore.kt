@@ -18,12 +18,13 @@ class CachedAffectedVarStore: AffectedVarStore {
 
     init {
         affectedVarResult = try {
-            val f = File(storeFileName)
-            if (f.isFile) {
-                Gson().fromJson(f.readText(), storeType)
-            } else {
-                mutableMapOf()
-            }
+//            val f = File(storeFileName)
+//            if (f.isFile) {
+//                Gson().fromJson(f.readText(), storeType)
+//            } else {
+//                mutableMapOf()
+//            }
+            mutableMapOf()
         } catch (e: IOException) {
             mutableMapOf()
         }
@@ -35,7 +36,7 @@ class CachedAffectedVarStore: AffectedVarStore {
         catchLocation: Long,
         isThrowInsn: Boolean
     ): AffectedVarResult? {
-        val sig = "$clazz:$method:$throwLocation:$catchLocation$isThrowInsn"
+        val sig = "$clazz:$method:$throwLocation:$catchLocation:$isThrowInsn"
         return affectedVarResult[sig]
     }
 
@@ -49,8 +50,8 @@ class CachedAffectedVarStore: AffectedVarStore {
     ) {
         val sig = "$clazz:$method:$throwLocation:$catchLocation:$isThrowInsn"
         affectedVarResult[sig] = result
-        executor.submit {
-            File(storeFileName).writeText(Gson().toJson(affectedVarResult))
-        }
+//        executor.submit {
+//            File(storeFileName).writeText(Gson().toJson(affectedVarResult))
+//        }
     }
 }
