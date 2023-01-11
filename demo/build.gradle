@@ -106,7 +106,7 @@ task runOriginJar(type: JavaExec) {
 
 task runNaiveTaintAnalysis(type: JavaExec) {
 	var runtime = project(":runtime")
-	executable = "${runtime.buildDir}/jre-inst-origin/bin/java"
+	executable = "${runtime.buildDir}/jre-inst/bin/java"
 	classpath "${buildDir}/libs/instrumented-origin/${project.name}-${version}.jar"
 	mainClass = "al.aoli.exchain.demo.Main"
 	jvmArgs "-DPhosphor.INSTRUMENTATION_CLASSPATH=instrumented_classes"

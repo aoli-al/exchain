@@ -13,11 +13,11 @@ PHOSPHOR_JAR_PATH = os.path.join(BASE_FOLDER, "..", "phosphor/build/libs/phospho
 
 RUNTIME_JAR_PATH = os.path.join(BASE_FOLDER, "..", "runtime/build/libs/runtime-shadow.jar")
 
-INSTRUMENTATION_FOLDER_NAME = os.path.realpath("instrumented")
-HYBRID_FOLDER_NAME = os.path.realpath("hybrid")
-INSTRUMENTATION_CLASSPATH = os.path.realpath("instrumented_classes")
-ORIGIN_CLASSPATH = os.path.realpath("origin_classes")
-HYBRID_CLASSPATH = os.path.realpath("hybrid_classes")
+INSTRUMENTATION_FOLDER_NAME = "/tmp/instrumented"
+HYBRID_FOLDER_NAME = "/tmp/hybrid"
+INSTRUMENTATION_CLASSPATH = "/tmp/instrumented_classes"
+ORIGIN_CLASSPATH = "/tmp/origin_classes"
+HYBRID_CLASSPATH = "/tmp/hybrid_classes"
 
 
 

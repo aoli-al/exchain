@@ -11,7 +11,7 @@ import edu.columbia.cs.psl.phosphor.struct.PowerSetTree
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
 import java.io.File
 import java.io.IOException
-import java.lang.Exception
+import kotlin.Exception
 
 private val logger = Logger()
 
@@ -186,6 +186,20 @@ object AffectedVarDriver {
         location: String
     ) {
         val origin = System.identityHashCode(exception)
+
+        try {
+            val field = obj.javaClass.getDeclaredField( "PHOSPHOR_TAG")
+            field.isAccessible = true
+            val taint = field.get(obj) as Taint<Int>? ?: return
+            for (label in taint.labels) {
+                if (label is Int && label in exceptionStore && label != origin) {
+                    ExceptionLogger.logDependency(label, origin)
+                }
+            }
+        } catch (e: Exception) {
+            logger.warn { "Cannot access PHOSPHOR_TAG for type: ${obj.javaClass.name}, " + "error: $e" }
+        }
+
         for (name in affectedVarResult.sourceField) {
             try {
                 val field = obj.javaClass.getDeclaredField(name + "PHOSPHOR_TAG")
@@ -197,7 +211,8 @@ object AffectedVarDriver {
                     }
                 }
             } catch (e: Exception) {
-                logger.warn { "Cannot access field: $name for type: ${obj.javaClass.name}, " + "error: $e" }
+                logger.warn { "Cannot access field: ${name}PHOSRPHOR_TAG for type: ${obj.javaClass.name}, " +
+                        "error:$e" }
             }
         }
     }

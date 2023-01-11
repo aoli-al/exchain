@@ -6,8 +6,11 @@ import static edu.columbia.cs.psl.phosphor.instrumenter.TaintMethodRecord.REMOVE
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
 
 import edu.columbia.cs.psl.phosphor.instrumenter.TaintMethodRecord;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.AnnotationVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
+import edu.columbia.cs.psl.phosphor.org.objectweb.asm.TypePath;
+
 import java.lang.reflect.Method;
 
 public class ReflectionFixingMethodVisitor extends MethodVisitor {
@@ -16,6 +19,16 @@ public class ReflectionFixingMethodVisitor extends MethodVisitor {
     public ReflectionFixingMethodVisitor(MethodVisitor methodVisitor, String owner) {
         super(ASM9, methodVisitor);
         className = owner;
+    }
+
+    @Override
+    public void visitInsn(int opcode) {
+        super.visitInsn(opcode);
+    }
+
+    @Override
+    public void visitTypeInsn(int opcode, String type) {
+        super.visitTypeInsn(opcode, type);
     }
 
     @Override

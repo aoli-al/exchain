@@ -20,6 +20,7 @@ public class DynamicSwitchTaintTagFactory extends DataAndControlFlowTagFactory {
                 || className.startsWith("mu/")
                 || className.startsWith("kotlin")
                 || className.startsWith("net/bytebuddy")) {
+//                || className.startsWith("org/apache/derby/exe")) {
             return true;
         }
         return super.isIgnoredClass(className);

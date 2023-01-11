@@ -5,10 +5,13 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
 import java.io.IOException
+import java.util.concurrent.Executor
+import java.util.concurrent.Executors
 
 class CachedAffectedVarStore: AffectedVarStore {
 
 
+    val executor = Executors.newSingleThreadExecutor();
     val affectedVarResult: MutableMap<String, AffectedVarResult>
     var storeType = object : TypeToken<MutableMap<String, AffectedVarResult>>() {}.type
     val storeFileName = "cached_affected_var_store.json"
@@ -46,6 +49,8 @@ class CachedAffectedVarStore: AffectedVarStore {
     ) {
         val sig = "$clazz:$method:$throwLocation:$catchLocation:$isThrowInsn"
         affectedVarResult[sig] = result
-        File(storeFileName).writeText(Gson().toJson(affectedVarResult))
+        executor.submit {
+            File(storeFileName).writeText(Gson().toJson(affectedVarResult))
+        }
     }
 }

@@ -7,34 +7,42 @@ import com.google.gson.Gson
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.concurrent.Executors
 
 object ExceptionLogger {
+    val executor = Executors.newSingleThreadExecutor();
     fun logException(e: Throwable): Int {
         val label = System.identityHashCode(e)
         if (label in savedExceptions) {
             return label
         }
         savedExceptions.add(label)
-        val elements = ArrayList<String>()
-        for (stackTrace in e.stackTrace) {
-            elements.add("${stackTrace.className}/${stackTrace.methodName}:${stackTrace.lineNumber}")
+        executor.submit {
+            val elements = ArrayList<String>()
+            for (stackTrace in e.stackTrace) {
+                elements.add("${stackTrace.className}/${stackTrace.methodName}:${stackTrace.lineNumber}")
+            }
+            val item =
+                Gson()
+                    .toJson(
+                        ExceptionElement(label, e.javaClass.name, elements, e.message?.replace("\n", ""))
+                    )
+            exceptionLog.appendText(item + "\n")
         }
-        val item =
-            Gson()
-                .toJson(
-                    ExceptionElement(label, e.javaClass.name, elements, e.message?.replace("\n", ""))
-                )
-        exceptionLog.appendText(item + "\n")
         return label
     }
 
     fun logDependency(e1: Int, e2: Int) {
-        dynamicDependencyLog.appendText("$e1, $e2")
+        executor.submit {
+            dynamicDependencyLog.appendText("$e1, $e2\n")
+        }
     }
 
     fun logAffectedVarResult(result: AffectedVarResult) {
-        val item = Gson().toJson(result)
-        affectedVarResults.appendText(item + "\n")
+        executor.submit {
+            val item = Gson().toJson(result)
+            affectedVarResults.appendText(item + "\n")
+        }
     }
 
     fun logStats(

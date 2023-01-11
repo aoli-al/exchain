@@ -39,7 +39,7 @@ public class Main {
     public static void main(String[] args)
             throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
         DataFlowTest test = new DataFlowTest();
-        test.sceneLocal();
+        test.testField();
     }
 
 }

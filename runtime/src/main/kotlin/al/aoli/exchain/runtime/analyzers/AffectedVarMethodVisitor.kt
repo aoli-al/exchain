@@ -312,6 +312,12 @@ class AffectedVarMethodVisitor(
         for (src in objRef.insns) {
             val srcFrame = frames[instructions.indexOf(src)] ?: return
             when (src) {
+                is MethodInsnNode -> {
+                    if (src.opcode != Opcodes.INVOKESTATIC && src.opcode != Opcodes.INVOKEDYNAMIC) {
+                        val srcRef = srcFrame.getStack(srcFrame.stackSize - Type.getArgumentTypes(src.desc).size - 1)
+                        processSourceValue(src, srcRef , frames, throwInsnFrame)
+                    }
+                }
                 is VarInsnNode -> {
                     if (src.`var` == 0 && !isStatic) {
                         if (insn is FieldInsnNode) {
