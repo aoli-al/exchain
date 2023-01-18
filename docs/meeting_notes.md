@@ -1213,3 +1213,73 @@ Kafka-12508
 Kafka-9374
 ```
 
+# Jan 17
+
+### Plan
+
+- Focus on evaluation
+    - Evaluate three candidate solutions on benchmark applications
+    - Two measurements
+        - Overhead
+        - Accuracy
+- More in-depth analysis over existing issues to understand the execution
+dependency of exceptions.
+    - If two exceptions are thrown in the same execution:
+        - Naive logging all exceptions helps the developer to find the causality.
+            - Is this true?
+    - If two exceptions are thrown across multiple executions:
+        - Logging all exceptions will not help.
+- Analyze issue list provided by Suman
+
+
+### Progress
+
+- Data collection: https://docs.google.com/spreadsheets/d/1xtlijJDPjTP0LcXTCCxugKpfqJFnx7oCcxIsod86WME/edit#gid=0
+    - We collected 30 issues
+        - 8/30 can be reproduced: unknown root cause is still the main reason we can not reproduce the issue
+        - 3/8 issues whose exceptions are thrown across different executions
+        - 5/8 issues are analyzed
+            - Implement harness to run application with ExChain
+            - Use three different approaches (static, dynamic, hybrid) to analyze the application
+    - The issue list provided by Suman cannot be used directly
+        - The issue does not tell if the failure is caused by multiple exceptions or not
+        - For example: https://issues.apache.org/jira/browse/ZOOKEEPER-3006
+        - We need reproduction steps to understand this information
+
+- Performance measurement
+    - Currently we only measure the performance impact of [Fineract](https://github.com/apache/fineract)
+    - I choose this target because:
+        - Nice client-server architecture that allows me to measure the __real__ overhead.
+            - End-to-end program execution introduces noises including:
+                - JVMTi initialization
+                - Program instrumentation
+                - Running program longer makes these overhead less significant but currently for many
+                applications we only run unit tests which are short.
+        - Built-in integration test that automatically generate HTTP requests
+    - How:
+        1. run the application using three different approaches
+        2. run integration test which generate HTTP requests to the application
+            - we collected ~400 requests
+        3. we record the response time of each request
+        4. we compute the average overhead across all requests: $\frac{\Sigma_{r\in R}{\frac{(r-r_o)}{r_o}}}{|R|}$
+    - Result:
+        - The static approach introduces 7.73\% overhead
+        - The hybrid approach introduces 22.2\% overhead
+            - This result is after we cache the affectedVar and
+            sourceVar computation.
+        - The dynamic approach introduces 1115.6\% overhead
+
+### Discussion
+
+- Collect and reproduce issues is challenging
+    - the issue descriptions do not always tell
+        - if the failure is caused by multiple exceptions.
+        - how to reproduce the failure
+
+- Shall we look at other applications?
+    - Spring framework
+    - etc...
+
+- How many cases do we need?
+
+- Measure the throughput of fineract

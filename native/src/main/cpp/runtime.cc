@@ -9,7 +9,7 @@
 bool initialized = false;
 std::set<jthread> working_threads;
 
-JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_initializedCallback(JNIEnv *env, jclass clazz) {
+JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_initializedCallback(JNIEnv *env) {
     PLOG_INFO << "Native runtime started.";
     initialized = true;
 }
