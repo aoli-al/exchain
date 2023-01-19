@@ -49,3 +49,6 @@
 [submodule "applications/wicket-6249"]
 	path = applications/wicket-6249
 	url = git@github.com:aoli-al/wicket.git
+[submodule "applications/cassandra-17663"]
+	path = applications/cassandra-17663
+	url = git@github.com:aoli-al/cassandra.git
