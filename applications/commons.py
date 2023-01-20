@@ -22,6 +22,6 @@ HYBRID_CLASSPATH = "/tmp/hybrid_classes"
 
 
 if platform == "linux" or platform == "linux2":
-    NATIVE_LIB_PATH = os.path.join(BASE_FOLDER, "..", "native/build/lib/main/debug/libnative.so")
+    NATIVE_LIB_PATH = os.path.join(BASE_FOLDER, "..", "native/build/cmake/native_release/linux-amd64/cpp/libnative.so")
 else:
-    NATIVE_LIB_PATH = os.path.join(BASE_FOLDER, "..", "native/build/lib/main/debug/libnative.dylib")
+    NATIVE_LIB_PATH = os.path.join(BASE_FOLDER, "..", "native/build/cmake/native_release/macos_x86/cpp/libnative.dylib")

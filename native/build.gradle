@@ -1,27 +1,29 @@
-import org.gradle.internal.jvm.Jvm
-
 plugins {
-    id 'cpp-library'
+    id "io.github.tomtzook.gradle-cmake" version "1.2.2"
 }
 
-group 'al.aoli.exchain.native'
-version 'unspecified'
 
-library {
-    binaries.configureEach { CppBinary binary ->
-        def compileTask = binary.compileTask.get()
-        compileTask.compilerArgs.add("-std=c++2a")
-        compileTask.compilerArgs.add("-O2")
-        compileTask.compilerArgs.add("-g")
-        compileTask.includes.from("${Jvm.current().javaHome}/include")
-        compileTask.includes.from("$projectDir/dependencies/plog/include")
-        def osFamily = binary.targetPlatform.targetMachine.operatingSystemFamily
-        if (osFamily.macOs) {
-            compileTask.includes.from("${Jvm.current().javaHome}/include/darwin")
-        } else if (osFamily.linux) {
-            compileTask.includes.from("${Jvm.current().javaHome}/include/linux")
-        } else if (osFamily.windows) {
-            compileTask.includes.from("${Jvm.current().javaHome}/include/win32")
+
+
+cmake {
+    targets {
+        native_release {
+            cmakeLists.set(file('src/CMakeLists.txt'))
+            cmakeArgs.add("-DCMAKE_BUILD_TYPE=Release")
+            targetMachines.add(machines.host)
+        }
+        native_debug {
+            cmakeLists.set(file('src/CMakeLists.txt'))
+            cmakeArgs.add("-DCMAKE_BUILD_TYPE=Release")
+            targetMachines.add(machines.host)
         }
     }
+}
+
+task clean {
+    dependsOn tasks.cmakeClean
+}
+
+task build {
+    dependsOn tasks.cmakeBuild
 }

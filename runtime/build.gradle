@@ -28,7 +28,7 @@ task createShadow(type: ShadowJar) {
 	archiveClassifier.set('')
 	archiveVersion.set('')
 	relocate 'org.objectweb.asm', 'al.aoli.exchain.instrumentation.asm'
-	dependsOn ':native:linkDebug'
+	dependsOn ':native:build'
 	exclude "module-info.class"
 	from sourceSets.main.output
 	from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }

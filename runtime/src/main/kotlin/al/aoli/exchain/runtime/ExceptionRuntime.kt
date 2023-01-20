@@ -119,6 +119,7 @@ object ExceptionRuntime {
         location: String
     ) {
         if (obj == null) return
+        if (affectedVarResult.sourceField.isEmpty()) return
         AffectedVarDriver.analyzeSourceFields(obj, affectedVarResult, exception, location)
     }
 }

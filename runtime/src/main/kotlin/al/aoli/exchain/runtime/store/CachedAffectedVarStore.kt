@@ -48,6 +48,8 @@ class CachedAffectedVarStore: AffectedVarStore {
         isThrowInsn: Boolean,
         result: AffectedVarResult
     ) {
+
+
         val sig = "$clazz:$method:$throwLocation:$catchLocation:$isThrowInsn"
         affectedVarResult[sig] = result
 //        executor.submit {

@@ -153,7 +153,7 @@ object AffectedVarDriver {
         exceptionStore[label] = exception
         for (name in affectedVarResult.affectedFieldName) {
             try {
-                val field = obj.javaClass.getDeclaredField(name + "PHOSPHOR_TAG")
+                val field = obj.javaClass.getField(name + "PHOSPHOR_TAG")
                 field.isAccessible = true
                 val value = field.get(obj) as Taint<Int>?
                 val tag =

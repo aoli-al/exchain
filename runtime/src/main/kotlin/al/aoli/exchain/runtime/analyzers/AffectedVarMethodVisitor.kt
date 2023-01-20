@@ -216,6 +216,11 @@ class AffectedVarMethodVisitor(
     fun appendAffectedVars(insn: VarInsnNode) {
         val name = getLocalName(insn.`var`)
         if (name.startsWith("phosphor")) return
+        for (affectedVar in affectedVars) {
+            if (affectedVar.second == insn.`var`) {
+                return
+            }
+        }
         affectedVars.add(Triple(getLineNumber(insn), insn.`var`, name))
     }
 
@@ -408,6 +413,9 @@ class AffectedVarMethodVisitor(
         val throwInsnFrame = frames[instructions.indexOf(throwInsn)] ?: return
         val throwInsnLocal = throwInsn ?: return
         try {
+            if (exception is ReflectiveOperationException) {
+                return
+            }
             if (isThrowInsn &&
                 (exception is NullPointerException || exception is IndexOutOfBoundsException)
             ) {

@@ -187,4 +187,31 @@ internal class AffectedVarClassReaderTest {
         assert(visitor.methodVisitor!!.sourceLocalVariable.contains(51))
         assert(visitor.methodVisitor!!.sourceLines.contains(Pair(296, SourceType.JUMP)))
     }
+
+    @Test
+    fun testRedundantLocalVar() {
+        val resource =
+            AffectedVarClassReader::class
+                .java
+                .getResourceAsStream("/bytecode/DefaultPageFactory.class")!!
+                .readAllBytes()
+        val cr = AffectedVarClassReader(resource)
+        val e = RuntimeException("dummy exception")
+        val visitor =
+            AffectedVarClassVisitor(
+                e,
+                112,
+                244,
+                false,
+                true,
+                "Lorg/apache/wicket/session/DefaultPageFactory;",
+                "newPage(Ljava/lang/Class;)Lorg/apache/wicket/request/component/IRequestablePage;",
+                cr
+            )
+        cr.accept(visitor, 0)
+        println(visitor.methodVisitor!!.affectedVars)
+//        assert(visitor.methodVisitor!!.sourceField.isEmpty())
+//        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(51))
+//        assert(visitor.methodVisitor!!.sourceLines.contains(Pair(296, SourceType.JUMP)))
+    }
 }
