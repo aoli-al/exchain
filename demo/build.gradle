@@ -116,7 +116,7 @@ task runNaiveTaintAnalysis(type: JavaExec) {
 			"dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
 			"phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
 	var nat= project(":native")
-	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=exchain:Lal/aoli/exchain/demo"
+	jvmArgs "-agentpath:${nat.buildDir}/cmake/native_release/linux-amd64/cpp/lib${nat.name}.so=exchain:Lal/aoli/exchain/demo"
 	var instrumentation = project(":instrumentation")
 	jvmArgs "-javaagent:${runtime.buildDir}/libs/${runtime.name}-shadow." +
 			"jar=dynamic:${buildDir}/libs/instrumented_classes"

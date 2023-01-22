@@ -15,6 +15,7 @@ import org.objectweb.asm.tree.LabelNode
 import org.objectweb.asm.tree.LineNumberNode
 import org.objectweb.asm.tree.MethodInsnNode
 import org.objectweb.asm.tree.MethodNode
+import org.objectweb.asm.tree.TypeInsnNode
 import org.objectweb.asm.tree.VarInsnNode
 import org.objectweb.asm.tree.analysis.Frame
 import org.objectweb.asm.tree.analysis.SourceValue
@@ -183,8 +184,10 @@ class AffectedVarMethodVisitor(
 
     val affectedVars = mutableSetOf<Triple<Int, Int, String>>()
     val affectedFields = mutableSetOf<Pair<Int, String>>()
+    val affectedStaticField = mutableSetOf<Pair<Int, String>>()
     val sourceLines = mutableSetOf<Pair<Int, SourceType>>()
     val sourceField = mutableSetOf<String>()
+    val sourceStaticField = mutableSetOf<String>()
     val sourceLocalVariable = mutableSetOf<Int>()
 
     // This is not the right way to get local variable names.
@@ -211,6 +214,10 @@ class AffectedVarMethodVisitor(
 
     fun appendAffectedFields(insn: FieldInsnNode) {
         affectedFields.add(Pair(getLineNumber(insn), insn.name))
+    }
+
+    fun appendAffectedStaticField(insn: FieldInsnNode) {
+        affectedStaticField.add(Pair(getLineNumber(insn), insn.owner + "#" + insn.name))
     }
 
     fun appendAffectedVars(insn: VarInsnNode) {
@@ -256,6 +263,9 @@ class AffectedVarMethodVisitor(
                                     appendAffectedFields(src)
                                 }
                             }
+                            if (src is FieldInsnNode && src.opcode == Opcodes.GETSTATIC) {
+                                appendAffectedStaticField(src)
+                            }
                             // If a method call is from a local object, check if the object is on the stack.
                             if (src is VarInsnNode && src.opcode == Opcodes.ALOAD) {
                                 try {
@@ -270,23 +280,24 @@ class AffectedVarMethodVisitor(
                     }
                 }
                 is FieldInsnNode -> {
-                    if (insn.opcode == Opcodes.PUTFIELD) {
-                        val objRef =
-                            try {
-                                frame?.getStack(frame.stackSize - 2)
-                            } catch (e: IndexOutOfBoundsException) {
-                                logger.error { "Processing instruction $insn failed. Error: $e" }
-                                continue
-                            } ?: continue
-                        for (src in objRef.insns) {
-                            if (src is VarInsnNode) {
-                                if (src.`var` == 0 && !isStatic) {
-                                    appendAffectedFields(insn)
-                                } else {
-                                    appendAffectedVars(src)
+                    when (insn.opcode) {
+                        Opcodes.PUTFIELD -> {
+                            val objRef =
+                                try {
+                                    frame?.getStack(frame.stackSize - 2)
+                                } catch (e: IndexOutOfBoundsException) {
+                                    logger.error { "Processing instruction $insn failed. Error: $e" }
+                                    continue
+                                } ?: continue
+                            for (src in objRef.insns) {
+                                if (src is VarInsnNode) {
+                                    if (src.`var` == 0 && !isStatic) {
+                                        appendAffectedFields(insn)
+                                    } else {
+                                        appendAffectedVars(src)
+                                    }
                                 }
                             }
-                            if (src is FieldInsnNode) {}
                         }
                     }
                 }
@@ -308,11 +319,38 @@ class AffectedVarMethodVisitor(
         }
     }
 
+    // We may want to check if the source var is from
+    // a map or an array.
+    fun findVariableSource(varInsn: VarInsnNode,
+                           frames: Array<Frame<SourceValue>?>,
+                           throwInsnFrame: Frame<SourceValue>,
+                           localVariableMap: MutableMap<Int, MutableList<Pair<Int, SourceValue>>>,
+                           ) {
+        val records = localVariableMap[varInsn.`var`] ?: return
+        val index = instructions.indexOf(varInsn)
+        var selectedRecord: Pair<Int, SourceValue>? = null
+        for (record in records) {
+            if (record.first > index) break
+            selectedRecord = record
+        }
+        if (selectedRecord == null) {
+            return
+        }
+        processSourceValue(
+            instructions.get(selectedRecord.first),
+            selectedRecord.second,
+            frames,
+            throwInsnFrame,
+            localVariableMap
+        )
+    }
+
     fun processSourceValue(
         insn: AbstractInsnNode,
         objRef: SourceValue,
         frames: Array<Frame<SourceValue>?>,
-        throwInsnFrame: Frame<SourceValue>
+        throwInsnFrame: Frame<SourceValue>,
+        localVariableMap: MutableMap<Int, MutableList<Pair<Int, SourceValue>>>
     ) {
         for (src in objRef.insns) {
             val srcFrame = frames[instructions.indexOf(src)] ?: return
@@ -320,7 +358,7 @@ class AffectedVarMethodVisitor(
                 is MethodInsnNode -> {
                     if (src.opcode != Opcodes.INVOKESTATIC && src.opcode != Opcodes.INVOKEDYNAMIC) {
                         val srcRef = srcFrame.getStack(srcFrame.stackSize - Type.getArgumentTypes(src.desc).size - 1)
-                        processSourceValue(src, srcRef , frames, throwInsnFrame)
+                        processSourceValue(src, srcRef , frames, throwInsnFrame, localVariableMap)
                     }
                 }
                 is VarInsnNode -> {
@@ -329,16 +367,39 @@ class AffectedVarMethodVisitor(
                             sourceField.add(insn.name)
                         } else {
                             sourceLocalVariable.add(src.`var`)
+                            findVariableSource(src, frames, throwInsnFrame, localVariableMap)
                         }
                     } else {
                         if (throwInsnFrame.getLocal(src.`var`) == srcFrame.getLocal(src.`var`)) {
                             sourceLocalVariable.add(src.`var`)
+                            findVariableSource(src, frames, throwInsnFrame, localVariableMap)
                         }
                     }
                 }
                 is FieldInsnNode -> {
-                    val srcRef = srcFrame.getStack(srcFrame.stackSize - 1)
-                    processSourceValue(src, srcRef, frames, throwInsnFrame)
+                    when (src.opcode) {
+                        Opcodes.GETFIELD -> {
+                            val srcRef = srcFrame.getStack(srcFrame.stackSize - 1)
+                            processSourceValue(src, srcRef, frames, throwInsnFrame, localVariableMap)
+                        }
+                        Opcodes.GETSTATIC -> {
+                            sourceStaticField.add(src.owner + "#" + src.name)
+                        }
+                    }
+                }
+                is TypeInsnNode -> {
+                    when (src.opcode) {
+                        Opcodes.CHECKCAST,
+                        Opcodes.INSTANCEOF -> {
+                            processSourceValue(
+                                src,
+                                srcFrame.getStack(srcFrame.stackSize - 1),
+                                frames,
+                                throwInsnFrame,
+                                localVariableMap
+                            )
+                        }
+                    }
                 }
                 is InsnNode -> {
                     when (src.opcode) {
@@ -367,13 +428,15 @@ class AffectedVarMethodVisitor(
                                 src,
                                 srcFrame.getStack(srcFrame.stackSize - 1),
                                 frames,
-                                throwInsnFrame
+                                throwInsnFrame,
+                                localVariableMap
                             )
                             processSourceValue(
                                 src,
                                 srcFrame.getStack(srcFrame.stackSize - 2),
                                 frames,
-                                throwInsnFrame
+                                throwInsnFrame,
+                                localVariableMap
                             )
                         }
                         Opcodes.L2D,
@@ -397,7 +460,8 @@ class AffectedVarMethodVisitor(
                                 src,
                                 srcFrame.getStack(srcFrame.stackSize - 1),
                                 frames,
-                                throwInsnFrame
+                                throwInsnFrame,
+                                localVariableMap
                             )
                         }
                     }
@@ -408,7 +472,8 @@ class AffectedVarMethodVisitor(
 
     fun findSourceInsn(
         analyzer: AffectedVarAnalyser<SourceValue>,
-        frames: Array<Frame<SourceValue>?>
+        frames: Array<Frame<SourceValue>?>,
+        localVariableMap: MutableMap<Int, MutableList<Pair<Int, SourceValue>>>
     ) {
         val throwInsnFrame = frames[instructions.indexOf(throwInsn)] ?: return
         val throwInsnLocal = throwInsn ?: return
@@ -447,7 +512,7 @@ class AffectedVarMethodVisitor(
                         null
                     }
                 if (objRef != null) {
-                    processSourceValue(throwInsnLocal, objRef, frames, throwInsnFrame)
+                    processSourceValue(throwInsnLocal, objRef, frames, throwInsnFrame, localVariableMap)
                 }
                 return
             }
@@ -507,7 +572,7 @@ class AffectedVarMethodVisitor(
                         else -> emptyList()
                     }
                 for (objRef in objRefs) {
-                    processSourceValue(currentInsn, objRef, frames, throwInsnFrame)
+                    processSourceValue(currentInsn, objRef, frames, throwInsnFrame, localVariableMap)
                 }
             }
         } catch (e: IndexOutOfBoundsException) {
@@ -555,7 +620,7 @@ class AffectedVarMethodVisitor(
             }
             processAffectedInsns(affectedInsns, analyzer.frames)
             if (findSource && !Constants.exceptionHelpers.contains(name + desc)) {
-                findSourceInsn(analyzer, analyzer.frames)
+                findSourceInsn(analyzer, analyzer.frames, interpreter.localValueMap)
             }
         } else {
             logger.error {

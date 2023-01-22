@@ -2,6 +2,7 @@ package al.aoli.exchain.runtime.analyzers
 
 import org.objectweb.asm.tree.AbstractInsnNode
 import org.objectweb.asm.tree.InsnList
+import org.objectweb.asm.tree.VarInsnNode
 import org.objectweb.asm.tree.analysis.SourceInterpreter
 import org.objectweb.asm.tree.analysis.SourceValue
 
@@ -14,6 +15,7 @@ class AffectedVarInterpreter(
     val affectedInsns = mutableSetOf<AbstractInsnNode>()
     val affectedInsnInTry = mutableSetOf<AbstractInsnNode>()
     val visitedInsns = mutableSetOf<AbstractInsnNode>()
+    val localValueMap = mutableMapOf<Int, MutableList<Pair<Int, SourceValue>>>()
 
     private fun checkExceptionInstructionStarts(insn: AbstractInsnNode) {
         // We only want to process instructions once to avoid loops.
@@ -39,6 +41,24 @@ class AffectedVarInterpreter(
 
     override fun copyOperation(insn: AbstractInsnNode, value: SourceValue): SourceValue? {
         checkExceptionInstructionStarts(insn)
+        when (insn.opcode) {
+            LSTORE,
+            FSTORE,
+            DSTORE,
+            ASTORE,
+            IASTORE,
+            LASTORE,
+            FASTORE,
+            DASTORE,
+            AASTORE,
+            BASTORE,
+            CASTORE,
+            SASTORE -> {
+                val values = localValueMap.getOrPut((insn as VarInsnNode).`var`) { mutableListOf() }
+                values.add(Pair(insnList.indexOf(insn), value))
+                insnList.indexOf(insn)
+            }
+        }
         return when (insn.opcode) {
             DUP,
             DUP_X1,

@@ -1,6 +1,7 @@
 package al.aoli.exchain.demo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 import java.util.zip.DataFormatException;
 
@@ -166,15 +167,15 @@ public class DataFlowTest {
     Object thisisalongname = null;
 
     ArrayList<String> objs = new ArrayList<>();
+    static HashMap<String, String> map = new HashMap<>();
     public void testField() {
         try {
             createObjectWithException();
-            objs.add("123");
+            map.put("a", "b");
         } catch (Exception e) {
         }
-        if (objs.isEmpty()) {
-            throw new RuntimeException("?");
-        }
+        String str = map.get("a");
+        System.out.println(str.toString());
     }
 
     public void sceneLocal() {

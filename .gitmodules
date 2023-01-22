@@ -30,7 +30,7 @@
 	url = git@github.com:aoli-al/kylin.git
 [submodule "applications/mapreduce-6654"]
 	path = applications/mapreduce-6654
-	url = https://github.com/aoli-al/hadoop
+	url = git@github.com/aoli-al/hadoop.git
 [submodule "applications/nifi-8249"]
 	path = applications/nifi-8249
 	url = git@github.com:aoli-al/nifi.git

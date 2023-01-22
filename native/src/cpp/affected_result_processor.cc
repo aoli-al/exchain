@@ -20,12 +20,8 @@ void AffectedResultProcessor::Process() {
     ProcessSourceVars();
     ProcessAffectedVars();
 
-    jint modifier = 0;
-    jvmti_->GetMethodModifiers(frame_.method, &modifier);
-    if (!(modifier & 0x0008)) {
-        ProcessAffectedFields();
-        ProcessSourceFields();
-    }
+    ProcessAffectedFields();
+    ProcessSourceFields();
     jvmti_->Deallocate((unsigned char *)table_);
 }
 
@@ -45,8 +41,10 @@ void AffectedResultProcessor::ProcessAffectedFields() {
     static auto taint_fields_method_id = jni_->GetStaticMethodID(
         runtime_class_, kTaintFieldsMethodName, kTaintFieldsMethodDescriptor);
     jobject obj = NULL;
-    jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
-    if (obj != NULL && taint_fields_method_id != NULL) {
+    if (!is_static_method_) {
+        jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
+    }
+    if (taint_fields_method_id != NULL && (is_static_method_ || obj != NULL)) {
         jni_->CallStaticVoidMethod(runtime_class_, taint_fields_method_id, obj,
                                    result_, exception_);
     }
@@ -58,8 +56,10 @@ void AffectedResultProcessor::ProcessSourceFields() {
         jni_->GetStaticMethodID(runtime_class_, kAnalyzeSourceFieldsMethodName,
                                 kAnalyzeSourceFieldsMethodDescriptor);
     jobject obj = NULL;
-    jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
-    if (obj != NULL) {
+    if (!is_static_method_) {
+        jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
+    }
+    if (obj != NULL || is_static_method_) {
         jni_->CallStaticVoidMethod(runtime_class_, analyze_source_method_id,
                                    obj, result_, exception_, location_jstring_);
     }

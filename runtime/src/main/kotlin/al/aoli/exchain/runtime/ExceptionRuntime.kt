@@ -94,7 +94,6 @@ object ExceptionRuntime {
 
     @JvmStatic
     fun taintFields(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
-        if (obj == null) return
         AffectedVarDriver.updateAffectedFields(obj, affectedVarResult, exception)
     }
 
@@ -118,8 +117,7 @@ object ExceptionRuntime {
         exception: Any,
         location: String
     ) {
-        if (obj == null) return
-        if (affectedVarResult.sourceField.isEmpty()) return
+        if (affectedVarResult.sourceField.isEmpty() && affectedVarResult.sourceStaticField.isEmpty()) return
         AffectedVarDriver.analyzeSourceFields(obj, affectedVarResult, exception, location)
     }
 }

@@ -17,14 +17,17 @@ data class AffectedVarResult(
     val throwIndex: Long,
     val catchIndex: Long,
     val isThrownInsn: Boolean,
-    val affectedLocalIndex: IntArray,
-    val affectedLocalName: Array<String>,
-    val affectedLocalLine: IntArray,
-    val affectedFieldName: Array<String>,
-    val affectedFieldLine: IntArray,
-    val sourceLines: Array<Pair<Int, SourceType>>,
-    val sourceLocalVariable: IntArray,
-    val sourceField: Array<String>
+    val affectedLocalIndex: IntArray = intArrayOf(),
+    val affectedLocalName: Array<String> = emptyArray(),
+    val affectedLocalLine: IntArray = intArrayOf(),
+    val affectedFieldName: Array<String> = emptyArray(),
+    val affectedFieldLine: IntArray = intArrayOf(),
+    val affectedStaticFieldName: Array<String> = emptyArray(),
+    val affectedStaticFieldLine: IntArray = intArrayOf(),
+    val sourceLines: Array<Pair<Int, SourceType>> = emptyArray(),
+    val sourceLocalVariable: IntArray = intArrayOf(),
+    val sourceField: Array<String> = emptyArray(),
+    val sourceStaticField: Array<String> = emptyArray()
 ) {
     override fun toString(): String {
         val gson = GsonBuilder().setPrettyPrinting().create()

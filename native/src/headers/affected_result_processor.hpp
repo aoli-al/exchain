@@ -30,6 +30,7 @@ class AffectedResultProcessor: ProcessorBase {
     int num_of_nulls_ = 0;
     int num_of_arrays_ = 0;
     std::vector<std::pair<int, std::string>> local_variable_map_;
+    bool is_static_method_ = false;
 
    public:
     AffectedResultProcessor(jvmtiEnv *jvmti, JNIEnv *jni, jvmtiFrameInfo frame,
@@ -49,6 +50,9 @@ class AffectedResultProcessor: ProcessorBase {
         }
         location_jstring_ =
             jni_->NewStringUTF(location_string_.c_str());
+        jint modifier = 0;
+        jvmti_->GetMethodModifiers(frame_.method, &modifier);
+        is_static_method_ = (modifier & 0x0008) != 0;
     }
 
     void Process();
