@@ -101,6 +101,10 @@ object AffectedVarDriver {
         val affectedVars = visitor.methodVisitor?.affectedVars?.toTypedArray() ?: emptyArray()
         val sourceLocalVariable =
             visitor.methodVisitor?.sourceLocalVariable?.toIntArray() ?: intArrayOf()
+        if (method.contains("clinit")) {
+            visitor.methodVisitor?.affectedStaticField?.clear()
+            visitor.methodVisitor?.sourceStaticField?.clear()
+        }
 
         val (affectedLocalLine, affectedLocalIndex, affectedLocalName) = affectedVars.unzip()
         val (affectedStaticFieldLine, affectedStaticFieldName) =

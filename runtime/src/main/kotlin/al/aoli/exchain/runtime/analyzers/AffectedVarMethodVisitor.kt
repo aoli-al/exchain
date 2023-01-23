@@ -217,7 +217,9 @@ class AffectedVarMethodVisitor(
     }
 
     fun appendAffectedStaticField(insn: FieldInsnNode) {
-        affectedStaticField.add(Pair(getLineNumber(insn), insn.owner + "#" + insn.name))
+        if (!insn.name.lowercase().contains("log")) {
+            affectedStaticField.add(Pair(getLineNumber(insn), insn.owner + "#" + insn.name))
+        }
     }
 
     fun appendAffectedVars(insn: VarInsnNode) {
@@ -383,7 +385,9 @@ class AffectedVarMethodVisitor(
                             processSourceValue(src, srcRef, frames, throwInsnFrame, localVariableMap)
                         }
                         Opcodes.GETSTATIC -> {
-                            sourceStaticField.add(src.owner + "#" + src.name)
+                            if (!src.name.lowercase().contains("log")) {
+                                sourceStaticField.add(src.owner + "#" + src.name)
+                            }
                         }
                     }
                 }
