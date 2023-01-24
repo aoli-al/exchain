@@ -605,7 +605,7 @@ class AffectedVarMethodVisitor(
             val interpreter = AffectedVarInterpreter(instructions, throwInsnIndex, tryCatchLocations)
             val analyzer = AffectedVarAnalyser(instructions, interpreter, throwInsn!!, catchInsn)
             analyzer.analyze(owner, this)
-            val affectedInsns = interpreter.affectedInsns
+            val affectedInsns = analyzer.reachableBlocks(throwInsn!!)
             if (catchIndex != -1L) {
                 val normalRunInterpreter = AffectedVarInterpreter(instructions, throwInsnIndex, emptyList())
                 val normalRunAnalyzer =
@@ -619,8 +619,8 @@ class AffectedVarMethodVisitor(
                     }
                 }
             }
-            if (isThrowInsn) {
-                affectedInsns.add(throwInsn!!)
+            if (!isThrowInsn) {
+                affectedInsns.remove(throwInsn!!)
             }
             processAffectedInsns(affectedInsns, analyzer.frames)
             if (findSource && !Constants.exceptionHelpers.contains(name + desc)) {

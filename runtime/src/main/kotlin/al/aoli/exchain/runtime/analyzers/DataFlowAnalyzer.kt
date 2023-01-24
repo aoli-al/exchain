@@ -12,7 +12,7 @@ open class DataFlowAnalyzer<V : Value>(val instructions: InsnList, interpreter: 
     val instructionSuccessors = mutableMapOf<AbstractInsnNode, MutableSet<AbstractInsnNode>>()
     val instructionPredecessors = mutableMapOf<AbstractInsnNode, MutableSet<AbstractInsnNode>>()
 
-    fun reachableBlocks(from: AbstractInsnNode): Set<AbstractInsnNode> {
+    fun reachableBlocks(from: AbstractInsnNode): MutableSet<AbstractInsnNode> {
         val workItems = mutableListOf(from)
         val reachedBlocks = mutableSetOf<AbstractInsnNode>()
         while (workItems.isNotEmpty()) {

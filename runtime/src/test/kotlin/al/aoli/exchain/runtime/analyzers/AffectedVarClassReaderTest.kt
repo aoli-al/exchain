@@ -214,4 +214,31 @@ internal class AffectedVarClassReaderTest {
 //        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(51))
 //        assert(visitor.methodVisitor!!.sourceLines.contains(Pair(296, SourceType.JUMP)))
     }
+
+    @Test
+    fun testAffectedInsns() {
+        val resource =
+            AffectedVarClassReader::class
+                .java
+                .getResourceAsStream("/bytecode/RawLocalFileSystem.class")!!
+                .readAllBytes()
+        val cr = AffectedVarClassReader(resource)
+        val e = RuntimeException("dummy exception")
+        val visitor =
+            AffectedVarClassVisitor(
+                e,
+                186,
+                -1,
+                false,
+                true,
+                "Lorg/apache/hadoop/fs/RawLocalFileSystem;",
+                "getFileLinkStatusInternal(Lorg/apache/hadoop/fs/Path;Z)Lorg/apache/hadoop/fs/FileStatus;",
+                cr
+            )
+        cr.accept(visitor, 0)
+        println(visitor.methodVisitor!!.affectedVars)
+//        assert(visitor.methodVisitor!!.sourceField.isEmpty())
+//        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(51))
+//        assert(visitor.methodVisitor!!.sourceLines.contains(Pair(296, SourceType.JUMP)))
+    }
 }

@@ -168,6 +168,17 @@ public class DataFlowTest {
 
     ArrayList<String> objs = new ArrayList<>();
     static HashMap<String, String> map = new HashMap<>();
+
+
+
+
+    public void testBranch() {
+        if (test) {
+            createObjectWithException();
+        } else {
+            testField();
+        }
+    }
     public void testField() {
         try {
             createObjectWithException();

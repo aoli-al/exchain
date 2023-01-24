@@ -1283,3 +1283,16 @@ dependency of exceptions.
 - How many cases do we need?
 
 - Measure the throughput of fineract
+
+
+# Data Collection
+
+- Revisit existing dataset
+- In total 13 reproducible issues (6 not analyzed)
+    - We reproduced 5 issues by rerunning the service
+    - Usually takes me about ~1 day to reproduce and analyze 1 issue.
+
+- Haoze's issues:
+    - they focus on grey failures (the end failure is usually system hang)
+    - no interesting issue identified yet
+    - they mentioned they may have some interesting issues from other projects
