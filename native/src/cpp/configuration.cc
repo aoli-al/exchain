@@ -1,16 +1,24 @@
 #include "configuration.hpp"
 
+#include <ranges>
+#include <sstream>
+#include <string>
+
 namespace exchain {
 
 void Configuration::Init(std::string args) {
-    std::string delimiter = ":";
-    std::string type = args.substr(0, args.find(delimiter));
-    application_ = args.substr(args.find(delimiter) + 1, args.length());
-    if (type == "logging") {
-        mode_ = LOGGING;
-    } else {
-        mode_ = EXCHAIN;
+    char delim = ':';
+    std::string line;
+    std::stringstream ss(args);
+    while(std::getline(ss, line, delim)) {
+        application_.push_back(line);
     }
+    mode_ = EXCHAIN;
+    // if (type == "logging") {
+    //     mode_ = LOGGING;
+    // } else {
+    //     mode_ = EXCHAIN;
+    // }
 }
 
 }  // namespace exchain

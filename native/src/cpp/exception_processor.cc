@@ -25,9 +25,11 @@ void ExceptionProcessor::FullPass() {
         bool is_application_code_visited = false;
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
             auto class_signature = GetClassSignature(frames[stack_idx].method);
-            if (class_signature.starts_with(
-                    Configuration::GetInstance().application())) {
-                is_application_code_visited = true;
+            for (auto &application: Configuration::GetInstance().application()) {
+                if (class_signature.starts_with(application)) {
+                    is_application_code_visited = true;
+                    break;
+                }
             }
             if (frames[stack_idx].method == catch_method_) {
                 break;

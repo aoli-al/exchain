@@ -9,6 +9,9 @@ public class DynamicSwitchTaintTagFactory extends DataAndControlFlowTagFactory {
         if (name.contains(Constants.originMethodSuffix)) {
             return true;
         }
+        if (owner.contains("java/lang/invoke/MethodHandleImpl") && name.contains("checkSpreadArgument")) {
+            return true;
+        }
         return super.isIgnoredMethod(owner, name, desc);
     }
 

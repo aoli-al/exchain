@@ -5,10 +5,13 @@ package al.aoli.exchain.demo;
 // import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
 
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.util.*;
 
 public class Main {
     //    public static int foo = 3;
@@ -36,11 +39,19 @@ public class Main {
         }
     }
 
-    public static void main(String[] args)
-            throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
-        DataFlowTest test = new DataFlowTest();
-        test.testBranch();
+    private static final MethodType LOAD_CLASS_CLASSLOADER = MethodType.methodType(ServiceLoader.class, Class.class,
+            ClassLoader.class);
 
+    public static void main(String[] args)
+            throws Throwable {
+        MethodHandles.Lookup publicLookup = MethodHandles.lookup();
+        final MethodHandle handle = publicLookup.findStatic(ServiceLoader.class, "load", LOAD_CLASS_CLASSLOADER);
+        final ServiceLoader serviceLoader = (ServiceLoader) handle.invokeExact(Main.class, Main.class.getClassLoader());
+        System.out.println(serviceLoader);
+    }
+
+    public static String concat(String a) {
+        return a + "1";
     }
 
 }

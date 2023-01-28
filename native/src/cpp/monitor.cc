@@ -63,7 +63,7 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
 
     static plog::ColorConsoleAppender<plog::FuncMessageFormatter>
         console_appender;
-    plog::init(plog::info, &console_appender);
+    plog::init(plog::error, &console_appender);
 
     PLOG_INFO << "Agent initialization done!"
               << " mode: " << exchain::Configuration::GetInstance().mode()
