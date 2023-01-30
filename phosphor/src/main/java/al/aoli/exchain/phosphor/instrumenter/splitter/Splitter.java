@@ -160,7 +160,9 @@ public class Splitter implements Iterable<Splitter.SplitPoint> {
       // Can't have an invoke special of <init>
       for (int i = info.startIndex; i <= info.endIndex; i++) {
         AbstractInsnNode node = insns[i];
-        if (node.getOpcode() == Opcodes.INVOKESPECIAL && ((MethodInsnNode) node).name.equals("<init>")) {
+        if (node.getOpcode() == Opcodes.INVOKESPECIAL &&
+                ((MethodInsnNode) node).name.equals("<init>") &&
+                method.name.equals("<init>")) {
           info.endIndex = Math.max(info.startIndex, i - 1);
           return;
         }
@@ -279,7 +281,23 @@ public class Splitter implements Iterable<Splitter.SplitPoint> {
       adapter.localsRead.clear();
       adapter.localsWritten.clear();
       // Now go over the remaining range
-      for (int i = info.startIndex; i <= info.endIndex; i++) insns[i].accept(adapter);
+      for (int i = info.startIndex; i <= info.endIndex; i++)  {
+        boolean before = false;
+        if (adapter.stack != null) {
+          before = true;
+        }
+
+        insns[i].accept(adapter);
+        if ((adapter.stack == null && before) || (!before && (adapter.stack != null))) {
+          if (before) {
+            System.out.println("?" + i);
+            System.out.println(insns[i].getOpcode());
+          } else {
+            System.out.println("!" + i);
+            System.out.println(insns[i].getOpcode());
+          }
+        }
+      }
       // Build the split point
       return new SplitPoint(
           localMapFromAdapterLocalMap(adapter.localsRead, adapter.uninitializedTypes),
@@ -301,12 +319,14 @@ public class Splitter implements Iterable<Splitter.SplitPoint> {
     protected List<Type> typesFromAdapterStackRange(
         List<Object> stack, int start, Map<Object, Object> uninitializedTypes) {
       List<Type> ret = new ArrayList<>();
-      for (int i = start; i < stack.size(); i++) {
-        Object item = stack.get(i);
-        ret.add(typeFromAdapterStackItem(item, uninitializedTypes));
-        // Jump an extra spot for longs and doubles
-        if (item == Opcodes.LONG || item == Opcodes.DOUBLE) {
-          if (stack.get(++i) != Opcodes.TOP) throw new IllegalStateException("Expected top after long/double");
+      if (stack != null) {
+        for (int i = start; i < stack.size(); i++) {
+          Object item = stack.get(i);
+          ret.add(typeFromAdapterStackItem(item, uninitializedTypes));
+          // Jump an extra spot for longs and doubles
+          if (item == Opcodes.LONG || item == Opcodes.DOUBLE) {
+            if (stack.get(++i) != Opcodes.TOP) throw new IllegalStateException("Expected top after long/double");
+          }
         }
       }
       return ret;
@@ -363,8 +383,8 @@ public class Splitter implements Iterable<Splitter.SplitPoint> {
 
     @Override
     public void visitIincInsn(int var, int increment) {
-      localsRead.put(var, Type.INT_TYPE);
-      localsWritten.put(var, Type.INT_TYPE);
+      localsRead.put(var, Type.INT);
+      localsWritten.put(var, Type.INT);
       super.visitIincInsn(var, increment);
     }
   }

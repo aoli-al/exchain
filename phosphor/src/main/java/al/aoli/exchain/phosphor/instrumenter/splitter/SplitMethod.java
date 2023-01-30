@@ -65,6 +65,27 @@ public class SplitMethod {
    */
   public Result fromSplitPoint(String owner, MethodNode orig, Splitter.SplitPoint splitPoint) {
     MethodNode splitOff = createSplitOffMethod(orig, splitPoint);
+
+//    JumpInsnNode badNode = null;
+//    for (AbstractInsnNode instruction : splitOff.instructions) {
+//      if ((instruction instanceof  JumpInsnNode) && badNode == null){
+//        badNode = (JumpInsnNode) instruction;
+//        System.out.println("?");
+//      }
+//    }
+//
+//    MethodNode node = new MethodNode();
+//    for (AbstractInsnNode instruction : orig.instructions) {
+//      if ((instruction instanceof  JumpInsnNode)){
+//        System.out.println("?");
+//      }
+//      instruction.accept(node);
+//      try {
+//        splitOff.instructions.toArray();
+//      } catch (Throwable e) {
+//        System.out.println("?");
+//      }
+//    }
     MethodNode trimmed = createTrimmedMethod(owner, orig, splitOff, splitPoint);
     return new Result(trimmed, splitOff);
   }
@@ -102,7 +123,7 @@ public class SplitMethod {
     for (int i = 0; i < splitPoint.length; i++) {
       AbstractInsnNode insn = orig.instructions.get(i + splitPoint.start);
       // Skip frames
-      if (insn instanceof FrameNode) continue;
+//      if (insn instanceof FrameNode) continue;
       // Store the label
       if (insn instanceof LabelNode) seenLabels.add(((LabelNode) insn).getLabel());
       // Change the local if needed
@@ -111,7 +132,7 @@ public class SplitMethod {
         ((VarInsnNode) insn).var = localsMap.get(((VarInsnNode) insn).var);
       } else if (insn instanceof IincInsnNode) {
         insn = insn.clone(Collections.emptyMap());
-        ((VarInsnNode) insn).var = localsMap.get(((VarInsnNode) insn).var);
+        ((IincInsnNode) insn).var = localsMap.get(((IincInsnNode) insn).var);
       }
       insn.accept(newMethod);
     }
@@ -164,6 +185,7 @@ public class SplitMethod {
     }
     // Reset the labels
     newMethod.instructions.resetLabels();
+    orig.instructions.resetLabels();
     return newMethod;
   }
 
@@ -196,7 +218,7 @@ public class SplitMethod {
     for (int i = 0; i < splitPoint.start; i++) {
       AbstractInsnNode insn = orig.instructions.get(i);
       // Skip frames
-      if (insn instanceof FrameNode) continue;
+//      if (insn instanceof FrameNode) continue;
       // Record label
       if (insn instanceof LabelNode) seenLabels.add(((LabelNode) insn).getLabel());
       // Check a local store has happened
@@ -264,7 +286,7 @@ public class SplitMethod {
     for (int i = splitPoint.start + splitPoint.length; i < orig.instructions.size(); i++) {
       AbstractInsnNode insn = orig.instructions.get(i);
       // Skip frames
-      if (insn instanceof FrameNode) continue;
+//      if (insn instanceof FrameNode) continue;
       // Record label
       if (insn instanceof LabelNode) seenLabels.add(((LabelNode) insn).getLabel());
       insn.accept(newMethod);

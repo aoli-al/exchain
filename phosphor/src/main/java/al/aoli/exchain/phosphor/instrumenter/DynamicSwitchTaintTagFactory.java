@@ -12,6 +12,9 @@ public class DynamicSwitchTaintTagFactory extends DataAndControlFlowTagFactory {
         if (owner.contains("java/lang/invoke/MethodHandleImpl") && name.contains("checkSpreadArgument")) {
             return true;
         }
+        if (owner.contains("org/apache/hadoop/hive/ql/parse/HiveParser") && name.contains("clinit")) {
+            return true;
+        }
         return super.isIgnoredMethod(owner, name, desc);
     }
 

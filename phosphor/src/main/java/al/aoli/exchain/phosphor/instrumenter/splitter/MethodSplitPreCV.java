@@ -38,7 +38,7 @@ public class MethodSplitPreCV extends ClassVisitor {
                 field.setAccessible(true);
                 HashSet<String> methodList = (HashSet<String>) field.get(subCV);
 
-                while (subCV != null && !(subCV instanceof DynamicSwitchPostCV)) {
+                while (subCV != null && !(subCV instanceof MethodSplitPostCV)) {
                     try {
                         field = ClassVisitor.class.getDeclaredField("cv");
                         field.setAccessible(true);
@@ -49,8 +49,7 @@ public class MethodSplitPreCV extends ClassVisitor {
                 }
 
                 if (subCV != null) {
-                    ((DynamicSwitchPostCV) subCV)
-                            .setAggressivelyReduceMethodSize(methodList);
+                    ((MethodSplitPostCV) subCV).aggressivelyReduceMethodSize = methodList;
                 }
 
             } catch (NoSuchFieldException | IllegalAccessException e) {
