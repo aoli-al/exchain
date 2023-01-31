@@ -8,11 +8,11 @@ namespace exchain {
 jclass AffectedResultProcessor::runtime_class_ = nullptr;
 jclass AffectedResultProcessor::result_class_ = nullptr;
 
-void AffectedResultProcessor::Process() {
+bool AffectedResultProcessor::Process() {
     if (!ProcessorBase::CheckJvmTIError(
             jvmti_->GetLocalVariableTable(frame_.method, &table_size_, &table_),
             "get local variable table " + location_string_)) {
-        return;
+        return is_cause_identified_;
     }
     PLOG_INFO << "Start processing frame: " << location_string_
               << " at frame: " << frame_.location;
@@ -23,6 +23,7 @@ void AffectedResultProcessor::Process() {
     ProcessAffectedFields();
     ProcessSourceFields();
     jvmti_->Deallocate((unsigned char *)table_);
+    return is_cause_identified_;
 }
 
 void AffectedResultProcessor::ReportStats() {
@@ -45,8 +46,8 @@ void AffectedResultProcessor::ProcessAffectedFields() {
         jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
     }
     if (taint_fields_method_id != NULL && (is_static_method_ || obj != NULL)) {
-        jni_->CallStaticVoidMethod(runtime_class_, taint_fields_method_id, obj,
-                                   result_, exception_);
+        is_cause_identified_ |= jni_->CallStaticBooleanMethod(
+            runtime_class_, taint_fields_method_id, obj, result_, exception_);
     }
 }
 
@@ -60,8 +61,9 @@ void AffectedResultProcessor::ProcessSourceFields() {
         jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
     }
     if (obj != NULL || is_static_method_) {
-        jni_->CallStaticVoidMethod(runtime_class_, analyze_source_method_id,
-                                   obj, result_, exception_, location_jstring_);
+        is_cause_identified_ |= jni_->CallStaticBooleanMethod(
+            runtime_class_, analyze_source_method_id, obj, result_, exception_,
+            location_jstring_, is_cause_identified_);
     }
 }
 

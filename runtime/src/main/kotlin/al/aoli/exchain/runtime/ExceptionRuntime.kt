@@ -105,9 +105,9 @@ object ExceptionRuntime {
     }
 
     @JvmStatic
-    fun analyzeSourceVars(obj: Any?, exception: Any, location: String) {
-        if (obj == null) return
-        AffectedVarDriver.analyzeSourceVars(obj, exception, location)
+    fun analyzeSourceVars(obj: Any?, exception: Any, location: String): Boolean {
+        if (obj == null) return false
+        return AffectedVarDriver.analyzeSourceVars(obj, exception, location)
     }
 
     @JvmStatic
@@ -115,9 +115,10 @@ object ExceptionRuntime {
         obj: Any?,
         affectedVarResult: AffectedVarResult,
         exception: Any,
-        location: String
-    ) {
-        if (affectedVarResult.sourceField.isEmpty() && affectedVarResult.sourceStaticField.isEmpty()) return
-        AffectedVarDriver.analyzeSourceFields(obj, affectedVarResult, exception, location)
+        location: String,
+        causeIdentified: Boolean
+    ): Boolean {
+        if (affectedVarResult.sourceField.isEmpty() && affectedVarResult.sourceStaticField.isEmpty() && causeIdentified) return false
+        return AffectedVarDriver.analyzeSourceFields(obj, affectedVarResult, exception, location)
     }
 }

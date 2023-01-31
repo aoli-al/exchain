@@ -20,6 +20,7 @@ class ExceptionProcessor : ProcessorBase {
     int exception_id_;
     jobject exception_;
     std::string location_string_;
+    bool is_cause_identified_;
 
     static jclass runtime_class_;
 

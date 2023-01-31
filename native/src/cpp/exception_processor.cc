@@ -156,10 +156,10 @@ void ExceptionProcessor::ProcessStackFrameInfo(jvmtiFrameInfo frame,
     if (result == NULL) {
         return;
     }
-    AffectedResultProcessor processor(jvmti_, jni_, frame, depth, result,
-                                      frame.method == catch_method_,
-                                      location_string_, exception_, thread_);
-    processor.Process();
+    AffectedResultProcessor processor(
+        jvmti_, jni_, frame, depth, result, frame.method == catch_method_,
+        location_string_, exception_, thread_, is_cause_identified_);
+    is_cause_identified_ |= processor.Process();
 }
 
 int ExceptionProcessor::ComputeExceptionId(jobject obj) {

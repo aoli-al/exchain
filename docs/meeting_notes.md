@@ -1298,3 +1298,56 @@ dependency of exceptions.
     - they focus on grey failures (the end failure is usually system hang)
     - no interesting issue identified yet
     - they mentioned they may have some interesting issues from other projects
+
+
+# Data Collection and Benchmarking
+
+
+- 15 reproducible issues now.
+    - 5 issues whose exceptions are thrown from different executions.
+
+
+- 7 issues are reproduced and analyzed
+    - We are trying to reproduce the failure by running the service.
+
+
+# Issues:
+
+## Dynamic analysis
+
+- Phosphor (the taint analysis tool we use) requires full program instrumentation
+    - Not instrumented class causes program to crash
+    - E.g. Type cast failure because Phosphor wraps all array objects.
+- Phosphor handles 90% of classes properly
+    - Unfortunately, the unhandled 10% corner cases are extremely hard to debug
+    because many of them are:
+        - Generated dynamically
+        - Calling native methods
+        - Large methods (MethodTooLargeException)
+    - I have patched back to phosphor multiple times but it still crashes.
+![PRs](./files/prs.png)
+
+- Our goal to reproduce the failure by running services makes it more likely to
+reach corner cases in phosphor because:
+    - The code has longer execution
+    - More classes are involved
+    - Large applications are more likely to use fancy techniques
+        - Runtime code generation
+        - Dynamic dispatch
+
+
+## Static analysis
+
+- Turns out static analysis is super slow for large applications
+    - Take ~hours to do data-flow analysis
+    - Is this something we want to measure?
+
+
+
+
+## TODOs:
+
+- Finish analyzing the rest 8 application
+- Start benchmarking applications as well
+    - Benchmarking leads to new execution paths
+    - More crashes caused by Phosphor needs to be fixed.

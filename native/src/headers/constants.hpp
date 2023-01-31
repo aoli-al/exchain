@@ -27,11 +27,11 @@ const static char *kTaintFieldsMethodDescriptor =
     "Object;)V";
 const static char *kAnalyzeSourceVarsMethodName = "analyzeSourceVars";
 const static char *kAnalyzeSourceVarsMethodDescriptor =
-    "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)V";
+    "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Z";
 const static char *kAnalyzeSourceFieldsMethodName = "analyzeSourceFields";
 const static char *kAnalyzeSourceFieldsMethodDescriptor =
     "(Ljava/lang/Object;Lal/aoli/exchain/runtime/objects/"
-    "AffectedVarResult;Ljava/lang/Object;Ljava/lang/String;)V";
+    "AffectedVarResult;Ljava/lang/Object;Ljava/lang/String;Z)Z";
 const static char *kOnExceptionCaughtMethodName = "onExceptionCaught";
 const static char *kOnExceptionCaughtMethodDescriptor =
     "(Ljava/lang/Throwable;)V";

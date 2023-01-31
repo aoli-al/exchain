@@ -205,10 +205,10 @@ object AffectedVarDriver {
         affectedVarResult: AffectedVarResult,
         exception: Any,
         location: String
-    ) {
+    ): Boolean {
         val origin = System.identityHashCode(exception)
-
-        if (obj != null && affectedVarResult.sourceField.isNotEmpty()) {
+        var causeIdentified = false
+        if (obj != null) {
             try {
                 val field = obj.javaClass.getDeclaredField( "PHOSPHOR_TAG")
                 field.isAccessible = true
@@ -217,6 +217,7 @@ object AffectedVarDriver {
                     for (label in taint.labels) {
                         if (label is Int && label in exceptionStore && label != origin) {
                             ExceptionLogger.logDependency(label, origin)
+                            causeIdentified = true
                         }
                     }
                 }
@@ -234,6 +235,7 @@ object AffectedVarDriver {
                     for (label in taint.labels) {
                         if (label is Int && label in exceptionStore && label != origin) {
                             ExceptionLogger.logDependency(label, origin)
+                            causeIdentified = true
                         }
                     }
                 } catch (e: Exception) {
@@ -252,17 +254,18 @@ object AffectedVarDriver {
                 for (label in taint.labels) {
                     if (label is Int && label in exceptionStore && label != origin) {
                         ExceptionLogger.logDependency(label, origin)
+                        causeIdentified = true
                     }
                 }
             } catch (e: Exception) {
                 logger.warn { "Cannot access static field: $name, error: $e" }
             }
         }
-
+        return causeIdentified
     }
 
 
-    fun analyzeSourceVars(obj: Any, exception: Any, location: String) {
+    fun analyzeSourceVars(obj: Any, exception: Any, location: String): Boolean {
         logger.info { "Start processing source var: $obj at $location" }
         val origin = System.identityHashCode(exception)
         val taint =
@@ -271,12 +274,15 @@ object AffectedVarDriver {
                 is TaintedWithObjTag -> obj.phosphoR_TAG as Taint<*>?
                 else -> null
             }
-                ?: return
+                ?: return false
+        var causeIdentified = false
         for (label in taint.labels) {
             if (label is Int && label in exceptionStore && label != origin) {
                 ExceptionLogger.logDependency(label, origin)
+                causeIdentified = true
             }
         }
+        return causeIdentified
     }
 }
 

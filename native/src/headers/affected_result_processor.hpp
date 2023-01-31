@@ -31,11 +31,12 @@ class AffectedResultProcessor: ProcessorBase {
     int num_of_arrays_ = 0;
     std::vector<std::pair<int, std::string>> local_variable_map_;
     bool is_static_method_ = false;
+    bool is_cause_identified_;
 
    public:
     AffectedResultProcessor(jvmtiEnv *jvmti, JNIEnv *jni, jvmtiFrameInfo frame,
                             int depth, jobject result, jboolean is_caught_by_frame,
-                            std::string location_string, jobject exception, jthread thread)
+                            std::string location_string, jobject exception, jthread thread, bool is_cause_identified)
         : ProcessorBase(jvmti, jni),
           frame_(frame),
           depth_(depth),
@@ -43,7 +44,8 @@ class AffectedResultProcessor: ProcessorBase {
           is_caught_by_frame_(is_caught_by_frame),
           location_string_(location_string),
           exception_(exception),
-          thread_(thread) {
+          thread_(thread),
+          is_cause_identified_(is_cause_identified) {
         if (result_class_ == nullptr) {
             result_class_ = jni_->FindClass(kAffectedVarResultClassName);
             runtime_class_ = jni_->FindClass(kRuntimeClassName);
@@ -55,7 +57,7 @@ class AffectedResultProcessor: ProcessorBase {
         is_static_method_ = (modifier & 0x0008) != 0;
     }
 
-    void Process();
+    bool Process();
 
    private:
     void ProcessAffectedVars();
