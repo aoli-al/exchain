@@ -562,6 +562,8 @@ class AffectedVarMethodVisitor(
                         Opcodes.IFLE -> {
                             listOf(branchFrame.getStack(branchFrame.stackSize - 1))
                         }
+                        Opcodes.IF_ACMPEQ,
+                        Opcodes.IF_ACMPNE,
                         Opcodes.IF_ICMPEQ,
                         Opcodes.IF_ICMPNE,
                         Opcodes.IF_ICMPLT,
