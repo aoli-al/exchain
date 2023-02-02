@@ -3,7 +3,6 @@ package al.aoli.exchain.runtime
 import al.aoli.exchain.runtime.analyzers.AffectedVarDriver
 import al.aoli.exchain.runtime.analyzers.ExceptionLogger
 import al.aoli.exchain.runtime.objects.AffectedVarResult
-import al.aoli.exchain.runtime.objects.Type
 import al.aoli.exchain.runtime.objects.exceptions.ExceptionInjector
 import al.aoli.exchain.runtime.server.ExceptionServiceImpl
 import edu.columbia.cs.psl.phosphor.runtime.Taint
@@ -74,7 +73,6 @@ object ExceptionRuntime {
         catchLocation: Long,
         isThrowInsn: Boolean
     ): AffectedVarResult? {
-
         return AffectedVarDriver.analyzeAffectedVar(
             e,
             clazz,
@@ -118,7 +116,12 @@ object ExceptionRuntime {
         location: String,
         causeIdentified: Boolean
     ): Boolean {
-        if (affectedVarResult.sourceField.isEmpty() && affectedVarResult.sourceStaticField.isEmpty() && causeIdentified) return false
+        if (affectedVarResult.sourceField.isEmpty() &&
+            affectedVarResult.sourceStaticField.isEmpty() &&
+            causeIdentified
+        ) {
+            return false
+        }
         return AffectedVarDriver.analyzeSourceFields(obj, affectedVarResult, exception, location)
     }
 }

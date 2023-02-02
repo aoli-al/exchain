@@ -8,10 +8,13 @@
 #include <queue>
 #include <thread>
 #include <vector>
+#include <chrono>
 
 #include "jni.h"
 #include "utils.hpp"
 #include "plog/Log.h"
+
+using namespace std::chrono_literals;
 
 namespace exchain {
 class ThreadPool {
@@ -25,16 +28,26 @@ class ThreadPool {
     std::queue<std::function<void(JNIEnv *)>> tasks_ = {};
     std::vector<std::thread> threads_;
     std::set<jlong> processing_threads_;
+    std::chrono::time_point<std::chrono::system_clock> last_updated_time_ = std::chrono::system_clock::now();
+    bool is_worker_running_ = false;
 
    public:
-    ThreadPool(int count, JavaVM *jvm) : count_(count), jvm_(jvm) {
-        threads_ = std::vector<std::thread>(count);
-        for (int i = 0; i < count; i++) {
+    ThreadPool(int count, JavaVM *jvm) : count_(count), jvm_(jvm) {}
+
+    void SpawnThreadAndStart() {
+        threads_ = std::vector<std::thread>(count_);
+        for (int i = 0; i < count_; i++) {
             threads_[i] = std::thread(&ThreadPool::Worker, this);
         }
     }
 
     void Push(std::function<void(JNIEnv *)> &&task) {
+        if (processing_threads_.size() == 0) {
+            SpawnThreadAndStart();
+        }
+
+
+        last_updated_time_ = std::chrono::system_clock::now();
         {
             std::unique_lock<std::mutex> lock(tasks_mutex);
             tasks_.push(task);
@@ -60,11 +73,17 @@ class ThreadPool {
         return task_promise->get_future();
     }
 
-    bool isProcessingThread(jlong thread_id) {
+    bool IsProcessingThread(jlong thread_id) {
         return processing_threads_.find(thread_id) != processing_threads_.end();
     }
 
    private:
+    bool ShouldStopWorker() {
+        return last_updated_time_ + 10s < std::chrono::system_clock::now();
+    }
+
+
+
     void Worker() {
         JNIEnv *jni;
         if (auto result = jvm_->AttachCurrentThread((void **)&jni, NULL) != 0) {
@@ -78,21 +97,28 @@ class ThreadPool {
         jthread current_thread = jni->CallStaticObjectMethod(cls, mid);
         jlong current_thread_id = exchain::GetThreadId(current_thread, jni);
         jni->DeleteLocalRef(current_thread);
-
         {
             std::unique_lock<std::mutex> lock(processing_threads_mutex_);
             processing_threads_.insert(current_thread_id);
         }
         PLOG_INFO << "Attached thread with id: " << current_thread_id;
 
-        while (true) {
+        while (!ShouldStopWorker()) {
             std::function<void(JNIEnv *)> task;
             std::unique_lock<std::mutex> lock(tasks_mutex);
-            task_available_cv_.wait(lock, [this] { return !tasks_.empty(); });
-            task = std::move(tasks_.front());
-            tasks_.pop();
-            lock.unlock();
-            task(jni);
+            if (task_available_cv_.wait_for(
+                    lock, 10s, [this] { return !tasks_.empty(); })) {
+                task = std::move(tasks_.front());
+                tasks_.pop();
+                lock.unlock();
+                task(jni);
+            }
+        }
+
+        jvm_->DetachCurrentThread();
+        {
+            std::unique_lock<std::mutex> lock(processing_threads_mutex_);
+            processing_threads_.erase(current_thread_id);
         }
     }
 };

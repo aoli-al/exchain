@@ -179,7 +179,7 @@ internal class AffectedVarClassReaderTest {
                 true,
                 "Lorg/apache/hadoop/hdfs/server/namenode/FSEditLogLoader;",
                 "loadEditRecords(Lorg/apache/hadoop/hdfs/server/namenode/EditLogInputStream;" +
-                        "ZJJLorg/apache/hadoop/hdfs/server/common/HdfsServerConstants\$StartupOption;Lorg/apache/hadoop/hdfs/server/namenode/MetaRecoveryContext;)J",
+                    "ZJJLorg/apache/hadoop/hdfs/server/common/HdfsServerConstants\$StartupOption;Lorg/apache/hadoop/hdfs/server/namenode/MetaRecoveryContext;)J",
                 cr
             )
         cr.accept(visitor, 0)
@@ -210,9 +210,9 @@ internal class AffectedVarClassReaderTest {
             )
         cr.accept(visitor, 0)
         println(visitor.methodVisitor!!.affectedVars)
-//        assert(visitor.methodVisitor!!.sourceField.isEmpty())
-//        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(51))
-//        assert(visitor.methodVisitor!!.sourceLines.contains(Pair(296, SourceType.JUMP)))
+        //        assert(visitor.methodVisitor!!.sourceField.isEmpty())
+        //        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(51))
+        //        assert(visitor.methodVisitor!!.sourceLines.contains(Pair(296, SourceType.JUMP)))
     }
 
     @Test
@@ -237,8 +237,8 @@ internal class AffectedVarClassReaderTest {
             )
         cr.accept(visitor, 0)
         println(visitor.methodVisitor!!.affectedVars)
-//        assert(visitor.methodVisitor!!.sourceField.isEmpty())
-//        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(51))
-//        assert(visitor.methodVisitor!!.sourceLines.contains(Pair(296, SourceType.JUMP)))
+        //        assert(visitor.methodVisitor!!.sourceField.isEmpty())
+        //        assert(visitor.methodVisitor!!.sourceLocalVariable.contains(51))
+        //        assert(visitor.methodVisitor!!.sourceLines.contains(Pair(296, SourceType.JUMP)))
     }
 }

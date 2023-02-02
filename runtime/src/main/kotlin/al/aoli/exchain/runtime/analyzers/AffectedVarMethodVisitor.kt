@@ -323,11 +323,12 @@ class AffectedVarMethodVisitor(
 
     // We may want to check if the source var is from
     // a map or an array.
-    fun findVariableSource(varInsn: VarInsnNode,
-                           frames: Array<Frame<SourceValue>?>,
-                           throwInsnFrame: Frame<SourceValue>,
-                           localVariableMap: MutableMap<Int, MutableList<Pair<Int, SourceValue>>>,
-                           ) {
+    fun findVariableSource(
+        varInsn: VarInsnNode,
+        frames: Array<Frame<SourceValue>?>,
+        throwInsnFrame: Frame<SourceValue>,
+        localVariableMap: MutableMap<Int, MutableList<Pair<Int, SourceValue>>>
+    ) {
         val records = localVariableMap[varInsn.`var`] ?: return
         val index = instructions.indexOf(varInsn)
         var selectedRecord: Pair<Int, SourceValue>? = null
@@ -359,8 +360,9 @@ class AffectedVarMethodVisitor(
             when (src) {
                 is MethodInsnNode -> {
                     if (src.opcode != Opcodes.INVOKESTATIC && src.opcode != Opcodes.INVOKEDYNAMIC) {
-                        val srcRef = srcFrame.getStack(srcFrame.stackSize - Type.getArgumentTypes(src.desc).size - 1)
-                        processSourceValue(src, srcRef , frames, throwInsnFrame, localVariableMap)
+                        val srcRef =
+                            srcFrame.getStack(srcFrame.stackSize - Type.getArgumentTypes(src.desc).size - 1)
+                        processSourceValue(src, srcRef, frames, throwInsnFrame, localVariableMap)
                     }
                 }
                 is VarInsnNode -> {
@@ -482,6 +484,14 @@ class AffectedVarMethodVisitor(
         val throwInsnFrame = frames[instructions.indexOf(throwInsn)] ?: return
         val throwInsnLocal = throwInsn ?: return
         try {
+            if (exception is ClassNotFoundException &&
+                throwInsnLocal is MethodInsnNode &&
+                throwInsnLocal.name.contains("forName")
+            ) {
+                sourceLines.add(Pair(getLineNumber(throwInsnLocal), SourceType.INVOKE))
+                return
+            }
+
             if (exception is ReflectiveOperationException) {
                 return
             }
@@ -520,15 +530,6 @@ class AffectedVarMethodVisitor(
                 }
                 return
             }
-
-            if (exception is ClassNotFoundException &&
-                throwInsnLocal is MethodInsnNode &&
-                throwInsnLocal.name.contains("forName")
-            ) {
-                sourceLines.add(Pair(getLineNumber(throwInsnLocal), SourceType.INVOKE))
-                return
-            }
-
             // this is default behavior
             var currentInsn: AbstractInsnNode? = throwInsnLocal
 

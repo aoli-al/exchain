@@ -10,7 +10,8 @@ import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
 
 object ExceptionLogger {
-    val executor = Executors.newSingleThreadExecutor();
+    val executor = Executors.newSingleThreadExecutor()
+
     fun logException(e: Throwable): Int {
         val label = System.identityHashCode(e)
         if (label in savedExceptions) {
@@ -33,9 +34,7 @@ object ExceptionLogger {
     }
 
     fun logDependency(e1: Int, e2: Int) {
-        executor.submit {
-            dynamicDependencyLog.appendText("$e1, $e2\n")
-        }
+        executor.submit { dynamicDependencyLog.appendText("$e1, $e2\n") }
     }
 
     fun logAffectedVarResult(result: AffectedVarResult) {
@@ -77,11 +76,12 @@ object ExceptionLogger {
     private val dynamicDependencyLog: File
     private val affectedVarResults: File
     init {
-        val basePath = when (AffectedVarDriver.type) {
-            Type.Static -> "static-results"
-            Type.Dynamic -> "dynamic-results"
-            Type.Hybrid -> "hybrid-results"
-        }
+        val basePath =
+            when (AffectedVarDriver.type) {
+                Type.Static -> "static-results"
+                Type.Dynamic -> "dynamic-results"
+                Type.Hybrid -> "hybrid-results"
+            }
         val baseFolder = File(basePath)
         if (!baseFolder.isDirectory) {
             baseFolder.mkdir()

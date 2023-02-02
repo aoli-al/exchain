@@ -36,15 +36,16 @@ object AffectedVarDriver {
     ): AffectedVarResult? {
         val label = ExceptionLogger.logException(e)
         if (type == Type.Static) {
-            val result = AffectedVarResult(
-                label,
-                e.javaClass.name,
-                clazz,
-                method,
-                throwIndex,
-                catchIndex,
-                isThrowInsn
-            )
+            val result =
+                AffectedVarResult(
+                    label,
+                    e.javaClass.name,
+                    clazz,
+                    method,
+                    throwIndex,
+                    catchIndex,
+                    isThrowInsn
+                )
             ExceptionLogger.logAffectedVarResult(result)
             return null
         }
@@ -68,9 +69,7 @@ object AffectedVarDriver {
                     val path = instrumentedClassPath ?: return null
                     AffectedVarClassReader(File("$path/$classPath.class").readBytes())
                 } catch (e2: Throwable) {
-                    logger.error {
-                        "Failed to get class file $className"
-                    }
+                    logger.error { "Failed to get class file $className" }
                     return null
                 }
             }
@@ -124,7 +123,11 @@ object AffectedVarDriver {
                 throwIndex,
                 catchIndex,
                 isThrowInsn,
-                if (type == Type.Hybrid) { intArrayOf() } else { affectedLocalIndex.toIntArray() },
+                if (type == Type.Hybrid) {
+                    intArrayOf()
+                } else {
+                    affectedLocalIndex.toIntArray()
+                },
                 affectedLocalName.toTypedArray(),
                 affectedLocalLine.toIntArray(),
                 affectedFieldName.toTypedArray(),
@@ -132,7 +135,11 @@ object AffectedVarDriver {
                 affectedStaticFieldName.toTypedArray(),
                 affectedStaticFieldLine.toIntArray(),
                 sourceLines,
-                if (type == Type.Hybrid) { intArrayOf() } else { sourceLocalVariable },
+                if (type == Type.Hybrid) {
+                    intArrayOf()
+                } else {
+                    sourceLocalVariable
+                },
                 sourceField,
                 sourceStaticField
             )
@@ -167,7 +174,9 @@ object AffectedVarDriver {
                         }
                     field.set(obj, tag)
                 } catch (e: Exception) {
-                    logger.warn { "Cannot access field: $name for type: ${obj.javaClass.name}, " + "error: $e" }
+                    logger.warn {
+                        "Cannot access field: $name for type: ${obj.javaClass.name}, " + "error: $e"
+                    }
                 }
             }
         }
@@ -178,11 +187,12 @@ object AffectedVarDriver {
                 val clazz = Class.forName(clazzName.replace("/", "."))
                 val field = clazz.getField(fieldName + "PHOSPHOR_TAG")
                 val value = field.get(null) as Taint<Int>?
-                val tag = if (value == null) {
-                    Taint.withLabel(label)
-                } else {
-                    value.union(Taint.withLabel(label))
-                }
+                val tag =
+                    if (value == null) {
+                        Taint.withLabel(label)
+                    } else {
+                        value.union(Taint.withLabel(label))
+                    }
                 field.set(null, tag)
             } catch (e: Exception) {
                 logger.warn { "Cannot access static field: $name, error: $e" }
@@ -210,7 +220,7 @@ object AffectedVarDriver {
         var causeIdentified = false
         if (obj != null) {
             try {
-                val field = obj.javaClass.getDeclaredField( "PHOSPHOR_TAG")
+                val field = obj.javaClass.getDeclaredField("PHOSPHOR_TAG")
                 field.isAccessible = true
                 val taint = field.get(obj) as Taint<*>?
                 if (taint != null) {
@@ -239,8 +249,10 @@ object AffectedVarDriver {
                         }
                     }
                 } catch (e: Exception) {
-                    logger.warn { "Cannot access field: ${name}PHOSRPHOR_TAG for type: ${obj.javaClass.name}, " +
-                            "error:$e" }
+                    logger.warn {
+                        "Cannot access field: ${name}PHOSRPHOR_TAG for type: ${obj.javaClass.name}, " +
+                            "error:$e"
+                    }
                 }
             }
         }
@@ -263,7 +275,6 @@ object AffectedVarDriver {
         }
         return causeIdentified
     }
-
 
     fun analyzeSourceVars(obj: Any, exception: Any, location: String): Boolean {
         logger.info { "Start processing source var: $obj at $location" }

@@ -30,7 +30,7 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
     if (!initialized) return;
     if (thread == NULL) return;
     jlong exception_thread_id = exchain::GetThreadId(thread, env);
-    if (thread_pool->isProcessingThread(exception_thread_id)) {
+    if (thread_pool->IsProcessingThread(exception_thread_id)) {
         return;
     }
     auto task = thread_pool->Submit([=](JNIEnv *jni) {
@@ -40,6 +40,10 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
         processor.Process();
     });
     task.wait();
+}
+
+JNIEXPORT void JNICALL Agent_OnUnload(JavaVM *vm) {
+    PLOG_INFO << "Agent unloaded";
 }
 
 JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {

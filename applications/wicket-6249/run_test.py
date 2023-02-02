@@ -65,17 +65,17 @@ def origin(debug: bool):
 
 @main.command(name="static")
 def static():
-    subprocess.call(["java",
-                     "-cp",
-                     f"{ORIGIN_JAR_PATH}/{JAR_NAME}",
-                     f"-javaagent:{RUNTIME_JAR_PATH}=static:{INSTRUMENTATION_CLASSPATH}",
-                     f"-agentpath:{NATIVE_LIB_PATH}=exchain:L{APPLICATION_NAMESPACE}",
-                     TEST_CLASS])
-    args = ["./gradlew", "static-analyzer:run", f"--args={ORIGIN_CLASSPATH} {DIR}/static-results {ORIGIN_CLASSPATH}"]
-    print(args)
-    cmd = run_command(args, cwd=os.path.join(DIR, "../.."))
+    args = ["java",
+            "-cp",
+            f"{ORIGIN_JAR_PATH}/{JAR_NAME}",
+            f"-javaagent:{RUNTIME_JAR_PATH}=static:{INSTRUMENTATION_CLASSPATH}",
+            f"-agentpath:{NATIVE_LIB_PATH}=exchain:L{APPLICATION_NAMESPACE}",
+            TEST_CLASS]
+    cmd = run_command(args)
     post()
     cmd.kill()
+    args = ["./gradlew", "static-analyzer:run", f"--args={ORIGIN_CLASSPATH} {DIR}/static-results {ORIGIN_CLASSPATH}"]
+    subprocess.call(args, cwd=os.path.join(DIR, "../.."))
 
 
 @main.command(name="hybrid")

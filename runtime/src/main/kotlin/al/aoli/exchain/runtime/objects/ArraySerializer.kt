@@ -6,14 +6,13 @@ import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonSerializer
 import java.lang.reflect.Type
 
-class ArraySerializer: JsonSerializer<Array<Pair<Int, SourceType>>> {
+class ArraySerializer : JsonSerializer<Array<Pair<Int, SourceType>>> {
     override fun serialize(
         src: Array<Pair<Int, SourceType>>?,
         typeOfSrc: Type?,
         context: JsonSerializationContext?
     ): JsonElement {
-        if (src != null) {
-        }
+        if (src != null) {}
         return JsonPrimitive(0)
     }
 }

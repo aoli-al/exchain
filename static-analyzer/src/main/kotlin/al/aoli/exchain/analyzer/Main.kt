@@ -3,6 +3,8 @@ package al.aoli.exchain.analyzer
 import al.aoli.exchain.runtime.analyzers.AffectedVarDriver
 import al.aoli.exchain.runtime.objects.AffectedVarResult
 import al.aoli.exchain.runtime.objects.Type
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.arguments.argument
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import mu.KotlinLogging
@@ -31,10 +33,10 @@ fun setupSoot(sourceDirectory: String): List<String> {
     return paths
 }
 
-fun loadAndProcess(args: List<String>) {
-    val libs = setupSoot(args[0])
-    val dataDirectory = args[1]
-    AffectedVarDriver.instrumentedClassPath = args[2]
+fun loadAndProcess(options: AnalyzerOptions) {
+    val libs = setupSoot(options.classPath)
+    val dataDirectory = options.reportPath
+    AffectedVarDriver.instrumentedClassPath = options.classPath
     AffectedVarDriver.type = Type.Dynamic
 
     val path = File("$dataDirectory/latest").readText().trim()
@@ -77,28 +79,29 @@ fun loadAndProcess(args: List<String>) {
         configs.dataFlowTimeout = 10 * 60
     }
 
-    val processedResults = results.map { origin ->
-        val dummyException = if ("ClassNotFoundException" in origin.exceptionType) {
-            ClassNotFoundException()
-        }
-        else if ("NullPointerException" in origin.exceptionType) {
-            NullPointerException()
-        }
-        else if ("IndexOutOfBoundsException" in origin.exceptionType) {
-            IndexOutOfBoundsException()
-        }
-        else {
-            java.lang.RuntimeException()
-        }
-        AffectedVarDriver.analyzeAffectedVar(
-            dummyException,
-            origin.clazz,
-            origin.method,
-            origin.throwIndex,
-            origin.catchIndex,
-            origin.isThrownInsn
-        )
-    }.filterNotNull()
+    val processedResults =
+        results
+            .map { origin ->
+                val dummyException =
+                    if ("ClassNotFoundException" in origin.exceptionType) {
+                        ClassNotFoundException()
+                    } else if ("NullPointerException" in origin.exceptionType) {
+                        NullPointerException()
+                    } else if ("IndexOutOfBoundsException" in origin.exceptionType) {
+                        IndexOutOfBoundsException()
+                    } else {
+                        java.lang.RuntimeException()
+                    }
+                AffectedVarDriver.analyzeAffectedVar(
+                    dummyException,
+                    origin.clazz,
+                    origin.method,
+                    origin.throwIndex,
+                    origin.catchIndex,
+                    origin.isThrownInsn
+                )
+            }
+            .filterNotNull()
     val libPath = libs.joinToString(File.pathSeparator)
     val sourceVarAnalyzer = SourceVarAnalyzer(processedResults)
     val dependencyFile = File("$dataDirectory/$path/dependency.json")
@@ -112,7 +115,6 @@ fun loadAndProcess(args: List<String>) {
     for (result in processedResults) {
         sourceVarAnalyzer.disabledLabels.add(result.label)
         if (dependencies.processed.contains(result.getSignature())) continue
-
 
         if (result.affectedLocalName.isEmpty() && result.affectedFieldName.isEmpty()) continue
         logger.info("Start analysing ${result.label}.")
@@ -150,6 +152,13 @@ fun loadAndProcess(args: List<String>) {
     }
 }
 
-fun main(argv: Array<String>) {
-    loadAndProcess(argv.asList())
+class AnalyzerOptions : CliktCommand() {
+    val classPath: String by argument(help = "Project classpath")
+    val reportPath: String by argument(help = "Production report path")
+
+    override fun run() {
+        loadAndProcess(this)
+    }
 }
+
+fun main(args: Array<String>) = AnalyzerOptions().main(args)
