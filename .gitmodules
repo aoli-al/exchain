@@ -15,7 +15,7 @@
 	url = git@github.com:aoli-al/fineract.git
 [submodule "applications/hadoop-17812"]
 	path = applications/hadoop-17812
-	url = https://github.com/aoli-al/hadoop
+	url = git@github.com:aoli-al/hadoop.git
 [submodule "applications/hbase-17475"]
 	path = applications/hbase-17475
 	url = git@github.com:aoli-al/hbase.git
@@ -24,7 +24,7 @@
 	url = git@github.com:aoli-al/hive.git
 [submodule "applications/hdfs-4128"]
 	path = applications/hdfs-4128
-	url = https://github.com/aoli-al/hadoop
+	url = git@github.com:aoli-al/hadoop.git
 [submodule "applications/kylin-4263"]
 	path = applications/kylin-4263
 	url = git@github.com:aoli-al/kylin.git
@@ -57,7 +57,7 @@
 	url = git@github.com:aoli-al/ignite-3.git
 [submodule "applications/jena-324"]
 	path = applications/jena-324
-	url = https://github.com/apache/jena
+	url = git@github.com:aoli-al/jena.git
 [submodule "applications/hive-13410"]
 	path = applications/hive-13410
-	url = https://github.com/aoli-al/hive
+	url = git@github.com:aoli-al/hive.git
