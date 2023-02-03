@@ -2,8 +2,12 @@ import click
 from runner import BENCHMARK_APPLICATIONS
 from typing import List
 from commons import *
+import subprocess
 
 
+
+def prepare_env():
+    subprocess.call()
 
 
 @click.command()

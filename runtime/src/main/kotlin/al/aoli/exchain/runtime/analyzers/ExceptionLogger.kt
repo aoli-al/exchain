@@ -88,9 +88,9 @@ object ExceptionLogger {
         }
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")
         val path = formatter.format(LocalDateTime.now())
-        File("$basePath/latest").writeText(path)
         val outDir = System.getenv("EXCHAIN_OUT_DIR") ?: ""
         val outPath = "$outDir/$basePath/$path"
+        File("$outDir/$basePath").writeText(path)
         val dataFolder = File(outPath)
         dataFolder.mkdirs()
         exceptionLog = File("$outPath/exception.json")
