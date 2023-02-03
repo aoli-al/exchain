@@ -18,4 +18,3 @@ class Jena(Benchmark):
     def build(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
         subprocess.call(["mvn", "install", "-DskipTests"], cwd=self.work_dir + "/jena-tdb")
-

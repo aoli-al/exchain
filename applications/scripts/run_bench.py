@@ -20,6 +20,7 @@ def prepare_env():
 def bench(build: bool, instrument: bool, run: bool, analyze: bool,
           skip_app: List[str], skip_type: List[str]):
     for name, cls in BENCHMARK_APPLICATIONS.items():
+        print(f"Start processing {name}")
         if name in skip_app:
             continue
         app = cls()
