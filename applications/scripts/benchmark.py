@@ -3,6 +3,7 @@ from commons import *
 from typing import List
 import glob
 import time
+import os
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -32,6 +33,8 @@ class Benchmark:
         os.makedirs(self.origin_classpath, exist_ok=True)
         os.makedirs(self.hybrid_classpath, exist_ok=True)
         os.makedirs(self.hybrid_output, exist_ok=True)
+
+        del os.environ["JAVA_HOME"]
 
     def build(self):
         pass
@@ -138,7 +141,6 @@ class Benchmark:
                 0, "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005")
 
         print(" ".join([java, *self.additional_args, *cmd]))
-        print(EXCHAIN_OUT_DIR + self.test_name)
         return subprocess.Popen([java, *self.additional_args, *cmd],
                                 env={
             "EXCHAIN_OUT_DIR": self.out_path,
