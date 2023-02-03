@@ -16,12 +16,7 @@ EXCHAIN_OUT_DIR = os.path.join(BASE_FOLDER, "../results")
 
 TEST_NAME = os.getcwd().split("/")[-1]
 
-# INSTRUMENTATION_FOLDER_NAME = "/tmp/instrumented"
-# HYBRID_FOLDER_NAME = "/tmp/hybrid"
-# INSTRUMENTATION_CLASSPATH = "/tmp/instrumented_classes/" + TEST_NAME
-# ORIGIN_CLASSPATH = "/tmp/origin_classes/" + TEST_NAME
-# HYBRID_CLASSPATH = "/tmp/hybrid_classes/" + TEST_NAME
-
+DEFAULT_TYPES = ["origin", "dynamic", "hybrid", "static"]
 
 
 if sys.platform == "linux" or sys.platform == "linux2":

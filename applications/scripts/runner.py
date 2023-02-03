@@ -3,11 +3,13 @@ import os
 from glob import glob
 import inspect
 from benchmark import Benchmark
+from commons import *
+from typing import Dict
 
 
 # Load all python3 files in the current directory
 
-BENCHMARK_APPLICATIONS = {}
+BENCHMARK_APPLICATIONS: Dict[str, Benchmark] = {}
 
 for file in glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "*.py")):
     name = os.path.splitext(os.path.basename(file))[0]
@@ -46,7 +48,7 @@ def instrument(app: Benchmark):
 
 
 @main.command(name="run")
-@click.option('--type', type=click.Choice(["origin", "dynamic", "hybrid", "static"]), default="origin", help='Type of run.')
+@click.option('--type', type=click.Choice(DEFAULT_TYPES), default="origin", help='Type of run.')
 @click.option('--debug/--no-debug', default=False, help='Enable debugging.')
 @click.pass_obj
 def run(app: Benchmark, type: str, debug: bool):
