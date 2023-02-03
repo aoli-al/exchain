@@ -6,10 +6,11 @@ import time
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
+
 class Benchmark:
 
     def __init__(self, test_name: str, jar_name: str, origin_jar_path: str, test_class: str, application_namespace: str, is_single_jar: bool = True, additional_args: List[str] = [],
-    additional_classpaths: List[str] = []):
+                 additional_classpaths: List[str] = []):
         self.test_name = test_name
         self.jar_name = jar_name
         self.test_class = test_class
@@ -24,6 +25,7 @@ class Benchmark:
         self.hybrid_classpath = "/tmp/hybrid_classes/" + self.test_name
         self.hybrid_output = "/tmp/hybrid_output/" + self.test_name
         self.additional_classpaths = additional_classpaths
+        self.out_path = os.path.join(EXCHAIN_OUT_DIR, self.test_name)
 
         os.makedirs(self.instrumentation_classpath, exist_ok=True)
         os.makedirs(self.instrumentation_output, exist_ok=True)
@@ -47,8 +49,8 @@ class Benchmark:
                          "-cp", PHOSPHOR_JAR_PATH, "edu.columbia.cs.psl.phosphor.Instrumenter",
                          input_name, self.instrumentation_output,
                          "-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
-                        #  "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPostCV",
-                        #  "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPreCV"
+                         #  "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPostCV",
+                         #  "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPreCV"
                          ], cwd=self.work_dir)
         subprocess.call(["java",
                         f"-DPhosphor.INSTRUMENTATION_CLASSPATH={self.hybrid_classpath}",
@@ -66,7 +68,6 @@ class Benchmark:
 
     def get_instrumented_jar(self) -> str:
         return ":".join(list(glob.glob(f"{self.instrumentation_output}/*.jar")) + self.additional_classpaths)
-
 
     def post(self, type: str, cmd: subprocess.Popen):
         time.sleep(200)
@@ -105,7 +106,6 @@ class Benchmark:
             f"-agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}",
             self.test_class]
 
-
     def run_test(self, type: str, debug: bool = False):
         self.pre()
         cmd = self.exec(type, debug)
@@ -113,10 +113,11 @@ class Benchmark:
 
     def post_analysis(self, type: str):
         if type == "static":
-            subprocess.call(["./gradlew", "static-analyzer:run", f"--args={self.origin_classpath} {self.work_dir}/static-results" ])
+            subprocess.call(["./gradlew", "static-analyzer:run", f"--args={self.origin_classpath} {self.work_dir}/static-results"],
+                            cwd=os.path.join(DIR_PATH, "../.."))
         elif type == "hybrid":
-            subprocess.call(["./gradlew", "static-analyzer:run", f"--args={self.hybrid_classpath} {self.work_dir}/hybrid-results" ])
-
+            subprocess.call(["./gradlew", "static-analyzer:run", f"--args={self.hybrid_classpath} {self.work_dir}/hybrid-results"],
+                            cwd=os.path.join(DIR_PATH, "../.."))
 
     def exec(self, type: str, debug: bool) -> subprocess.Popen:
         if type == "origin":
@@ -137,33 +138,9 @@ class Benchmark:
                 0, "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005")
 
         print(" ".join([java, *self.additional_args, *cmd]))
-        return subprocess.Popen([java, *self.additional_args, *cmd], cwd=self.work_dir)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        print(EXCHAIN_OUT_DIR + self.test_name)
+        return subprocess.Popen([java, *self.additional_args, *cmd],
+                                env={
+            "EXCHAIN_OUT_DIR": self.out_path,
+            **os.environ
+        }, cwd=self.work_dir)

@@ -35,9 +35,12 @@ class Fineract(Benchmark):
             time.sleep(100)
         else:
             time.sleep(60)
+        print(self.work_dir)
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
-        subprocess.call("./gradlew :fineract-provider:triggerBug --tests org.apache.fineract.integrationtests.HookIntegrationTest.shouldSendOfficeCreationNotification", shell=True,
+        del os.environ["JAVA_HOME"]
+        subprocess.call("./gradlew :fineract-provider:triggerBug --tests org.apache.fineract.integrationtests.HookIntegrationTest.shouldSendOfficeCreationNotification",
                         env={"PERF_OUT_FILE": "/tmp/out",
                              **os.environ
-                             }, cwd=self.work_dir)
+                             },
+                        cwd=self.work_dir, shell=True)
         cmd.kill()

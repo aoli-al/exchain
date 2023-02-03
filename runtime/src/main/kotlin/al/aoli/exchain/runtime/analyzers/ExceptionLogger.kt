@@ -89,12 +89,13 @@ object ExceptionLogger {
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")
         val path = formatter.format(LocalDateTime.now())
         File("$basePath/latest").writeText(path)
-        val dataFolder = File("$basePath/$path")
-        dataFolder.mkdir()
-
-        exceptionLog = File("$basePath/$path/exception.json")
-        exceptionStats = File("$basePath/$path/stats.csv")
-        affectedVarResults = File("$basePath/$path/affected-var-results.json")
-        dynamicDependencyLog = File("$basePath/$path/dynamic_dependency.json")
+        val outDir = System.getenv("EXCHAIN_OUT_DIR") ?: ""
+        val outPath = "$outDir/$basePath/$path"
+        val dataFolder = File(outPath)
+        dataFolder.mkdirs()
+        exceptionLog = File("$outPath/exception.json")
+        exceptionStats = File("$outPath/stats.csv")
+        affectedVarResults = File("$outPath/affected-var-results.json")
+        dynamicDependencyLog = File("$outPath/dynamic_dependency.json")
     }
 }

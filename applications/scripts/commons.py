@@ -12,6 +12,7 @@ PHOSPHOR_JAR_PATH = os.path.join(BASE_FOLDER, "../..", "phosphor/build/libs/phos
     BASE_FOLDER, "../..", "dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar")
 
 RUNTIME_JAR_PATH = os.path.join(BASE_FOLDER, "../..", "runtime/build/libs/runtime-shadow.jar")
+EXCHAIN_OUT_DIR = os.path.join(BASE_FOLDER, "../results")
 
 TEST_NAME = os.getcwd().split("/")[-1]
 

@@ -5,7 +5,6 @@ import inspect
 from benchmark import Benchmark
 
 
-
 # Load all python3 files in the current directory
 
 BENCHMARK_APPLICATIONS = {}
@@ -18,10 +17,11 @@ for file in glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "*.py"
         if isinstance(obj, type) and issubclass(obj, Benchmark) and obj != Benchmark:
             BENCHMARK_APPLICATIONS[name] = obj
 
-@click.group(name="application")
+
+@click.group(name="app")
 @click.pass_context
-def application(ctx, application: str):
-    ctx.obj = BENCHMARK_APPLICATIONS[application]()
+def application(ctx, app: str):
+    ctx.obj = BENCHMARK_APPLICATIONS[app]()
     print("123")
 
 
@@ -45,13 +45,20 @@ def instrument(app: Benchmark):
     app.instrument()
 
 
-
 @main.command(name="run")
 @click.option('--type', type=click.Choice(["origin", "dynamic", "hybrid", "static"]), default="origin", help='Type of run.')
 @click.option('--debug/--no-debug', default=False, help='Enable debugging.')
 @click.pass_obj
 def run(app: Benchmark, type: str, debug: bool):
     app.run_test(type, debug)
+
+
+@main.command(name="analyze")
+@click.option('--type', type=click.Choice(["hybrid", "static"]), help='Type of analysis.')
+@click.pass_obj
+def analyze(app: Benchmark, type: str):
+    app.post_analysis(type)
+
 
 if __name__ == '__main__':
     main(None, None)
