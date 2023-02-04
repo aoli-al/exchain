@@ -65,13 +65,13 @@ class Benchmark:
                          ], cwd=self.work_dir)
 
     def get_origin_jar(self) -> str:
-        return ":".join(sorted(list(glob.glob(f"{self.origin_jar_path}/*.jar")) + self.additional_classpaths))
+        return ":".join(self.additional_classpaths + sorted(list(glob.glob(f"{self.origin_jar_path}/*.jar"))))
 
     def get_hybrid_jar(self) -> str:
-        return ":".join(sorted(list(glob.glob(f"{self.hybrid_output}/*.jar")) + self.additional_classpaths))
+        return ":".join(self.additional_classpaths + sorted(list(glob.glob(f"{self.hybrid_output}/*.jar"))))
 
     def get_instrumented_jar(self) -> str:
-        return ":".join(sorted(list(glob.glob(f"{self.instrumentation_output}/*.jar")) + self.additional_classpaths))
+        return ":".join(self.additional_classpaths + sorted(list(glob.glob(f"{self.instrumentation_output}/*.jar"))))
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen):
         time.sleep(200)
@@ -144,11 +144,14 @@ class Benchmark:
         if debug:
             cmd.insert(
                 0, "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005")
+        cmd = [java, *self.additional_args, *cmd]
+        print(" ".join(cmd))
         if type == "origin":
-            f = open(os.path.join([java, *self.additional_args, *cmd]))
+            # f = open(os.path.join(self.out_path, "program_out.txt"))
+            f = sys.stdout.buffer
         else:
             f = sys.stdout.buffer
-        return subprocess.Popen([java, *self.additional_args, *cmd],
+        return subprocess.Popen(cmd,
                                 stdout=f, stderr=f,
                                 env={
             "EXCHAIN_OUT_DIR": self.out_path,
