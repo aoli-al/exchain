@@ -34,7 +34,8 @@ class Benchmark:
         os.makedirs(self.hybrid_classpath, exist_ok=True)
         os.makedirs(self.hybrid_output, exist_ok=True)
 
-        del os.environ["JAVA_HOME"]
+        if "JAVA_HOME" in os.environ:
+            del os.environ["JAVA_HOME"]
 
     def build(self):
         pass
@@ -115,11 +116,12 @@ class Benchmark:
         self.post(type, cmd)
 
     def post_analysis(self, type: str):
+        print(self.out_path)
         if type == "static":
-            subprocess.call(["./gradlew", "static-analyzer:run", f"--args={self.origin_classpath} {self.work_dir}/static-results"],
+            subprocess.call(["./gradlew", "static-analyzer:run", f"--args={self.origin_classpath} {self.out_path}/static-results"],
                             cwd=os.path.join(DIR_PATH, "../.."))
         elif type == "hybrid":
-            subprocess.call(["./gradlew", "static-analyzer:run", f"--args={self.hybrid_classpath} {self.work_dir}/hybrid-results"],
+            subprocess.call(["./gradlew", "static-analyzer:run", f"--args={self.hybrid_classpath} {self.out_path}/hybrid-results"],
                             cwd=os.path.join(DIR_PATH, "../.."))
 
     def exec(self, type: str, debug: bool) -> subprocess.Popen:
