@@ -77,6 +77,8 @@ class Benchmark:
         time.sleep(200)
         if not debug:
             cmd.kill()
+        else:
+            cmd.communicate()
 
     def pre(self):
         pass
