@@ -30,7 +30,7 @@ class Fineract(Benchmark):
         subprocess.call(
             "./gradlew createDB -PdbName=fineract_default", shell=True, cwd=self.work_dir)
 
-    def post(self, type: str, cmd: subprocess.Popen):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen):
         if type == "dynamic":
             time.sleep(100)
         else:
@@ -42,4 +42,5 @@ class Fineract(Benchmark):
                              **os.environ
                              },
                         cwd=self.work_dir, shell=True)
-        cmd.kill()
+        if not debug:
+            cmd.kill()

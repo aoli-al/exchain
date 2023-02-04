@@ -73,9 +73,10 @@ class Benchmark:
     def get_instrumented_jar(self) -> str:
         return ":".join(sorted(list(glob.glob(f"{self.instrumentation_output}/*.jar")) + self.additional_classpaths))
 
-    def post(self, type: str, cmd: subprocess.Popen):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen):
         time.sleep(200)
-        cmd.kill()
+        if not debug:
+            cmd.kill()
 
     def pre(self):
         pass
@@ -113,7 +114,7 @@ class Benchmark:
     def run_test(self, type: str, debug: bool = False):
         self.pre()
         cmd = self.exec(type, debug)
-        self.post(type, cmd)
+        self.post(type, debug, cmd)
 
     def post_analysis(self, type: str):
         print(self.out_path)
@@ -144,7 +145,7 @@ class Benchmark:
         if type == "origin":
             f = open(os.path.join([java, *self.additional_args, *cmd]))
         else:
-            f = sys.stdout.fileno
+            f = sys.stdout.buffer
         return subprocess.Popen([java, *self.additional_args, *cmd],
                                 stdout=f, stderr=f,
                                 env={
