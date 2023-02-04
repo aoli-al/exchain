@@ -21,8 +21,10 @@ class Wicket(Benchmark):
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen):
         time.sleep(10)
-        requests.get("http://127.0.0.1:8080")
-        requests.get("http://127.0.0.1:8080")
         if not debug:
+            requests.get("http://127.0.0.1:8080")
+            requests.get("http://127.0.0.1:8080")
             cmd.kill()
+        else:
+            cmd.communicate()
 
