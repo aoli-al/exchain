@@ -33,8 +33,10 @@ def analyze_dynamic_results():
         for (cause, exec) in dependencies:
             e1 = exception_data[cause]
             e2 = exception_data[exec]
-            print(f"{e1['type']}:{e1['message']}")
-            print(f"{e2['type']}:{e2['message']}")
+            message = e1['message'] if 'message' in e1 else ""
+            print(f"{e1['type']}:{message}")
+            message = e2['message'] if 'message' in e2 else ""
+            print(f"{e2['type']}:{message}")
 
 
 
