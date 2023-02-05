@@ -1,6 +1,7 @@
 package al.aoli.exchain.analyzer
 
 import al.aoli.exchain.runtime.analyzers.AffectedVarDriver
+import al.aoli.exchain.runtime.analyzers.ExceptionLogger
 import al.aoli.exchain.runtime.objects.AffectedVarResult
 import al.aoli.exchain.runtime.objects.Type
 import com.github.ajalt.clikt.core.CliktCommand
@@ -92,14 +93,17 @@ fun loadAndProcess(options: AnalyzerOptions) {
                     } else {
                         java.lang.RuntimeException()
                     }
-                AffectedVarDriver.analyzeAffectedVar(
-                    dummyException,
-                    origin.clazz,
-                    origin.method,
-                    origin.throwIndex,
-                    origin.catchIndex,
-                    origin.isThrownInsn
-                )
+                val result =
+                    AffectedVarDriver.analyzeAffectedVar(
+                        dummyException,
+                        origin.clazz,
+                        origin.method,
+                        origin.throwIndex,
+                        origin.catchIndex,
+                        origin.isThrownInsn
+                    )
+                result?.label = origin.label
+                result
             }
             .filterNotNull()
     val libPath = libs.joinToString(File.pathSeparator)
@@ -150,6 +154,8 @@ fun loadAndProcess(options: AnalyzerOptions) {
         }
         File("$dataDirectory/$path/dependency.json").writeText(gson.toJson(dependencies))
     }
+    infoFlow.abortAnalysis()
+    ExceptionLogger.stop()
 }
 
 class AnalyzerOptions : CliktCommand() {

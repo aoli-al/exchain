@@ -33,6 +33,10 @@ object ExceptionLogger {
         return label
     }
 
+    fun stop() {
+        executor.shutdown()
+    }
+
     fun logDependency(e1: Int, e2: Int) {
         executor.submit { dynamicDependencyLog.appendText("$e1, $e2\n") }
     }

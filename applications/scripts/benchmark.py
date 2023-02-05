@@ -118,14 +118,19 @@ class Benchmark:
         cmd = self.exec(type, debug)
         self.post(type, debug, cmd)
 
-    def post_analysis(self, type: str):
+    def post_analysis(self, type: str, debug: bool = False):
         print(self.out_path)
         if type == "static":
-            subprocess.call(["./gradlew", "static-analyzer:run", f"--args={self.origin_classpath} {self.out_path}/static-results"],
-                            cwd=os.path.join(DIR_PATH, "../.."))
+            args = [f"--args={self.origin_classpath} {self.out_path}/static-results"]
         elif type == "hybrid":
-            subprocess.call(["./gradlew", "static-analyzer:run", f"--args={self.hybrid_classpath} {self.out_path}/hybrid-results"],
-                            cwd=os.path.join(DIR_PATH, "../.."))
+            args = [f"--args={self.hybrid_classpath} {self.out_path}/hybrid-results"]
+        else:
+            return
+        if debug:
+            args.insert(0, "--debug-jvm")
+
+        subprocess.call(["./gradlew", "static-analyzer:run", *args],
+                        cwd=os.path.join(DIR_PATH, "../.."))
 
     def exec(self, type: str, debug: bool) -> subprocess.Popen:
         if type == "origin":

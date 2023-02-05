@@ -57,9 +57,10 @@ def run(app: Benchmark, type: str, debug: bool):
 
 @main.command(name="analyze")
 @click.option('--type', type=click.Choice(["hybrid", "static"]), help='Type of analysis.')
+@click.option('--debug/--no-debug', default=False, help='Enable debugging.')
 @click.pass_obj
-def analyze(app: Benchmark, type: str):
-    app.post_analysis(type)
+def analyze(app: Benchmark, type: str, debug: bool):
+    app.post_analysis(type, debug)
 
 
 if __name__ == '__main__':
