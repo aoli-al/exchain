@@ -158,21 +158,39 @@ object AffectedVarDriver {
     }
 
     fun updateAffectedFields(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
+        if (affectedVarResult.method.contains("parse")) {
+            println("?")
+        }
         val label = System.identityHashCode(exception)
         exceptionStore[label] = exception
         if (obj != null) {
             for (name in affectedVarResult.affectedFieldName) {
                 try {
-                    val field = obj.javaClass.getField(name + "PHOSPHOR_TAG")
-                    field.isAccessible = true
-                    val value = field.get(obj) as Taint<Int>?
+                    val fieldTag = obj.javaClass.getField(name + "PHOSPHOR_TAG")
+                    fieldTag.isAccessible = true
+                    val value = fieldTag.get(obj) as Taint<Int>?
                     val tag =
                         if (value == null) {
                             Taint.withLabel(label)
                         } else {
                             value.union(Taint.withLabel(label))
                         }
-                    field.set(obj, tag)
+                    fieldTag.set(obj, tag)
+
+                    val fieldRef = obj.javaClass.getDeclaredField(name)
+                    if (!fieldRef.trySetAccessible()) {
+                        continue
+                    }
+                    val fieldObj = fieldRef.get(obj)
+                    if (fieldObj != null && fieldObj is TaintedWithObjTag) {
+                        val tag =
+                            if (fieldObj.phosphoR_TAG == null) {
+                                Taint.withLabel(label)
+                            } else {
+                                (fieldObj.phosphoR_TAG as Taint<Int>).union(Taint.withLabel(label))
+                            }
+                        fieldObj.phosphoR_TAG = tag
+                    }
                 } catch (e: Exception) {
                     logger.warn {
                         "Cannot access field: $name for type: ${obj.javaClass.name}, " + "error: $e"

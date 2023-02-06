@@ -1,0 +1,62 @@
+[
+  {
+    "src": {
+      "type": "java.lang.RuntimeException",
+      "message": "cannot open scope"
+    },
+    "dst": {
+      "type": "java.lang.RuntimeException",
+      "message": "cannot open scope"
+    }
+  },
+  {
+    "src": {
+      "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
+      "message": "FAILED: RuntimeException cannot open scope"
+    },
+    "dst": {
+      "type": "java.lang.RuntimeException",
+      "message": "cannot open scope"
+    }
+  },
+  {
+    "src": {
+      "type": "org.apache.hadoop.hive.ql.parse.ParseException",
+      "message": "null"
+    },
+    "dst": {
+      "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
+      "message": "FAILED: ParseException null"
+    }
+  },
+  {
+    "src": {
+      "type": "org.apache.hadoop.hive.ql.parse.ParseException",
+      "message": "null"
+    },
+    "dst": {
+      "type": "java.lang.RuntimeException",
+      "message": "cannot open scope"
+    }
+  },
+  {
+    "src": {
+      "type": "java.lang.RuntimeException",
+      "message": "cannot open scope"
+    },
+    "dst": {
+      "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
+      "message": "FAILED: RuntimeException cannot open scope"
+    }
+  },
+  {
+    "src": {
+      "type": "org.apache.hadoop.hive.ql.parse.ParseException",
+      "message": "null"
+    },
+    "dst": {
+      "type": "java.lang.RuntimeException",
+      "message": "cannot open scope"
+    }
+  }
+]

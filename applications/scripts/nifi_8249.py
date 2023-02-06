@@ -10,7 +10,8 @@ class NIFI(Benchmark):
             "nifi-standard-processors-1.20.0-SNAPSHOT-test-jar-with-dependencies.jar",
             "nifi-nar-bundles/nifi-standard-bundle/nifi-standard-processors/target",
             "org.apache.nifi.processors.standard.TestExecuteSQLRecord",
-            "Lorg/apache/nifi"
+            "Lorg/apache/",
+            additional_args=["-noverify"]
         )
 
     def build(self):

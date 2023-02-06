@@ -27,11 +27,11 @@ public class RelatedAuthorSpliterator implements Spliterator<Author> {
             return null;
         }
         for (int splitPos = currentSize / 2 + current.intValue();
-             splitPos < list.size(); splitPos++) {
+                splitPos < list.size();
+                splitPos++) {
             if (list.get(splitPos).relatedArticleId == 0) {
-                Spliterator<Author> spliterator
-                        = new RelatedAuthorSpliterator(
-                        list.subList(current.get(), splitPos));
+                Spliterator<Author> spliterator =
+                        new RelatedAuthorSpliterator(list.subList(current.get(), splitPos));
                 current.set(splitPos);
                 return spliterator;
             }

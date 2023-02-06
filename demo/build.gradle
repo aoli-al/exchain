@@ -48,8 +48,10 @@ task instrumentJarOrigin(type: JavaExec) {
 	var phosphor = project(":phosphor")
 	classpath "$phosphor.buildDir/libs/${phosphor.name}-merged.jar"
 	mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
-	var src= "/tmp/work_dir"
-	var dst = "/tmp"
+//	var src= "/tmp/work_dir"
+//	var dst = "/tmp"
+	var src= jar.getArchiveFile().get().asFile.absolutePath
+	var dst = "${buildDir}/libs/instrumented-origin"
 	jvmArgs "-DPhosphor.INSTRUMENTATION_CLASSPATH=${buildDir}/libs/instrumented_classes"
 	jvmArgs "-DPhosphor.ORIGIN_CLASSPATH=${buildDir}/libs/origin_classes"
 	args src, dst,
@@ -119,7 +121,6 @@ task runNaiveTaintAnalysis(type: JavaExec) {
 			"phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
 	var nat= project(":native")
 	jvmArgs "-agentpath:${nat.buildDir}/cmake/native_release/linux-amd64/cpp/lib${nat.name}.so=exchain:Lal/aoli/exchain/demo"
-	var instrumentation = project(":instrumentation")
 	jvmArgs "-javaagent:${runtime.buildDir}/libs/${runtime.name}-shadow." +
 			"jar=dynamic:${buildDir}/libs/instrumented_classes"
 }

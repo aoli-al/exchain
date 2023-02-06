@@ -28,6 +28,7 @@ class Benchmark:
         self.additional_classpaths = additional_classpaths
         self.out_path = os.path.join(EXCHAIN_OUT_DIR, self.test_name)
 
+
         os.makedirs(self.instrumentation_classpath, exist_ok=True)
         os.makedirs(self.instrumentation_output, exist_ok=True)
         os.makedirs(self.origin_classpath, exist_ok=True)
@@ -36,6 +37,11 @@ class Benchmark:
 
         if "JAVA_HOME" in os.environ:
             del os.environ["JAVA_HOME"]
+
+    def get_latest_result(self, type: str)-> str:
+        base_dir = os.path.join(self.out_path, f"{type}-results")
+        latest = open(os.path.join(base_dir, "latest")).read().strip()
+        return os.path.join(base_dir, latest)
 
     def build(self):
         pass

@@ -1,0 +1,12 @@
+[
+  {
+    "src": {
+      "type": "org.apache.nifi.processor.exception.ProcessException",
+      "message": "java.io.IOException: java.io.IOException: Could not obtain next record from ResultSet"
+    },
+    "dst": {
+      "type": "org.apache.nifi.processor.exception.FlowFileHandlingException",
+      "message": "Cannot commit session because the following FlowFiles have not been removed or transferred: [1, 2]"
+    }
+  }
+]

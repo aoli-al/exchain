@@ -4,12 +4,12 @@ from glob import glob
 import inspect
 from benchmark import Benchmark
 from commons import *
-from typing import Dict
+from typing import Dict, Type
 
 
 # Load all python3 files in the current directory
 
-BENCHMARK_APPLICATIONS: Dict[str, Benchmark] = {}
+BENCHMARK_APPLICATIONS: Dict[str, Type[Benchmark]] = {}
 
 for file in glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "*.py")):
     name = os.path.splitext(os.path.basename(file))[0]

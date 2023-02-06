@@ -169,9 +169,6 @@ public class DataFlowTest {
     ArrayList<String> objs = new ArrayList<>();
     static HashMap<String, String> map = new HashMap<>();
 
-
-
-
     public void testBranch() {
         if (test) {
             createObjectWithException();
@@ -179,6 +176,7 @@ public class DataFlowTest {
             testField();
         }
     }
+
     public void testField() {
         try {
             createObjectWithException();
@@ -233,6 +231,7 @@ public class DataFlowTest {
             throw new RuntimeException(s);
         }
     }
+
     static boolean test = true;
 
     public void test2(Dummy d, String o) {

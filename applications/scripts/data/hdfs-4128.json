@@ -1,0 +1,22 @@
+[
+  {
+    "src": {
+      "type": "java.io.IOException",
+      "message": "Injecting failure during merge"
+    },
+    "dst": {
+      "type": "java.io.IOException",
+      "message": "There appears to be an out-of-order edit in the edit log.  We expected txid 11, but got txid 10."
+    }
+  },
+  {
+    "src": {
+      "type": "java.lang.InterruptedException",
+      "message": ""
+    },
+    "dst": {
+      "type": "java.lang.InterruptedException",
+      "message": ""
+    }
+  }
+]

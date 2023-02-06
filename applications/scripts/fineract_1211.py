@@ -12,7 +12,7 @@ class Fineract(Benchmark):
             "fineract-provider.jar",
             "fineract-provider/build/libs",
             "org.springframework.boot.loader.JarLauncher",
-            "Lorg/apache/fineract")
+            "Lorg/apache/fineract:Lorg/springframework/core")
 
     def build(self):
         subprocess.call("jenv local 11", shell=True)
@@ -32,7 +32,7 @@ class Fineract(Benchmark):
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen):
         if type == "dynamic":
-            time.sleep(100)
+            time.sleep(300)
         else:
             time.sleep(60)
         print(self.work_dir)

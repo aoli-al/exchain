@@ -12,7 +12,7 @@ class Wicket(Benchmark):
             "myproject-1.0-SNAPSHOT-test-jar-with-dependencies.jar",
             "target",
             "org.apache.wicket.testapplication.Start",
-            "Lorg/apache/wicket"
+            "Lorg/apache/"
         )
 
     def build(self):

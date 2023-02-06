@@ -1,0 +1,12 @@
+[
+  {
+    "src": {
+      "type": "java.lang.RuntimeException",
+      "message": "????"
+    },
+    "dst": {
+      "type": "com.hp.hpl.jena.tdb.transaction.TDBTransactionException",
+      "message": "Transaction has already committed or aborted"
+    }
+  }
+]

@@ -10,7 +10,7 @@ class Hadoop(Benchmark):
             "hadoop-aws-3.4.0-SNAPSHOT-test-jar-with-dependencies.jar",
             "hadoop-tools/hadoop-aws/target",
             "org.apache.hadoop.fs.s3a.TestS3AInputStreamRetry",
-            "Lorg/apache/hadoop/hdfs"
+            "Lorg/apache/"
         )
 
     def build(self):

@@ -6,10 +6,6 @@ import subprocess
 
 
 
-def prepare_env():
-    subprocess.call()
-
-
 @click.command()
 @click.option("--build/--no-build", default=True, help="Build the project")
 @click.option("--instrument/--no-instrument", default=True, help="Instrument the project")

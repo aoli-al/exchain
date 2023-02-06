@@ -8,7 +8,7 @@ class HDFS(Benchmark):
             "hadoop-hdfs-3.4.0-SNAPSHOT-test-jar-with-dependencies.jar",
             "hadoop-hdfs-project/hadoop-hdfs/target",
             "org.apache.hadoop.hdfs.server.namenode.TestCheckpoint",
-            "Lorg/apache/hadoop/hdfs"
+            "Lorg/apache/"
         )
 
     def build(self):

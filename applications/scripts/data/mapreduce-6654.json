@@ -1,0 +1,12 @@
+[
+  {
+    "src": {
+      "type": "java.net.SocketTimeoutException",
+      "message": "injected socket timeout"
+    },
+    "dst": {
+      "type": "java.lang.NullPointerException",
+      "message": "Cannot invoke \"org.apache.hadoop.mapreduce.jobhistory.JobHistoryEventHandler$MetaInfo.writeEvent(org.apache.hadoop.mapreduce.jobhistory.HistoryEvent)\" because \"mi\" is null"
+    }
+  }
+]

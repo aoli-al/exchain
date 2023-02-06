@@ -9,7 +9,7 @@ class MapReduce(Benchmark):
             "hadoop-mapreduce-client-app-3.4.0-SNAPSHOT-test-jar-with-dependencies.jar",
             "hadoop-mapreduce-project/hadoop-mapreduce-client/hadoop-mapreduce-client-app/target",
             "org.apache.hadoop.mapreduce.v2.app.TestMRAppMaster",
-            "Lorg/apache/hadoop"
+            "Lorg/apache/"
         )
 
     def build(self):
