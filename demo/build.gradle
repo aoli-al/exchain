@@ -59,6 +59,7 @@ task instrumentJarOrigin(type: JavaExec) {
 			"-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPostCV",
 			"-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPreCV"
 	dependsOn ":phosphor:mergedJar"
+	dependsOn jar
 }
 
 task instrumentJarHybrid(type: JavaExec) {
