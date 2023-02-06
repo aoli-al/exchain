@@ -29,10 +29,11 @@ class ThreadPool {
     std::vector<std::thread> threads_;
     std::set<jlong> processing_threads_;
     std::chrono::time_point<std::chrono::system_clock> last_updated_time_ = std::chrono::system_clock::now();
-    bool is_worker_running_ = false;
 
    public:
-    ThreadPool(int count, JavaVM *jvm) : count_(count), jvm_(jvm) {}
+    ThreadPool(int count, JavaVM *jvm) : count_(count), jvm_(jvm) {
+        SpawnThreadAndStart();
+    }
 
     void SpawnThreadAndStart() {
         threads_ = std::vector<std::thread>(count_);
@@ -42,11 +43,6 @@ class ThreadPool {
     }
 
     void Push(std::function<void(JNIEnv *)> &&task) {
-        if (processing_threads_.size() == 0) {
-            SpawnThreadAndStart();
-        }
-
-
         last_updated_time_ = std::chrono::system_clock::now();
         {
             std::unique_lock<std::mutex> lock(tasks_mutex);
@@ -103,22 +99,14 @@ class ThreadPool {
         }
         PLOG_INFO << "Attached thread with id: " << current_thread_id;
 
-        while (!ShouldStopWorker()) {
+        while (true) {
             std::function<void(JNIEnv *)> task;
             std::unique_lock<std::mutex> lock(tasks_mutex);
-            if (task_available_cv_.wait_for(
-                    lock, 10s, [this] { return !tasks_.empty(); })) {
-                task = std::move(tasks_.front());
-                tasks_.pop();
-                lock.unlock();
-                task(jni);
-            }
-        }
-
-        jvm_->DetachCurrentThread();
-        {
-            std::unique_lock<std::mutex> lock(processing_threads_mutex_);
-            processing_threads_.erase(current_thread_id);
+            task_available_cv_.wait(lock, [this] { return !tasks_.empty(); });
+            task = std::move(tasks_.front());
+            tasks_.pop();
+            lock.unlock();
+            task(jni);
         }
     }
 };

@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "src": {
+      "type": "java.security.NoSuchAlgorithmException",
+      "message": "TLC SSLContext not available"
+    },
+    "dst": {
+      "type": "java.lang.NullPointerException",
+      "message": "Cannot invoke \"javax.net.ssl.SSLContext.getSocketFactory()\" because \"ctx\" is null"
+    }
+  }
+]
