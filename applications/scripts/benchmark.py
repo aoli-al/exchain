@@ -31,6 +31,7 @@ class Benchmark:
         self.additional_classpaths = additional_classpaths
         self.out_path = os.path.join(EXCHAIN_OUT_DIR, self.test_name)
         self.ground_truth_path = os.path.join(BASE_FOLDER, "data", f"{self.test_name}.json")
+        self.origin_log_path = os.path.join(self.out_path, "program_out.txt")
 
 
         os.makedirs(self.instrumentation_classpath, exist_ok=True)
@@ -54,17 +55,25 @@ class Benchmark:
     def read_latest_dynamic_dependency(self) -> List[Link]:
         path = self.get_latest_result("dynamic")
         exception_data = read_exceptions(os.path.join(path, "exception.json"))
-        dependencies = read_dependencies(os.path.join(path, "dynamic_dependency.json"))
-        expected_dependency = set()
-        for (cause, exec) in dependencies:
-            e1 = exception_data[cause]
-            e2 = exception_data[exec]
-            src = Exception(e1["type"],
-                            e1["message"] if 'message' in e1 else "")
-            dst = Exception(e2["type"],
-                            e2["message"] if 'message' in e2 else "")
-            expected_dependency.add(Link(src, dst))
-        return list(expected_dependency)
+        dependencies = read_dynamic_dependencies(os.path.join(path, "dynamic_dependency.json"), exception_data)
+        return list(dependencies)
+
+    def read_latest_hybrid_dependency(self) -> Tuple[List[Link], List[Link]]:
+        path = self.get_latest_result("hybrid")
+        exception_data = read_exceptions(os.path.join(path, "exception.json"))
+        dynamic_dependency = read_dynamic_dependencies(os.path.join(
+            path, "dynamic_dependency.json"), exception_data)
+        static_dependency = read_static_dependencies(os.path.join(
+            path, "dependency.json"), exception_data)
+
+        return list(dynamic_dependency), list(static_dependency)
+
+    def read_latest_static_dependency(self) -> List[Link]:
+        path = self.get_latest_result("static")
+        exception_data = read_exceptions(os.path.join(path, "exception.json"))
+        dependencies = read_static_dependencies(os.path.join(
+            path, "dependency.json"), exception_data)
+        return list(dependencies)
 
     def build(self):
         pass
@@ -181,8 +190,7 @@ class Benchmark:
         cmd = [java, *self.additional_args, *cmd]
         print(" ".join(cmd))
         if type == "origin":
-            # f = open(os.path.join(self.out_path, "program_out.txt"))
-            f = sys.stdout.buffer
+            f = open(self.origin_log_path, "w")
         else:
             f = sys.stdout.buffer
         return subprocess.Popen(cmd,
