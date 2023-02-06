@@ -4,6 +4,9 @@ from typing import List
 import glob
 import time
 import os
+from objects import *
+import jsonpickle
+from process_results import *
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -27,6 +30,7 @@ class Benchmark:
         self.hybrid_output = "/tmp/hybrid_output/" + self.test_name
         self.additional_classpaths = additional_classpaths
         self.out_path = os.path.join(EXCHAIN_OUT_DIR, self.test_name)
+        self.ground_truth_path = os.path.join(BASE_FOLDER, "data", f"{self.test_name}.json")
 
 
         os.makedirs(self.instrumentation_classpath, exist_ok=True)
@@ -42,6 +46,25 @@ class Benchmark:
         base_dir = os.path.join(self.out_path, f"{type}-results")
         latest = open(os.path.join(base_dir, "latest")).read().strip()
         return os.path.join(base_dir, latest)
+
+    def read_ground_truth(self) -> List[Link]:
+        data = jsonpickle.decode(open(self.ground_truth_path).read())
+        return data
+
+    def read_latest_dynamic_dependency(self) -> List[Link]:
+        path = self.get_latest_result("dynamic")
+        exception_data = read_exceptions(os.path.join(path, "exception.json"))
+        dependencies = read_dependencies(os.path.join(path, "dynamic_dependency.json"))
+        expected_dependency = set()
+        for (cause, exec) in dependencies:
+            e1 = exception_data[cause]
+            e2 = exception_data[exec]
+            src = Exception(e1["type"],
+                            e1["message"] if 'message' in e1 else "")
+            dst = Exception(e2["type"],
+                            e2["message"] if 'message' in e2 else "")
+            expected_dependency.add(Link(src, dst))
+        return list(expected_dependency)
 
     def build(self):
         pass

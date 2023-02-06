@@ -1,62 +1,67 @@
 [
   {
+    "py/object": "objects.Link",
     "src": {
+      "py/object": "objects.Exception",
       "type": "java.lang.RuntimeException",
       "message": "cannot open scope"
     },
     "dst": {
+      "py/object": "objects.Exception",
       "type": "java.lang.RuntimeException",
       "message": "cannot open scope"
     }
   },
   {
+    "py/object": "objects.Link",
     "src": {
-      "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
-      "message": "FAILED: RuntimeException cannot open scope"
-    },
-    "dst": {
-      "type": "java.lang.RuntimeException",
-      "message": "cannot open scope"
-    }
-  },
-  {
-    "src": {
+      "py/object": "objects.Exception",
       "type": "org.apache.hadoop.hive.ql.parse.ParseException",
       "message": "null"
     },
     "dst": {
+      "py/object": "objects.Exception",
+      "type": "java.lang.RuntimeException",
+      "message": "cannot open scope"
+    }
+  },
+  {
+    "py/object": "objects.Link",
+    "src": {
+      "py/object": "objects.Exception",
+      "type": "java.lang.RuntimeException",
+      "message": "cannot open scope"
+    },
+    "dst": {
+      "py/object": "objects.Exception",
+      "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
+      "message": "FAILED: RuntimeException cannot open scope"
+    }
+  },
+  {
+    "py/object": "objects.Link",
+    "src": {
+      "py/object": "objects.Exception",
+      "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
+      "message": "FAILED: RuntimeException cannot open scope"
+    },
+    "dst": {
+      "py/object": "objects.Exception",
+      "type": "java.lang.RuntimeException",
+      "message": "cannot open scope"
+    }
+  },
+  {
+    "py/object": "objects.Link",
+    "src": {
+      "py/object": "objects.Exception",
+      "type": "org.apache.hadoop.hive.ql.parse.ParseException",
+      "message": "null"
+    },
+    "dst": {
+      "py/object": "objects.Exception",
       "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
       "message": "FAILED: ParseException null"
-    }
-  },
-  {
-    "src": {
-      "type": "org.apache.hadoop.hive.ql.parse.ParseException",
-      "message": "null"
-    },
-    "dst": {
-      "type": "java.lang.RuntimeException",
-      "message": "cannot open scope"
-    }
-  },
-  {
-    "src": {
-      "type": "java.lang.RuntimeException",
-      "message": "cannot open scope"
-    },
-    "dst": {
-      "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
-      "message": "FAILED: RuntimeException cannot open scope"
-    }
-  },
-  {
-    "src": {
-      "type": "org.apache.hadoop.hive.ql.parse.ParseException",
-      "message": "null"
-    },
-    "dst": {
-      "type": "java.lang.RuntimeException",
-      "message": "cannot open scope"
     }
   }
 ]

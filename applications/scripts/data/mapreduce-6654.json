@@ -1,10 +1,13 @@
 [
   {
+    "py/object": "objects.Link",
     "src": {
+      "py/object": "objects.Exception",
       "type": "java.net.SocketTimeoutException",
       "message": "injected socket timeout"
     },
     "dst": {
+      "py/object": "objects.Exception",
       "type": "java.lang.NullPointerException",
       "message": "Cannot invoke \"org.apache.hadoop.mapreduce.jobhistory.JobHistoryEventHandler$MetaInfo.writeEvent(org.apache.hadoop.mapreduce.jobhistory.HistoryEvent)\" because \"mi\" is null"
     }

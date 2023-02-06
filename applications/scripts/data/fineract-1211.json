@@ -1,10 +1,13 @@
 [
   {
+    "py/object": "objects.Link",
     "src": {
+      "py/object": "objects.Exception",
       "type": "java.security.NoSuchAlgorithmException",
       "message": "TLC SSLContext not available"
     },
     "dst": {
+      "py/object": "objects.Exception",
       "type": "java.lang.NullPointerException",
       "message": "Cannot invoke \"javax.net.ssl.SSLContext.getSocketFactory()\" because \"ctx\" is null"
     }
