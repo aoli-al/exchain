@@ -85,18 +85,7 @@ def build_expected_dependencies():
     for name, cls in BENCHMARK_APPLICATIONS.items():
         print(f"\n\n=================== Start processing {name}")
         app = cls()
-        work_dir = app.get_latest_result("dynamic")
-        exception_data = read_exceptions(os.path.join(work_dir, "exception.json"))
-        dependencies = read_dynamic_dependencies(os.path.join(work_dir, "dynamic_dependency.json"))
-        expected_dependency = set()
-        for (cause, exec) in dependencies:
-            e1 = exception_data[cause]
-            e2 = exception_data[exec]
-            src = Exception(e1["type"],
-                            e1["message"] if 'message' in e1 else "")
-            dst = Exception(e2["type"],
-                            e2["message"] if 'message' in e2 else "")
-            expected_dependency.add(Link(src, dst))
+        expected_dependency= app.read_latest_dynamic_dependency()
         data = jsonpickle.encode(list(expected_dependency), indent=2)
         open(app.ground_truth_path, "w").write(data)
 

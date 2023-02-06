@@ -66,7 +66,7 @@ fun loadAndProcess(options: AnalyzerOptions) {
         options.set_drop_bodies_after_load(false)
         options.set_ignore_resolution_errors(true)
         options.set_ignore_resolving_levels(true)
-        configs.memoryThreshold = 0.4
+        configs.memoryThreshold = 0.1
         configs.enableExceptionTracking = false
         configs.enableArrayTracking = false
         configs.flowSensitiveAliasing = false

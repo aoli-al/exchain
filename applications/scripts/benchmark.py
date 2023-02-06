@@ -132,8 +132,6 @@ class Benchmark:
 
     def hybrid_commands(self) -> List[str]:
         return ["-cp", self.get_hybrid_jar(),
-                f"-DPhosphor.INSTRUMENTATION_CLASSPATH={self.hybrid_classpath}",
-                f"-DPhosphor.ORIGIN_CLASSPATH={self.origin_classpath}",
                 f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV",
                 f"-javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath}",
                 f"-agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}",
@@ -141,8 +139,6 @@ class Benchmark:
 
     def dynamic_commands(self) -> List[str]:
         return [
-            f"-DPhosphor.INSTRUMENTATION_CLASSPATH={self.instrumentation_classpath}",
-            f"-DPhosphor.ORIGIN_CLASSPATH={self.origin_classpath}",
             "-cp", self.get_instrumented_jar(),
             f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
             # ",postClassVisitor=al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPostCV"
