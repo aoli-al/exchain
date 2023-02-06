@@ -66,7 +66,7 @@ fun loadAndProcess(options: AnalyzerOptions) {
         options.set_drop_bodies_after_load(false)
         options.set_ignore_resolution_errors(true)
         options.set_ignore_resolving_levels(true)
-        configs.memoryThreshold = 0.2
+        configs.memoryThreshold = 0.4
         configs.enableExceptionTracking = false
         configs.enableArrayTracking = false
         configs.flowSensitiveAliasing = false
@@ -76,9 +76,8 @@ fun loadAndProcess(options: AnalyzerOptions) {
         configs.pathConfiguration.pathBuildingAlgorithm =
             InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
         configs.pathConfiguration.pathReconstructionTimeout = 2 * 60
-        configs.codeEliminationMode = InfoflowConfiguration.CodeEliminationMode.NoCodeElimination
         configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.None
-        configs.dataFlowTimeout = 10 * 60
+        configs.dataFlowTimeout = 5 * 60
     }
 
     val processedResults =
@@ -122,7 +121,7 @@ fun loadAndProcess(options: AnalyzerOptions) {
         if (dependencies.processed.contains(result.getSignature())) continue
 
         if (result.affectedLocalName.isEmpty() && result.affectedFieldName.isEmpty()) continue
-        logger.info("Start analysing ${result.label}.")
+        logger.info("Start analysing ${result.getSignature()}.")
         try {
             infoFlow.computeInfoflow(
                 libPath,
