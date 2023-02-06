@@ -16,6 +16,7 @@ import soot.jimple.infoflow.InfoflowConfiguration.StaticFieldTrackingMode
 import soot.options.Options
 import java.io.File
 import java.lang.NullPointerException
+import kotlin.system.exitProcess
 
 private val logger = KotlinLogging.logger {}
 
@@ -65,7 +66,7 @@ fun loadAndProcess(options: AnalyzerOptions) {
         options.set_drop_bodies_after_load(false)
         options.set_ignore_resolution_errors(true)
         options.set_ignore_resolving_levels(true)
-        configs.memoryThreshold = 0.3
+        configs.memoryThreshold = 0.2
         configs.enableExceptionTracking = false
         configs.enableArrayTracking = false
         configs.flowSensitiveAliasing = false
@@ -156,6 +157,7 @@ fun loadAndProcess(options: AnalyzerOptions) {
     }
     infoFlow.abortAnalysis()
     ExceptionLogger.stop()
+    exitProcess(0)
 }
 
 class AnalyzerOptions : CliktCommand() {
