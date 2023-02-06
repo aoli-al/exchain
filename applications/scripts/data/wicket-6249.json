@@ -1,72 +1,15 @@
 [
   {
+    "py/object": "objects.Link",
     "src": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.testapplication.HomePage.<init>()"
-    },
-    "dst": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.markup.html.pages.ExceptionErrorPage.<init>(org.apache.wicket.request.mapper.parameter.PageParameters)"
-    }
-  },
-  {
-    "src": {
+      "py/object": "objects.Exception",
       "type": "org.apache.wicket.testapplication.HomePage$SpecificException",
       "message": ""
     },
     "dst": {
+      "py/object": "objects.Exception",
       "type": "java.lang.NullPointerException",
       "message": "Cannot invoke \"String.toLowerCase()\" because \"result\" is null"
-    }
-  },
-  {
-    "src": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.testapplication.HomePage.<init>()"
-    },
-    "dst": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.markup.html.pages.ExceptionErrorPage.<init>()"
-    }
-  },
-  {
-    "src": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.testapplication.HomePage.<init>()"
-    },
-    "dst": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.testapplication.HomePage.<init>()"
-    }
-  },
-  {
-    "src": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.testapplication.HomePage.<init>()"
-    },
-    "dst": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.markup.html.pages.ExceptionErrorPage.<init>()"
-    }
-  },
-  {
-    "src": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.testapplication.HomePage.<init>()"
-    },
-    "dst": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.testapplication.HomePage.<init>()"
-    }
-  },
-  {
-    "src": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.testapplication.HomePage.<init>()"
-    },
-    "dst": {
-      "type": "java.lang.NoSuchMethodException",
-      "message": "org.apache.wicket.markup.html.pages.ExceptionErrorPage.<init>(org.apache.wicket.request.mapper.parameter.PageParameters)"
     }
   }
 ]
