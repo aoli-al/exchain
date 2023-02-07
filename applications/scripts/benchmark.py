@@ -13,8 +13,11 @@ DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class Benchmark:
 
-    def __init__(self, test_name: str, jar_name: str, origin_jar_path: str, test_class: str, application_namespace: str, is_single_jar: bool = True, additional_args: List[str] = [],
-                 additional_classpaths: List[str] = []):
+    def __init__(self, test_name: str, jar_name: str, origin_jar_path: str, test_class: str, application_namespace: str,
+                 is_single_jar: bool = True,
+                 additional_args: List[str] = [],
+                 additional_classpaths: List[str] = [],
+                 is_async: bool = False):
         self.test_name = test_name
         self.jar_name = jar_name
         self.test_class = test_class
@@ -32,6 +35,7 @@ class Benchmark:
         self.out_path = os.path.join(EXCHAIN_OUT_DIR, self.test_name)
         self.ground_truth_path = os.path.join(BASE_FOLDER, "data", f"{self.test_name}.json")
         self.origin_log_path = os.path.join(self.out_path, "program_out.txt")
+        self.is_async = is_async
 
 
         os.makedirs(self.instrumentation_classpath, exist_ok=True)
@@ -132,8 +136,6 @@ class Benchmark:
 
     def hybrid_commands(self) -> List[str]:
         return ["-cp", self.get_hybrid_jar(),
-                f"-DPhosphor.INSTRUMENTATION_CLASSPATH={self.hybrid_classpath}",
-                f"-DPhosphor.ORIGIN_CLASSPATH={self.origin_classpath}",
                 f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV",
                 f"-javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath}",
                 f"-agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}",
@@ -141,8 +143,6 @@ class Benchmark:
 
     def dynamic_commands(self) -> List[str]:
         return [
-            f"-DPhosphor.INSTRUMENTATION_CLASSPATH={self.instrumentation_classpath}",
-            f"-DPhosphor.ORIGIN_CLASSPATH={self.origin_classpath}",
             "-cp", self.get_instrumented_jar(),
             f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
             # ",postClassVisitor=al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPostCV"

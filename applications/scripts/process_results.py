@@ -15,21 +15,25 @@ def read_exceptions(path: str) -> Dict[int, Dict]:
             result[data['label']] = data
     return result
 
+def data_to_message(data: Dict) -> Exception:
+    return Exception(
+        data["type"],
+        data["stack"][0] if "stack" in data else "",
+        data["message"] if "message" in data else "",
+    )
+
 def read_static_dependencies(path: str, exceptions: Dict[int, Dict]) -> Set[Link]:
     dependencies = set()
     if not os.path.exists(path):
         return dependencies
-    print(path)
     data = json.load(open(path))
     dependency = set()
-    for src, dsts in data["exceptionGraph"].items():
-        e1 = exceptions[int(src)]
-        src = Exception(e1["type"],
-                        e1["message"] if 'message' in e1 else "")
-        for dst in dsts:
-            e2 = exceptions[dst["first"]]
-            dst = Exception(e2["type"],
-                            e2["message"] if 'message' in e2 else "")
+    for dst, srcs in data["exceptionGraph"].items():
+        e1 = exceptions[int(dst)]
+        dst = data_to_message(e1)
+        for src in srcs:
+            e2 = exceptions[src["first"]]
+            src= data_to_message(e2)
             dependency.add(Link(src, dst))
     return dependency
 
@@ -47,10 +51,8 @@ def read_dynamic_dependencies(path: str, exceptions: Dict[int, Dict]) -> Set[Lin
     for (cause, exec) in dependencies:
         e1 = exceptions[cause]
         e2 = exceptions[exec]
-        src = Exception(e1["type"],
-                        e1["message"] if 'message' in e1 else "")
-        dst = Exception(e2["type"],
-                        e2["message"] if 'message' in e2 else "")
+        src = data_to_message(e1)
+        dst = data_to_message(e2)
         dependency.add(Link(src, dst))
     return dependency
 
@@ -85,18 +87,7 @@ def build_expected_dependencies():
     for name, cls in BENCHMARK_APPLICATIONS.items():
         print(f"\n\n=================== Start processing {name}")
         app = cls()
-        work_dir = app.get_latest_result("dynamic")
-        exception_data = read_exceptions(os.path.join(work_dir, "exception.json"))
-        dependencies = read_dynamic_dependencies(os.path.join(work_dir, "dynamic_dependency.json"))
-        expected_dependency = set()
-        for (cause, exec) in dependencies:
-            e1 = exception_data[cause]
-            e2 = exception_data[exec]
-            src = Exception(e1["type"],
-                            e1["message"] if 'message' in e1 else "")
-            dst = Exception(e2["type"],
-                            e2["message"] if 'message' in e2 else "")
-            expected_dependency.add(Link(src, dst))
+        expected_dependency= app.read_latest_dynamic_dependency()
         data = jsonpickle.encode(list(expected_dependency), indent=2)
         open(app.ground_truth_path, "w").write(data)
 

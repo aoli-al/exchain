@@ -4,11 +4,13 @@
     "src": {
       "py/object": "objects.Exception",
       "type": "java.io.IOException",
+      "method": "org.apache.hadoop.hdfs.server.namenode.FSEditLogLoader/loadEditRecords:262",
       "message": "Injecting failure during merge"
     },
     "dst": {
       "py/object": "objects.Exception",
       "type": "java.io.IOException",
+      "method": "org.apache.hadoop.hdfs.server.namenode.MetaRecoveryContext/editLogLoaderPrompt:95",
       "message": "There appears to be an out-of-order edit in the edit log.  We expected txid 11, but got txid 10."
     }
   }

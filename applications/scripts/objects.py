@@ -1,18 +1,21 @@
 class Exception:
-    def __init__(self, type: str, message: str) -> None:
+    def __init__(self, type: str, method: str, message: str) -> None:
         self.type = type
+        self.method = method
         self.message = message
 
     def __eq__(self, __o: object) -> bool:
         if not isinstance(__o, Exception):
             return False
-        return __o.message == self.message and __o.type == self.type
+        return __o.method == self.method and __o.type == self.type
+
 
     def __hash__(self) -> int:
-        return hash((self.type, self.message))
+        return hash((self.type, self.method))
 
     def __str__(self) -> str:
-        return f"{self.type}:{self.message}"
+        return f"{self.type}:{self.message}:{self.method}"
+
 
 class Link:
     def __init__(self, src: Exception, dst: Exception) -> None:

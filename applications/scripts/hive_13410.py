@@ -30,7 +30,8 @@ class Hive(Benchmark):
             "Lorg/apache/hadoop:Lorg/apache/hive",
             False,
             ARGS,
-            ["itests/hive-unit/target/testconf", "conf"])
+            ["itests/hive-unit/target/testconf", "conf"],
+            is_async=True)
 
     def build(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)

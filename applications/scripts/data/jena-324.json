@@ -4,11 +4,13 @@
     "src": {
       "py/object": "objects.Exception",
       "type": "java.lang.RuntimeException",
+      "method": "com.hp.hpl.jena.tdb.transaction.Journal/write:151",
       "message": "????"
     },
     "dst": {
       "py/object": "objects.Exception",
       "type": "com.hp.hpl.jena.tdb.transaction.TDBTransactionException",
+      "method": "com.hp.hpl.jena.tdb.transaction.Transaction/abort:146",
       "message": "Transaction has already committed or aborted"
     }
   }

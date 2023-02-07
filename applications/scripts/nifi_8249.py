@@ -11,7 +11,8 @@ class NIFI(Benchmark):
             "nifi-nar-bundles/nifi-standard-bundle/nifi-standard-processors/target",
             "org.apache.nifi.processors.standard.TestExecuteSQLRecord",
             "Lorg/apache/",
-            additional_args=["-noverify"]
+            additional_args=["-noverify"],
+            is_async=True
         )
 
     def build(self):
