@@ -12,7 +12,8 @@ class Jena(Benchmark):
             "jena-tdb-0.9.4-SNAPSHOT-test-jar-with-dependencies.jar",
             "jena-tdb/target",
             "com.hp.hpl.jena.tdb.extra.T_TDBWriteTransaction",
-            "Lcom/hp/hpl"
+            "Lcom/hp/hpl",
+            is_async=True
         )
 
     def build(self):

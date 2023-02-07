@@ -4,11 +4,13 @@
     "src": {
       "py/object": "objects.Exception",
       "type": "org.apache.wicket.testapplication.HomePage$SpecificException",
+      "method": "org.apache.wicket.testapplication.HomePage$ExceptionalLoad/load:23",
       "message": ""
     },
     "dst": {
       "py/object": "objects.Exception",
       "type": "java.lang.NullPointerException",
+      "method": "org.apache.wicket.testapplication.HomePage$LoadWrapper/load:38",
       "message": "Cannot invoke \"String.toLowerCase()\" because \"result\" is null"
     }
   }

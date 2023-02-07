@@ -12,7 +12,8 @@ class Wicket(Benchmark):
             "myproject-1.0-SNAPSHOT-test-jar-with-dependencies.jar",
             "target",
             "org.apache.wicket.testapplication.Start",
-            "Lorg/apache/"
+            "Lorg/apache/",
+            is_async=True
         )
 
     def build(self):

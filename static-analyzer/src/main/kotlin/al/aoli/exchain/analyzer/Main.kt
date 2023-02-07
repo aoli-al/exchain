@@ -12,6 +12,7 @@ import mu.KotlinLogging
 import soot.G
 import soot.jimple.infoflow.Infoflow
 import soot.jimple.infoflow.InfoflowConfiguration
+import soot.jimple.infoflow.InfoflowConfiguration.ImplicitFlowMode
 import soot.jimple.infoflow.InfoflowConfiguration.StaticFieldTrackingMode
 import soot.options.Options
 import java.io.File
@@ -71,13 +72,21 @@ fun loadAndProcess(options: AnalyzerOptions) {
         configs.enableArrayTracking = false
         configs.flowSensitiveAliasing = false
         configs.staticFieldTrackingMode = StaticFieldTrackingMode.None
+        configs.implicitFlowMode = ImplicitFlowMode.NoImplicitFlows
+        configs.pathConfiguration.pathReconstructionMode = InfoflowConfiguration.PathReconstructionMode.NoPaths
         configs.solverConfiguration.dataFlowSolver =
-            InfoflowConfiguration.DataFlowSolver.GarbageCollecting
+            InfoflowConfiguration.DataFlowSolver.FlowInsensitive
         configs.pathConfiguration.pathBuildingAlgorithm =
             InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
         configs.pathConfiguration.pathReconstructionTimeout = 2 * 60
         configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.None
+        configs.solverConfiguration.maxCalleesPerCallSite = 25
+        configs.solverConfiguration.maxAbstractionPathLength = 50
         configs.dataFlowTimeout = 5 * 60
+        configs.stopAfterFirstKFlows = 5
+        configs.enableExceptionTracking = false
+        configs.enableArrayTracking = false
+        configs.enableArraySizeTainting = false
     }
 
     val processedResults =
