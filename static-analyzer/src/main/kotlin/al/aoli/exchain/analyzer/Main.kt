@@ -80,11 +80,8 @@ fun loadAndProcess(options: AnalyzerOptions) {
         configs.pathConfiguration.pathBuildingAlgorithm =
             InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
         configs.pathConfiguration.pathReconstructionTimeout = 10 * 60
-        configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.None
-        configs.solverConfiguration.maxCalleesPerCallSite = 25
-        configs.solverConfiguration.maxAbstractionPathLength = 50
+        configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.PtsBased
         configs.dataFlowTimeout = 1 * 60 * 60
-        configs.stopAfterFirstKFlows = 5
         configs.enableExceptionTracking = false
         configs.enableArrayTracking = false
         configs.enableArraySizeTainting = false
