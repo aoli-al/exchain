@@ -3,23 +3,58 @@ package al.aoli.exchain.analyzer
 import al.aoli.exchain.runtime.objects.AffectedVarResult
 import soot.Local
 import soot.SootMethod
-import soot.jimple.AbstractJimpleValueSwitch
-import soot.jimple.InstanceFieldRef
-import soot.jimple.Stmt
+import soot.jimple.*
 
 class AffectedVarAnalyzer(
-    val affectedVarResult: AffectedVarResult,
-    val method: SootMethod,
-    val stmt: Stmt
+    affectedVarResults: List<AffectedVarResult>,
 ) : AbstractJimpleValueSwitch<Boolean>() {
+    val affectedVars = mutableMapOf<String, MutableSet<AffectedVarResult>>()
+    var currentAffectedVar: AffectedVarResult? = null
+    var currentStmt: Stmt? = null
+
+    init {
+        for (result in affectedVarResults) {
+
+            affectedVars.getOrPut(result.getSootMethodSignature()) { mutableSetOf() }
+                .add(result)
+        }
+    }
+
+    fun process(method: SootMethod, stmt: Stmt): Set<Int> {
+        val exceptions = mutableSetOf<Int>()
+        if (stmt is DefinitionStmt) {
+            val methodAffectedVars = affectedVars[method.signature] ?: return exceptions
+            currentStmt = stmt
+            for (methodAffectedVar in methodAffectedVars) {
+                currentAffectedVar = methodAffectedVar
+                result = false
+                stmt.leftOp.apply(this)
+                if (result) {
+                    exceptions.add(methodAffectedVar.label)
+                }
+            }
+        }
+        return exceptions
+    }
 
     override fun caseInstanceFieldRef(v: InstanceFieldRef) {
         result = false
-        if (v.field.declaringClass?.name == affectedVarResult.getSootClassName()) {
-            val index = affectedVarResult.affectedFieldName.indexOf(v.field.name)
+        if (v.field.declaringClass?.name == currentAffectedVar?.getSootClassName()) {
+            val index = currentAffectedVar?.affectedFieldName?.indexOf(v.field.name) ?: -1
             if (index != -1 &&
-                affectedVarResult.affectedFieldLine[index] == stmt.javaSourceStartLineNumber
+                currentAffectedVar?.affectedFieldLine?.get(index)  == currentStmt?.javaSourceStartLineNumber
             ) {
+                result = true
+            }
+        }
+    }
+
+    override fun caseStaticFieldRef(v: StaticFieldRef) {
+        result = false
+        if (v.field.declaringClass?.name == currentAffectedVar?.getSootClassName()) {
+            val index = currentAffectedVar?.affectedStaticFieldName?.indexOf(v.field.name) ?: -1
+            if (index != -1 &&
+                currentAffectedVar?.affectedStaticFieldLine?.get(index) == currentStmt?.javaSourceStartLineNumber) {
                 result = true
             }
         }
@@ -36,9 +71,9 @@ class AffectedVarAnalyzer(
     override fun caseLocal(v: Local) {
         result = false
         val name = getLocalName(v)
-        val index = affectedVarResult.affectedLocalName.indexOf(name)
+        val index = currentAffectedVar?.affectedLocalName?.indexOf(name) ?: -1
         if (index != -1 &&
-            affectedVarResult.affectedLocalLine[index] == stmt.javaSourceStartLineNumber
+            currentAffectedVar?.affectedLocalLine?.get(index)  == currentStmt?.javaSourceStartLineNumber
         ) {
             result = true
         }

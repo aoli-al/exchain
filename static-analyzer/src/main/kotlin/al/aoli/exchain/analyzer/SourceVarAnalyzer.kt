@@ -9,7 +9,6 @@ import soot.jimple.Stmt
 
 class SourceVarAnalyzer(affectedVarResults: List<AffectedVarResult>) :
     AbstractJimpleValueSwitch<MutableSet<Int>>() {
-    val disabledLabels = mutableSetOf<Int>()
     val sourceBranches = mutableMapOf<String, MutableMap<Int, MutableSet<Pair<Int, SourceType>>>>()
 
     init {
@@ -54,7 +53,6 @@ class SourceVarAnalyzer(affectedVarResults: List<AffectedVarResult>) :
                 }
             }
         }
-        result.removeAll(disabledLabels)
         return result.ifEmpty { null }
     }
 }

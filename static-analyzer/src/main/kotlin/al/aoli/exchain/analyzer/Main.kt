@@ -14,6 +14,7 @@ import soot.jimple.infoflow.Infoflow
 import soot.jimple.infoflow.InfoflowConfiguration
 import soot.jimple.infoflow.InfoflowConfiguration.ImplicitFlowMode
 import soot.jimple.infoflow.InfoflowConfiguration.StaticFieldTrackingMode
+import soot.jimple.infoflow.entryPointCreators.SequentialEntryPointCreator
 import soot.options.Options
 import java.io.File
 import java.lang.NullPointerException
@@ -67,7 +68,7 @@ fun loadAndProcess(options: AnalyzerOptions) {
         options.set_drop_bodies_after_load(false)
         options.set_ignore_resolution_errors(true)
         options.set_ignore_resolving_levels(true)
-        configs.memoryThreshold = 0.1
+        configs.memoryThreshold = 0.8
         configs.enableExceptionTracking = false
         configs.enableArrayTracking = false
         configs.flowSensitiveAliasing = false
@@ -78,11 +79,11 @@ fun loadAndProcess(options: AnalyzerOptions) {
             InfoflowConfiguration.DataFlowSolver.FlowInsensitive
         configs.pathConfiguration.pathBuildingAlgorithm =
             InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
-        configs.pathConfiguration.pathReconstructionTimeout = 2 * 60
+        configs.pathConfiguration.pathReconstructionTimeout = 10 * 60
         configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.None
         configs.solverConfiguration.maxCalleesPerCallSite = 25
         configs.solverConfiguration.maxAbstractionPathLength = 50
-        configs.dataFlowTimeout = 5 * 60
+        configs.dataFlowTimeout = 1 * 60 * 60
         configs.stopAfterFirstKFlows = 5
         configs.enableExceptionTracking = false
         configs.enableArrayTracking = false
@@ -116,7 +117,6 @@ fun loadAndProcess(options: AnalyzerOptions) {
             }
             .filterNotNull()
     val libPath = libs.joinToString(File.pathSeparator)
-    val sourceVarAnalyzer = SourceVarAnalyzer(processedResults)
     val dependencyFile = File("$dataDirectory/$path/dependency.json")
     val dependencies =
         if (dependencyFile.exists()) {
@@ -125,44 +125,48 @@ fun loadAndProcess(options: AnalyzerOptions) {
             Dependencies()
         }
 
-    for (result in processedResults) {
-        sourceVarAnalyzer.disabledLabels.add(result.label)
-        if (dependencies.processed.contains(result.getSignature())) continue
+    val entryPoints = processedResults.filter() {
+        it.affectedFieldLine.isNotEmpty() ||
+                it.affectedStaticFieldLine.isNotEmpty() ||
+                it.sourceLines.isNotEmpty() ||
+                it.affectedLocalLine.isNotEmpty()
+    }.map { it.getSootMethodSignature() }
 
-        if (result.affectedLocalName.isEmpty() && result.affectedFieldName.isEmpty()) continue
-        logger.info("Start analysing ${result.getSignature()}.")
-        try {
-            infoFlow.computeInfoflow(
-                libPath,
-                libPath,
-                result.getSootMethodSignature(),
-                SourceSinkManager(result.getSootMethodSignature(), result, sourceVarAnalyzer)
-            )
-        } catch (e: RuntimeException) {
-            logger.warn("Failed to get method: ${result.getSootMethodSubsignature()}", e)
-            infoFlow.config.sootIntegrationMode =
-                InfoflowConfiguration.SootIntegrationMode.UseExistingCallgraph
-            continue
-        }
-        infoFlow.config.sootIntegrationMode =
-            InfoflowConfiguration.SootIntegrationMode.UseExistingCallgraph
-        dependencies.processed.add(result.getSignature())
+    try {
+        infoFlow.computeInfoflow(
+            libPath,
+            libPath,
+            SequentialEntryPointCreator(entryPoints),
+            SourceSinkManager(AffectedVarAnalyzer(processedResults), SourceVarAnalyzer(processedResults))
+        )
+    } catch (e: RuntimeException) {
+        logger.warn("Failed to get method compute infoflow", e)
+    }
 
-        if (!infoFlow.results.isEmpty) {
-            for (sourceSinkInfo in infoFlow.results.results) {
-                val definition = sourceSinkInfo.o1.definition
-                if (definition is LabeledSinkDefinition) {
-                    for (i in definition.label) {
+    if (!infoFlow.results.isEmpty) {
+        for (sourceSinkInfo in infoFlow.results.results) {
+            println(sourceSinkInfo)
+            val definition = sourceSinkInfo.o1.definition
+            val sources = sourceSinkInfo.o2.userData
+            if (definition is LabeledSinkDefinition && sources is Set<*>) {
+                for (from in sources) {
+                    if (from !is Int) {
+                        continue
+                    }
+                    val fromIdx = processedResults.indexOfFirst { it.label == from }
+                    for (to in definition.label) {
+                        val toIdx = processedResults.indexOfFirst { it.label == to }
+                        if (fromIdx >= toIdx) continue
                         dependencies.exceptionGraph
-                            .getOrPut(i) { mutableSetOf() }
-                            .add(Pair(result.label, sourceSinkInfo.toString()))
-                        println("Dependency $i --------> ${result.label}")
+                            .getOrPut(to) { mutableSetOf() }
+                            .add(Pair(from, sourceSinkInfo.toString()))
+                        println("Dependency $from --------> $to")
                     }
                 }
             }
         }
-        File("$dataDirectory/$path/dependency.json").writeText(gson.toJson(dependencies))
     }
+    File("$dataDirectory/$path/dependency.json").writeText(gson.toJson(dependencies))
     infoFlow.abortAnalysis()
     ExceptionLogger.stop()
     exitProcess(0)

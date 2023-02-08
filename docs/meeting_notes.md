@@ -1351,3 +1351,11 @@ reach corner cases in phosphor because:
 - Start benchmarking applications as well
     - Benchmarking leads to new execution paths
     - More crashes caused by Phosphor needs to be fixed.
+
+# Feb 7
+
+- Static analysis is super slow
+    - Analyzing map reduce takes more than 12 hours
+    - The execution time increases w.r.t number of sinks/sources
+- Static analysis requires lots of memory
+    - The simplest program requires more than 24 GB memory, which prevents me from running the analysis on my desktop or running analysis in parallel on the server.

@@ -12,23 +12,17 @@ import soot.jimple.infoflow.sourcesSinks.manager.SinkInfo
 import soot.jimple.infoflow.sourcesSinks.manager.SourceInfo
 
 class SourceSinkManager(
-    val methodSignature: String,
-    val result: AffectedVarResult,
+    val affectedVarAnalyzer: AffectedVarAnalyzer,
     val sourceVarAnalyzer: SourceVarAnalyzer
 ) : ISourceSinkManager {
     override fun initialize() {}
 
     override fun getSourceInfo(stmt: Stmt, manager: InfoflowManager): SourceInfo? {
         val currentMethod = manager.icfg.getMethodOf(stmt) ?: return null
-        if (currentMethod.signature == methodSignature) {
-            if (stmt is DefinitionStmt) {
-                val analyzer = AffectedVarAnalyzer(result, currentMethod, stmt)
-                stmt.leftOp.apply(analyzer)
-                if (analyzer.result) {
-                    val targetAp = manager.accessPathFactory.createAccessPath(stmt.leftOp, true)
-                    return SourceInfo(MethodSourceSinkDefinition(SootMethodAndClass(currentMethod)), targetAp)
-                }
-            }
+        val result = affectedVarAnalyzer.process(currentMethod, stmt)
+        if (result.isNotEmpty() && stmt is DefinitionStmt) {
+            val targetAp = manager.accessPathFactory.createAccessPath(stmt.leftOp, true)
+            return SourceInfo(MethodSourceSinkDefinition(SootMethodAndClass(currentMethod)), targetAp, result)
         }
         return null
     }
