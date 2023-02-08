@@ -131,7 +131,7 @@ fun loadAndProcess(options: AnalyzerOptions) {
             libPath,
             libPath,
             SequentialEntryPointCreator(entryPoints),
-            SourceSinkManager(AffectedVarAnalyzer(processedResults), SourceVarAnalyzer(processedResults))
+            SourceSinkManager(processedResults, SourceVarAnalyzer(processedResults))
         )
     } catch (e: RuntimeException) {
         logger.warn("Failed to get method compute infoflow", e)
