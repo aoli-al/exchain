@@ -168,7 +168,7 @@ class Benchmark:
             args.insert(0, "--debug-jvm")
 
         subprocess.call(["./gradlew", "static-analyzer:run", *args],
-                        cwd=os.path.join(DIR_PATH, "../.."))
+                        cwd=os.path.join(DIR_PATH, "../.."), timeout=60 * 60 * 5)
 
     def exec(self, type: str, debug: bool) -> subprocess.Popen:
         if type == "origin":
