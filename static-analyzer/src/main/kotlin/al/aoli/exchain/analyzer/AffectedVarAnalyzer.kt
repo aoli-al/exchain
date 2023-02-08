@@ -4,6 +4,7 @@ import al.aoli.exchain.runtime.objects.AffectedVarResult
 import soot.Local
 import soot.SootMethod
 import soot.jimple.*
+import java.lang.IndexOutOfBoundsException
 
 class AffectedVarAnalyzer(
     affectedVarResults: List<AffectedVarResult>,
