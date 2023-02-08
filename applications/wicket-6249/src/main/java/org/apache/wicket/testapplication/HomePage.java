@@ -53,6 +53,11 @@ public class HomePage extends WebPage {
 
     LoadWrapper wrapper = new LoadWrapper();
 
+    public HomePage() {
+        this(null);
+    }
+
+
     public HomePage(final PageParameters parameters) {
         super(parameters);
 
