@@ -69,22 +69,19 @@ fun loadAndProcess(options: AnalyzerOptions) {
         options.set_ignore_resolution_errors(true)
         options.set_ignore_resolving_levels(true)
         configs.memoryThreshold = 0.8
-        configs.enableExceptionTracking = false
-        configs.enableArrayTracking = false
-        configs.flowSensitiveAliasing = false
-        configs.staticFieldTrackingMode = StaticFieldTrackingMode.None
-        configs.implicitFlowMode = ImplicitFlowMode.NoImplicitFlows
-        configs.pathConfiguration.pathReconstructionMode = InfoflowConfiguration.PathReconstructionMode.NoPaths
-        configs.solverConfiguration.dataFlowSolver =
-            InfoflowConfiguration.DataFlowSolver.FlowInsensitive
-        configs.pathConfiguration.pathBuildingAlgorithm =
-            InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
-        configs.pathConfiguration.pathReconstructionTimeout = 10 * 60
-        configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.PtsBased
+        /* configs.staticFieldTrackingMode = StaticFieldTrackingMode.None */
+        /* configs.implicitFlowMode = ImplicitFlowMode.NoImplicitFlows */
+        /* configs.pathConfiguration.pathReconstructionMode = InfoflowConfiguration.PathReconstructionMode.NoPaths */
+        /* configs.solverConfiguration.dataFlowSolver = */
+            /* InfoflowConfiguration.DataFlowSolver.FlowInsensitive */
+        /* configs.pathConfiguration.pathBuildingAlgorithm = */
+            /* InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder */
+        /* configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.PtsBased */
+        /* configs.enableExceptionTracking = false */
+        /* configs.enableArrayTracking = false */
+        /* configs.enableArraySizeTainting = false */
         configs.dataFlowTimeout = 1 * 60 * 60
-        configs.enableExceptionTracking = false
-        configs.enableArrayTracking = false
-        configs.enableArraySizeTainting = false
+        configs.pathConfiguration.pathReconstructionTimeout = 10 * 60
     }
 
     val processedResults =
