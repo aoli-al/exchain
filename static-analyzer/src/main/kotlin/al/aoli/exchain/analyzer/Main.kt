@@ -68,7 +68,7 @@ fun loadAndProcess(options: AnalyzerOptions) {
         options.set_drop_bodies_after_load(false)
         options.set_ignore_resolution_errors(true)
         options.set_ignore_resolving_levels(true)
-        configs.memoryThreshold = 0.1
+        configs.memoryThreshold = 0.8
         configs.enableExceptionTracking = false
         configs.enableArrayTracking = false
         configs.flowSensitiveAliasing = false
@@ -79,11 +79,11 @@ fun loadAndProcess(options: AnalyzerOptions) {
             InfoflowConfiguration.DataFlowSolver.FlowInsensitive
         configs.pathConfiguration.pathBuildingAlgorithm =
             InfoflowConfiguration.PathBuildingAlgorithm.ContextInsensitiveSourceFinder
-        configs.pathConfiguration.pathReconstructionTimeout = 2 * 60
+        configs.pathConfiguration.pathReconstructionTimeout = 10 * 60
         configs.aliasingAlgorithm = InfoflowConfiguration.AliasingAlgorithm.None
         configs.solverConfiguration.maxCalleesPerCallSite = 25
         configs.solverConfiguration.maxAbstractionPathLength = 50
-        configs.dataFlowTimeout = 5 * 60
+        configs.dataFlowTimeout = 1 * 60 * 60
         configs.stopAfterFirstKFlows = 5
         configs.enableExceptionTracking = false
         configs.enableArrayTracking = false
