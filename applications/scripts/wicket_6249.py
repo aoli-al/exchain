@@ -24,6 +24,9 @@ class Wicket(Benchmark):
         time.sleep(10)
         if not debug:
             requests.get("http://127.0.0.1:8080")
+            requests.get("http://127.0.0.1:8080/wicket/page?1")
+            requests.get("http://localhost:8080/wicket/page?1-999.-btn")
+            requests.get("http://localhost:8080/wicket/page?1-3.ILinkListener-test2")
             requests.get("http://127.0.0.1:8080")
             cmd.kill()
         else:
