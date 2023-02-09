@@ -15,7 +15,7 @@ ARGS = ["-noverify",
         "-Xmx2048m",
         "-DJETTY_AVAILABLE_PROCESSORS=4",
         "-Dtest.tmp.dir=/tmp/hive/out_dir/db",
-        "-Dexchain.iter=15",
+        "-Dexchain.iter=1",
         "--add-opens", "java.base/java.net=ALL-UNNAMED",
         "--add-opens", "java.base/java.lang=ALL-UNNAMED",
         "--add-opens", "java.base/java.nio=ALL-UNNAMED"]
