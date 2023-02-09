@@ -2,6 +2,7 @@ package org.apache.wicket.testapplication;
 
 import org.apache.wicket.markup.html.WebPage;
 import org.apache.wicket.markup.html.basic.Label;
+import org.apache.wicket.markup.html.link.Link;
 import org.apache.wicket.model.LoadableDetachableModel;
 import org.apache.wicket.request.mapper.parameter.PageParameters;
 
@@ -53,11 +54,23 @@ public class HomePage extends WebPage {
 
     LoadWrapper wrapper = new LoadWrapper();
 
+    public HomePage() {
+        this(null);
+    }
+
+
     public HomePage(final PageParameters parameters) {
         super(parameters);
 
         add(new Label("version", getApplication().getFrameworkSettings().getVersion()));
         add(new Label("model", wrapper));
+        add(new Link<Void>("test") {
+
+            @Override
+            public void onClick() {
+                setResponsePage(new TestPage(null));
+            }
+        });
     }
 
 }
