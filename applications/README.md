@@ -7,3 +7,5 @@ You may see the following errors when you open Hadoop in intellij
   - [Disable release option](https://youtrack.jetbrains.com/issue/IDEA-201168)
   - Run `mvn package -DskilTests` to generate generated sources.
 
+
+- HDFS may crash non-determinismly.
