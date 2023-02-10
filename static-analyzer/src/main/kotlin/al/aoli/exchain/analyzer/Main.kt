@@ -80,8 +80,8 @@ fun loadAndProcess(options: AnalyzerOptions) {
         /* configs.enableExceptionTracking = false */
         /* configs.enableArrayTracking = false */
         /* configs.enableArraySizeTainting = false */
-        configs.dataFlowTimeout = 1 * 60 * 60
-        configs.pathConfiguration.pathReconstructionTimeout = 10 * 60
+        configs.dataFlowTimeout = 6 * 60 * 60
+        configs.pathConfiguration.pathReconstructionTimeout = 30 * 60
     }
 
     val processedResults =
