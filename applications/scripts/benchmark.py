@@ -38,6 +38,7 @@ class Benchmark:
         self.is_async = is_async
 
 
+        os.makedirs(self.out_path, exist_ok=True)
         os.makedirs(self.instrumentation_classpath, exist_ok=True)
         os.makedirs(self.instrumentation_output, exist_ok=True)
         os.makedirs(self.origin_classpath, exist_ok=True)
