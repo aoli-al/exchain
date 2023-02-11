@@ -158,9 +158,6 @@ object AffectedVarDriver {
     }
 
     fun updateAffectedFields(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
-        if (affectedVarResult.method.contains("parse")) {
-            println("?")
-        }
         val label = System.identityHashCode(exception)
         exceptionStore[label] = exception
         if (obj != null) {
