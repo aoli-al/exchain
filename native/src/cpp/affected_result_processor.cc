@@ -46,7 +46,7 @@ void AffectedResultProcessor::ProcessAffectedFields() {
         jvmti_->GetLocalObject(thread_, depth_, 0, &obj);
     }
     if (taint_fields_method_id != NULL && (is_static_method_ || obj != NULL)) {
-        is_cause_identified_ |= jni_->CallStaticBooleanMethod(
+        jni_->CallStaticVoidMethod(
             runtime_class_, taint_fields_method_id, obj, result_, exception_);
     }
 }
@@ -89,9 +89,9 @@ void AffectedResultProcessor::ProcessSourceVars() {
                     jvmti_->GetLocalObject(thread_, depth_, taint_slot, &taint),
                     "get local object failed: " + std::to_string(taint_slot)) &&
                 taint != NULL) {
-                jni_->CallStaticVoidMethod(runtime_class_,
-                                           analyze_source_method_id, taint,
-                                           exception_, location_jstring_);
+                is_cause_identified_ |= jni_->CallStaticBooleanMethod(
+                    runtime_class_, analyze_source_method_id, taint, exception_,
+                    location_jstring_);
                 jni_->DeleteLocalRef(taint);
             }
         }
@@ -103,9 +103,9 @@ void AffectedResultProcessor::ProcessSourceVars() {
             jobject obj;
             jvmti_->GetLocalObject(thread_, depth_, slot, &obj);
             if (obj != NULL) {
-                jni_->CallStaticVoidMethod(runtime_class_,
-                                           analyze_source_method_id, obj,
-                                           exception_, location_jstring_);
+                is_cause_identified_ |= jni_->CallStaticBooleanMethod(
+                    runtime_class_, analyze_source_method_id, obj, exception_,
+                    location_jstring_);
             }
             jni_->DeleteLocalRef(obj);
         }
