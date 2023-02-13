@@ -23,13 +23,13 @@
           },
           {
             "py/tuple": [
-              1
+              3
             ]
           }
         ]
       }
     ]
-    },
+  },
   {
     "py/tuple": [
       {
@@ -48,7 +48,38 @@
         }
       },
       {
-        "py/id": 3
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              1
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "java.io.FileNotFoundException",
+          "method": "java.io.FileInputStream/open0:-2",
+          "message": "/usr0/home/aoli/repos/exchain/applications/hdfs-4128/target/test/data/dfs/data/data1/current/BP-648251637-128.2.205.32-1676306999560/scanner.cursor (No such file or directory)"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.io.FileNotFoundException",
+          "method": "java.io.FileInputStream/open0:-2",
+          "message": "/usr0/home/aoli/repos/exchain/applications/hdfs-4128/target/test/data/dfs/data/data6/current/BP-648251637-128.2.205.32-1676306999560/scanner.cursor (No such file or directory)"
+        }
+      },
+      {
+        "py/id": 8
       }
     ]
   }

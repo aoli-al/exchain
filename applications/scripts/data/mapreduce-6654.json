@@ -11,9 +11,9 @@
         },
         "dst": {
           "py/object": "objects.Exception",
-          "type": "java.lang.NullPointerException",
-          "method": "org.apache.hadoop.mapreduce.jobhistory.JobHistoryEventHandler/handleEvent:653",
-          "message": "Cannot invoke \"org.apache.hadoop.mapreduce.jobhistory.JobHistoryEventHandler$MetaInfo.writeEvent(org.apache.hadoop.mapreduce.jobhistory.HistoryEvent)\" because \"mi\" is null"
+          "type": "org.apache.hadoop.yarn.exceptions.YarnRuntimeException",
+          "method": "org.apache.hadoop.mapreduce.jobhistory.JobHistoryEventHandler/handleEvent:641",
+          "message": "java.net.SocketTimeoutException: injected socket timeout"
         }
       },
       {
@@ -27,6 +27,28 @@
             ]
           }
         ]
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "java.net.SocketTimeoutException",
+          "method": "org.apache.hadoop.fs.ChecksumFileSystem/create:711",
+          "message": "injected socket timeout"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.NullPointerException",
+          "method": "org.apache.hadoop.mapreduce.jobhistory.JobHistoryEventHandler/handleEvent:653",
+          "message": "Cannot invoke \"org.apache.hadoop.mapreduce.jobhistory.JobHistoryEventHandler$MetaInfo.writeEvent(org.apache.hadoop.mapreduce.jobhistory.HistoryEvent)\" because \"mi\" is null"
+        }
+      },
+      {
+        "py/id": 4
       }
     ]
   }

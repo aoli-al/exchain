@@ -9,7 +9,11 @@ class HDFS(Benchmark):
             "hadoop-hdfs-project/hadoop-hdfs/target",
             "org.apache.hadoop.hdfs.server.namenode.TestCheckpoint",
             "Lorg/apache/",
-            is_async=True
+            is_async=True,
+            ignored_type=[
+                "org.apache.hadoop.ipc.Client/getRpcResponse:1629",
+                "java.io.FileInputStream/open0:-2"
+            ]
         )
 
     def build(self):

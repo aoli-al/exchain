@@ -1,0 +1,77 @@
+[
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.IllegalArgumentException",
+          "method": "org.apache.lucene.index.IndexingChain$PerField/invert:1209",
+          "message": "Document contains at least one immense term in field=\"t%)_s\" (whose UTF8 encoding is longer than the max length 32766), all of which were skipped.  Please correct the analyzer to not produce such terms.  The prefix of the first immense term is: '[97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97, 97]...', original message: bytes can be at most 32766 in length; got 50000"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.util.UnknownFormatConversionException",
+          "method": "java.util.Formatter/checkText:2748",
+          "message": "Conversion = ')'"
+        }
+      },
+      {
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              3
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.IllegalStateException",
+          "method": "org.apache.solr.cloud.ZkTestServer$ZKServerMain/getLocalPort:398",
+          "message": "A port has not yet been selected"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.IllegalStateException",
+          "method": "org.apache.solr.cloud.ZkTestServer$ZKServerMain/getLocalPort:404",
+          "message": "A port has not yet been selected"
+        }
+      },
+      {
+        "py/id": 4
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.zookeeper.KeeperException$NoNodeException",
+          "method": "org.apache.zookeeper.KeeperException/create:118",
+          "message": "KeeperErrorCode = NoNode for /clusterprops.json"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.zookeeper.KeeperException$NoNodeException",
+          "method": "org.apache.zookeeper.KeeperException/create:118",
+          "message": "KeeperErrorCode = NoNode for /collections/testCollection/collectionprops.json"
+        }
+      },
+      {
+        "py/id": 4
+      }
+    ]
+  }
+]

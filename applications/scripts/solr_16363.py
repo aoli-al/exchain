@@ -19,4 +19,5 @@ class Solr(Benchmark):
     def build(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
         subprocess.call(["./gradlew", ":solr:build", "-Pvalidation.git.failOnModified=false"], cwd=self.work_dir)
+        subprocess.call(["./gradlew", ":solr:benchmark:jar"], cwd=self.work_dir)
         subprocess.call(["./gradlew", ":solr:benchmark:copyDependencies"], cwd=self.work_dir)

@@ -116,6 +116,8 @@ def get_exception_distance(result: List[Tuple[Link, LinkType]], path: str) -> in
 def build_expected_dependencies():
     from runner import BENCHMARK_APPLICATIONS
     for name, cls in BENCHMARK_APPLICATIONS.items():
+        if "tomcat" in name:
+            continue
         print(f"\n\n=================== Start processing {name}")
         app = cls()
         expected_dependency= app.read_latest_dynamic_dependency()
@@ -123,6 +125,10 @@ def build_expected_dependencies():
         for dependency in expected_dependency:
             type = LinkType.KEY
             if "phosphor" in dependency.src.message or "phosphor" in dependency.dst.message:
+                type = LinkType.IGNORE
+            if dependency.src.method in app.ignored_type:
+                type = LinkType.IGNORE
+            if dependency.dst.method in app.ignored_type:
                 type = LinkType.IGNORE
             result.append((dependency, type))
 

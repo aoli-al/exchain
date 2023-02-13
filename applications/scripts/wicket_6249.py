@@ -13,7 +13,12 @@ class Wicket(Benchmark):
             "target",
             "org.apache.wicket.testapplication.Start",
             "Lorg/apache/",
-            is_async=True
+            is_async=True,
+            ignored_type=[
+                "org.apache.wicket.Component/internalRenderComponent:2589",
+                "org.apache.wicket.Page/checkRendering:666",
+                ""
+            ]
         )
 
     def build(self):

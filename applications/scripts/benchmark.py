@@ -17,7 +17,8 @@ class Benchmark:
                  is_single_jar: bool = True,
                  additional_args: List[str] = [],
                  additional_classpaths: List[str] = [],
-                 is_async: bool = False):
+                 is_async: bool = False,
+                 ignored_type: List[str] = []):
         self.test_name = test_name
         self.jar_name = jar_name
         self.test_class = test_class
@@ -36,6 +37,7 @@ class Benchmark:
         self.ground_truth_path = os.path.join(BASE_FOLDER, "data", f"{self.test_name}.json")
         self.origin_log_path = os.path.join(self.out_path, "program_out.txt")
         self.is_async = is_async
+        self.ignored_type = ignored_type
 
 
         os.makedirs(self.out_path, exist_ok=True)
