@@ -18,7 +18,7 @@ def read_exceptions(path: str) -> Dict[int, Dict]:
 def data_to_message(data: Dict) -> Exception:
     return Exception(
         data["type"],
-        data["stack"][0] if "stack" in data else "",
+        data["stack"][0] if "stack" in data and data["stack"] else "",
         data["message"] if "message" in data else "",
     )
 
@@ -60,7 +60,6 @@ def process_dependency_result(result: List[Link], ground_truth: List[Tuple[Link,
     tp = 0
     fp = 0
     fn = 0
-    ground_exceptions = [link[0] for link in filter(lambda it: it[1] != LinkType.IGNORE, ground_truth)]
     for link in result:
         identified = False
         for expected in ground_truth:
@@ -86,6 +85,31 @@ def check_root_cause_in_log(result: List[Tuple[Link, LinkType]], log_path: str) 
             if link[0].src.message not in log_data:
                 return False
     return True
+
+def get_exception_distance(result: List[Tuple[Link, LinkType]], path: str) -> int:
+    exceptions = []
+    with open(path) as f:
+        for line in f:
+            exceptions.append(data_to_message(json.loads(line)))
+    max_distance = 0
+    for item in result:
+        link = item[0]
+        distance = 0
+        src_found = False
+        for exception in exceptions:
+            if link.dst == exception:
+                max_distance = max(distance, max_distance)
+                break
+            if src_found:
+                distance += 1
+            if link.src == exception:
+                src_found = True
+    return max_distance
+
+
+
+
+
 
 
 
