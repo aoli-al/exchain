@@ -1,5 +1,7 @@
 from benchmark import Benchmark
 import subprocess
+import shutil
+import os
 
 
 class NIFI(Benchmark):
@@ -14,6 +16,9 @@ class NIFI(Benchmark):
             additional_args=["-noverify"],
             is_async=True
         )
+
+    # def pre(self):
+    #     shutil.rmtree(os.path.join(self.work_dir, "target/db"), ignore_errors=True)
 
     def build(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
