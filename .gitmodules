@@ -61,3 +61,6 @@
 [submodule "applications/hive-13410"]
 	path = applications/hive-13410
 	url = git@github.com:aoli-al/hive.git
+[submodule "applications/tomcat-65131"]
+	path = applications/tomcat-65131
+	url = git@github.com:aoli-al/tomcat.git

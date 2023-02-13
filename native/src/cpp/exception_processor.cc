@@ -29,7 +29,9 @@ void ExceptionProcessor::FullPass() {
                 continue;
             }
             auto class_signature = GetClassSignature(frames[stack_idx].method);
-            if (class_signature.starts_with("Lorg/apache/zookeeper")) break;
+            if (ShouldIgnoreClass(class_signature)) {
+                break;
+            }
             for (auto &application: Configuration::GetInstance().application()) {
                 if (class_signature.starts_with(application)) {
                     is_application_code_visited = true;
@@ -97,9 +99,8 @@ bool ExceptionProcessor::ShouldIgnoreClass(std::string class_name) {
     //        method_name.starts_with("Lsun") ||
     //        method_name.starts_with("Lcom/sun") ||
     //        method_name.starts_with("Lkotlin") ||
-    return class_name.starts_with("Lal/aoli/exchain/instrumentation") ||
-           class_name.starts_with("Lal/aoli/exchain/phosphor") ||
-           class_name.starts_with("Ledu/columbia/cs/psl/");
+    return class_name.starts_with("Lorg/apache/zookeeper") ||
+           class_name.starts_with("Ljava/lang/Class");
 }
 
 bool ExceptionProcessor::ShouldTerminateEarly(std::string class_name,
