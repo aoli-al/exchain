@@ -105,7 +105,12 @@ object ExceptionRuntime {
     @JvmStatic
     fun analyzeSourceVars(obj: Any?, exception: Any, location: String): Boolean {
         if (obj == null) return false
-        return AffectedVarDriver.analyzeSourceVars(obj, exception, location)
+        return try {
+            AffectedVarDriver.analyzeSourceVars(obj, exception, location)
+        } catch (e: Throwable) {
+            false
+        }
+
     }
 
     @JvmStatic
@@ -122,6 +127,10 @@ object ExceptionRuntime {
         ) {
             return false
         }
-        return AffectedVarDriver.analyzeSourceFields(obj, affectedVarResult, exception, location)
+        return try {
+            AffectedVarDriver.analyzeSourceFields(obj, affectedVarResult, exception, location)
+        } catch (e: Throwable) {
+            false;
+        }
     }
 }

@@ -24,7 +24,12 @@ void ExceptionProcessor::FullPass() {
         // PLOG_INFO << "Stack count: " << count;
         bool is_application_code_visited = false;
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
+            auto method_signature = GetMethodSignature(frames[stack_idx].method);
+            if (method_signature.find("lambda$") != std::string::npos) {
+                continue;
+            }
             auto class_signature = GetClassSignature(frames[stack_idx].method);
+            if (class_signature.starts_with("Lorg/apache/zookeeper")) break;
             for (auto &application: Configuration::GetInstance().application()) {
                 if (class_signature.starts_with(application)) {
                     is_application_code_visited = true;
@@ -52,6 +57,7 @@ void ExceptionProcessor::FullPass() {
             }
         }
     }
+    is_cause_identified_ = false;
     return;
 }
 

@@ -12,7 +12,7 @@ class Fineract(Benchmark):
             "fineract-provider.jar",
             "fineract-provider/build/libs",
             "org.springframework.boot.loader.JarLauncher",
-            "Lorg/apache/fineract:Lorg/springframework/core")
+            "Lorg/apache/fineract:Lorg/springframework/core:Lretrofit/client")
 
     def build(self):
         subprocess.call("jenv local 11", shell=True)

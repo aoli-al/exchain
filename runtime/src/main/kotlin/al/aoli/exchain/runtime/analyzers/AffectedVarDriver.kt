@@ -233,11 +233,9 @@ object AffectedVarDriver {
     ): Boolean {
         val origin = System.identityHashCode(exception)
         var causeIdentified = false
-        if (obj != null) {
+        if (obj != null &&  obj is TaintedWithObjTag) {
             try {
-                val field = obj.javaClass.getDeclaredField("PHOSPHOR_TAG")
-                field.isAccessible = true
-                val taint = field.get(obj) as Taint<*>?
+                val taint = obj.phosphoR_TAG as Taint<*>?
                 if (taint != null) {
                     for (label in taint.labels) {
                         if (label is Int && label in exceptionStore && label != origin) {
