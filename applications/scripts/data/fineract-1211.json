@@ -1,17 +1,33 @@
 [
   {
-    "py/object": "objects.Link",
-    "src": {
-      "py/object": "objects.Exception",
-      "type": "java.security.NoSuchAlgorithmException",
-      "method": "sun.security.jca.GetInstance/getInstance:159",
-      "message": "TLC SSLContext not available"
-    },
-    "dst": {
-      "py/object": "objects.Exception",
-      "type": "java.lang.NullPointerException",
-      "method": "org.apache.fineract.infrastructure.hooks.processor.ProcessorHelper/configureClient:84",
-      "message": "Cannot invoke \"javax.net.ssl.SSLContext.getSocketFactory()\" because \"ctx\" is null"
-    }
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "java.security.NoSuchAlgorithmException",
+          "method": "sun.security.jca.GetInstance/getInstance:159",
+          "message": "TLC SSLContext not available"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.NullPointerException",
+          "method": "org.apache.fineract.infrastructure.hooks.processor.ProcessorHelper/configureClient:84",
+          "message": "Cannot invoke \"javax.net.ssl.SSLContext.getSocketFactory()\" because \"ctx\" is null"
+        }
+      },
+      {
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              3
+            ]
+          }
+        ]
+      }
+    ]
   }
 ]

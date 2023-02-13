@@ -1,17 +1,33 @@
 [
   {
-    "py/object": "objects.Link",
-    "src": {
-      "py/object": "objects.Exception",
-      "type": "org.apache.hadoop.fs.s3a.AWSClientIOException",
-      "method": "org.apache.hadoop.fs.s3a.S3AUtils/translateException:212",
-      "message": "re-open s3a://mock-bucket/user/aoli/test-path at 0 on s3a://mock-bucket/user/aoli/test-path: com.amazonaws.SdkClientException: Failed to get S3Object: Failed to get S3Object"
-    },
-    "dst": {
-      "py/object": "objects.Exception",
-      "type": "java.lang.NullPointerException",
-      "method": "org.apache.hadoop.fs.s3a.S3AInputStream/lambda$read$3:566",
-      "message": "Cannot invoke \"com.amazonaws.services.s3.model.S3ObjectInputStream.read(byte[], int, int)\" because \"this.wrappedStream\" is null"
-    }
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.hadoop.fs.s3a.AWSClientIOException",
+          "method": "org.apache.hadoop.fs.s3a.S3AUtils/translateException:212",
+          "message": "re-open s3a://mock-bucket/user/aoli/test-path at 0 on s3a://mock-bucket/user/aoli/test-path: com.amazonaws.SdkClientException: Failed to get S3Object: Failed to get S3Object"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.NullPointerException",
+          "method": "org.apache.hadoop.fs.s3a.S3AInputStream/lambda$read$3:566",
+          "message": "Cannot invoke \"com.amazonaws.services.s3.model.S3ObjectInputStream.read(byte[], int, int)\" because \"this.wrappedStream\" is null"
+        }
+      },
+      {
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              3
+            ]
+          }
+        ]
+      }
+    ]
   }
 ]

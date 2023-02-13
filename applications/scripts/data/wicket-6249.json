@@ -1,17 +1,33 @@
 [
   {
-    "py/object": "objects.Link",
-    "src": {
-      "py/object": "objects.Exception",
-      "type": "org.apache.wicket.testapplication.HomePage$SpecificException",
-      "method": "org.apache.wicket.testapplication.HomePage$ExceptionalLoad/load:23",
-      "message": ""
-    },
-    "dst": {
-      "py/object": "objects.Exception",
-      "type": "java.lang.NullPointerException",
-      "method": "org.apache.wicket.testapplication.HomePage$LoadWrapper/load:38",
-      "message": "Cannot invoke \"String.toLowerCase()\" because \"result\" is null"
-    }
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.wicket.testapplication.HomePage$SpecificException",
+          "method": "org.apache.wicket.testapplication.HomePage$ExceptionalLoad/load:24",
+          "message": ""
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.NullPointerException",
+          "method": "org.apache.wicket.testapplication.HomePage$LoadWrapper/load:39",
+          "message": "Cannot invoke \"String.toLowerCase()\" because \"result\" is null"
+        }
+      },
+      {
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              3
+            ]
+          }
+        ]
+      }
+    ]
   }
 ]
