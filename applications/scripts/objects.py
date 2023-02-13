@@ -1,3 +1,6 @@
+from enum import Enum
+
+
 class Exception:
     def __init__(self, type: str, method: str, message: str) -> None:
         self.type = type
@@ -15,6 +18,11 @@ class Exception:
 
     def __str__(self) -> str:
         return f"{self.type}:{self.message}:{self.method}"
+
+class LinkType(Enum):
+    IGNORE = 1
+    OPTIONAL = 2
+    KEY = 3
 
 
 class Link:

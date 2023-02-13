@@ -53,7 +53,7 @@ class Benchmark:
         latest = open(os.path.join(base_dir, "latest")).read().strip()
         return os.path.join(base_dir, latest)
 
-    def read_ground_truth(self) -> List[Link]:
+    def read_ground_truth(self) -> List[Tuple[Link, LinkType]]:
         data = jsonpickle.decode(open(self.ground_truth_path).read())
         return data
 
