@@ -1,4 +1,4 @@
-from benchmark import SingleCommandTest
+from test_case_base import SingleCommandTest
 import subprocess
 
 

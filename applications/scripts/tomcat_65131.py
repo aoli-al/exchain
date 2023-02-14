@@ -1,4 +1,4 @@
-from benchmark import WrappedTest
+from test_case_base import WrappedTest
 import subprocess
 import shutil
 import time
@@ -13,7 +13,7 @@ class Tomcat(WrappedTest):
             "tomcat-65131",
             "Lorg/apache/tomcat",
             "output/build",
-            "bin/catalina.sh",
+            ["bin/catalina.sh", "run"],
             "JAVA_OPTS",
         )
         self.src = os.path.join(self.work_dir, "output", "build")

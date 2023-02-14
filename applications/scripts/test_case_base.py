@@ -144,6 +144,9 @@ class Test:
             f = open(self.origin_log_path, "w")
         else:
             f = sys.stdout.buffer
+        print(cmd)
+        print(env)
+        print(work_dir)
         return subprocess.Popen(cmd,
                                 stdout=f, stderr=f,
                                 env={
@@ -154,7 +157,7 @@ class Test:
 
 
 class WrappedTest(Test):
-    def __init__(self, test_name: str, application_namespace: str, dist_path: str, start_command: str, env_key: str, is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True):
+    def __init__(self, test_name: str, application_namespace: str, dist_path: str, start_command: List[str], env_key: str, is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True):
         super().__init__(test_name, application_namespace,
                          is_async, ignored_type, is_running_service)
         self.origin_dist = os.path.join(self.work_dir, dist_path)
@@ -181,11 +184,11 @@ class WrappedTest(Test):
             work_dir = self.origin_dist
         if type == "dynamic":
             env["JAVA_HOME"] = INSTRUMENTED_JAVA_HOME
-            env[self.env_key] = f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory -javaagent:{RUNTIME_JAR_PATH}=dynamic:{self.instrumentation_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}",
+            env[self.env_key] = f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory -javaagent:{RUNTIME_JAR_PATH}=dynamic:{self.instrumentation_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}"
             work_dir = self.dynamic_dist
         if type == "hybrid":
             env["JAVA_HOME"] = HYBRID_JAVA_HOME
-            env[self.env_key] = f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV -javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}",
+            env[self.env_key] = f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV -javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}"
             work_dir = self.hybrid_dist
         if type == "origin":
             env["JAVA_HOME"] = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11")

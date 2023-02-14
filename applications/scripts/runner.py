@@ -2,21 +2,22 @@ import click
 import os
 from glob import glob
 import inspect
-from benchmark import SingleCommandTest
+from test_case_base import *
 from commons import *
 from typing import Dict, Type
 
 
 # Load all python3 files in the current directory
 
-BENCHMARK_APPLICATIONS: Dict[str, Type[SingleCommandTest]] = {}
+BENCHMARK_APPLICATIONS: Dict[str, Type[Test]] = {}
+FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 
-for file in glob(os.path.join(os.path.dirname(os.path.abspath(__file__)), "*.py")):
+for file in glob.glob(os.path.join(FILE_PATH, "*.py")):
     name = os.path.splitext(os.path.basename(file))[0]
     # add package prefix to name, if required
     module = __import__(name)
     for _, obj in inspect.getmembers(module):
-        if isinstance(obj, type) and issubclass(obj, SingleCommandTest) and obj != SingleCommandTest:
+        if isinstance(obj, type) and issubclass(obj, Test) and obj != Test and obj != SingleCommandTest and obj != WrappedTest:
             BENCHMARK_APPLICATIONS[name] = obj
 
 
