@@ -1370,12 +1370,13 @@ reach corner cases in phosphor because:
     - Many exceptions are thrown in the very deep location of the project
     - Static always starts from main method and takes very long steps to reach
     the code that throws exceptions.
+    - Services such as web applications have multiple entry points (not necessarly from main function).
 
 - Idea:
     - We may take short cuts by only analyzing the code that throws exception
 
 - How:
-    - Create dummy main methods that invokes methods that throws exceptions sequentially.
+    - Use exception trace to create a dummy main method. The dummy main method invokes methods that throws exceptions sequentially.
 
 - Example:
 
@@ -1383,7 +1384,9 @@ Origin program:
 
 ```java
 void methodWithException1() {
+    // logic
     throw new RuntimeException();
+    // logic
 }
 
 void func1() {
@@ -1404,14 +1407,19 @@ Simplified program:
 
 ```java
 void methodWithException1() {
+    // logic
     throw new RuntimeException();
+    // logic
 }
 
 
-int main() {
+int dummyMain() {
     methodWithException();
 }
 ```
+
+- Result
+    - We managed to successfully get two true positives using this method.
 
 
 ## Reproducing failures in production
@@ -1446,5 +1454,7 @@ int main() {
     - Implement naive solutions
         - Log-based data mining approaches
     - Start to write paper and think about the story
-
+- Time management
+    - We have ~2 months left
+    - Maybe try to have a complete story first and then try to strengthen the story.
 
