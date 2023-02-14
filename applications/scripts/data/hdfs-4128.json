@@ -5,15 +5,15 @@
         "py/object": "objects.Link",
         "src": {
           "py/object": "objects.Exception",
-          "type": "java.io.IOException",
-          "method": "org.apache.hadoop.hdfs.server.namenode.FSEditLogLoader/loadEditRecords:262",
-          "message": "Injecting failure during merge"
+          "type": "java.lang.InterruptedException",
+          "method": "java.lang.Object/wait:-2",
+          "message": ""
         },
         "dst": {
           "py/object": "objects.Exception",
-          "type": "java.io.IOException",
-          "method": "org.apache.hadoop.hdfs.server.namenode.MetaRecoveryContext/editLogLoaderPrompt:95",
-          "message": "There appears to be an out-of-order edit in the edit log.  We expected txid 11, but got txid 10."
+          "type": "java.lang.InterruptedException",
+          "method": "java.lang.Object/wait:-2",
+          "message": ""
         }
       },
       {
@@ -29,7 +29,29 @@
         ]
       }
     ]
-    },
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "java.io.FileNotFoundException",
+          "method": "java.io.FileInputStream/open0:-2",
+          "message": "/usr0/home/aoli/repos/exchain/applications/hdfs-4128/target/test/data/dfs/data/data1/current/BP-1664966938-128.2.205.32-1676336506584/scanner.cursor (No such file or directory)"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.io.FileNotFoundException",
+          "method": "java.io.FileInputStream/open0:-2",
+          "message": "/usr0/home/aoli/repos/exchain/applications/hdfs-4128/target/test/data/dfs/data/data3/current/BP-1664966938-128.2.205.32-1676336506584/scanner.cursor (No such file or directory)"
+        }
+      },
+      {
+        "py/id": 4
+      }
+    ]
+  },
   {
     "py/tuple": [
       {
@@ -48,7 +70,38 @@
         }
       },
       {
-        "py/id": 3
+        "py/id": 4
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "java.io.IOException",
+          "method": "org.apache.hadoop.hdfs.server.namenode.FSEditLogLoader/loadEditRecords:262",
+          "message": "Injecting failure during merge"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.io.IOException",
+          "method": "org.apache.hadoop.hdfs.server.namenode.MetaRecoveryContext/editLogLoaderPrompt:95",
+          "message": "There appears to be an out-of-order edit in the edit log.  We expected txid 11, but got txid 10."
+        }
+      },
+      {
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              3
+            ]
+          }
+        ]
       }
     ]
   }

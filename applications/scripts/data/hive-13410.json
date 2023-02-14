@@ -5,15 +5,15 @@
         "py/object": "objects.Link",
         "src": {
           "py/object": "objects.Exception",
-          "type": "org.apache.hadoop.hive.ql.parse.ParseException",
-          "method": "org.apache.hadoop.hive.ql.parse.ParseDriver/parse:125",
-          "message": "line 1:0 cannot recognize input near 's129V' '<EOF>' '<EOF>'"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
           "type": "java.lang.RuntimeException",
           "method": "org.apache.hadoop.hive.common.metrics.metrics2.CodahaleMetrics$CodahaleMetricsScope/open:126",
           "message": "cannot open scope"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
+          "method": "org.apache.hadoop.hive.ql.DriverUtils/createProcessorException:181",
+          "message": "FAILED: RuntimeException cannot open scope"
         }
       },
       {
@@ -67,31 +67,9 @@
         "py/object": "objects.Link",
         "src": {
           "py/object": "objects.Exception",
-          "type": "java.lang.RuntimeException",
-          "method": "org.apache.hadoop.hive.common.metrics.metrics2.CodahaleMetrics$CodahaleMetricsScope/open:126",
-          "message": "cannot open scope"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
           "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
           "method": "org.apache.hadoop.hive.ql.DriverUtils/createProcessorException:181",
           "message": "FAILED: RuntimeException cannot open scope"
-        }
-      },
-      {
-        "py/id": 4
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.hive.service.cli.HiveSQLException",
-          "method": "org.apache.hive.service.cli.operation.Operation/toSQLException:372",
-          "message": "Error while compiling statement: FAILED: ParseException line 1:0 cannot recognize input near 's129V' '<EOF>' '<EOF>'"
         },
         "dst": {
           "py/object": "objects.Exception",
@@ -117,9 +95,53 @@
         },
         "dst": {
           "py/object": "objects.Exception",
+          "type": "java.lang.RuntimeException",
+          "method": "org.apache.hadoop.hive.common.metrics.metrics2.CodahaleMetrics$CodahaleMetricsScope/open:126",
+          "message": "cannot open scope"
+        }
+      },
+      {
+        "py/id": 4
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.hadoop.hive.ql.parse.ParseException",
+          "method": "org.apache.hadoop.hive.ql.parse.ParseDriver/parse:125",
+          "message": "line 1:0 cannot recognize input near 's129V' '<EOF>' '<EOF>'"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
           "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
           "method": "org.apache.hadoop.hive.ql.DriverUtils/createProcessorException:181",
           "message": "FAILED: ParseException line 1:0 cannot recognize input near 's129V' '<EOF>' '<EOF>'"
+        }
+      },
+      {
+        "py/id": 4
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.hive.service.cli.HiveSQLException",
+          "method": "org.apache.hive.service.cli.operation.Operation/toSQLException:372",
+          "message": "Error while compiling statement: FAILED: ParseException line 1:0 cannot recognize input near 's129V' '<EOF>' '<EOF>'"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.hive.service.cli.HiveSQLException",
+          "method": "org.apache.hive.service.cli.operation.Operation/toSQLException:372",
+          "message": "Error while compiling statement: FAILED: RuntimeException cannot open scope"
         }
       },
       {

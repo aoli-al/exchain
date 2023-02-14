@@ -124,6 +124,10 @@ def build_expected_dependencies():
             type = LinkType.KEY
             if "phosphor" in dependency.src.message or "phosphor" in dependency.dst.message:
                 type = LinkType.IGNORE
+            if dependency.src.method in app.ignored_type:
+                type = LinkType.IGNORE
+            if dependency.dst.method in app.ignored_type:
+                type = LinkType.IGNORE
             result.append((dependency, type))
 
         data = jsonpickle.encode(result, indent=2)
