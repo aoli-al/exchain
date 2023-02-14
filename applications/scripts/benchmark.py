@@ -18,7 +18,8 @@ class Benchmark:
                  additional_args: List[str] = [],
                  additional_classpaths: List[str] = [],
                  is_async: bool = False,
-                 ignored_type: List[str] = []):
+                 ignored_type: List[str] = [],
+                 is_running_service: bool = True):
         self.test_name = test_name
         self.jar_name = jar_name
         self.test_class = test_class
@@ -38,6 +39,7 @@ class Benchmark:
         self.origin_log_path = os.path.join(self.out_path, "program_out.txt")
         self.is_async = is_async
         self.ignored_type = ignored_type
+        self.is_running_service = is_running_service
 
 
         os.makedirs(self.out_path, exist_ok=True)
@@ -49,6 +51,8 @@ class Benchmark:
 
         if "JAVA_HOME" in os.environ:
             del os.environ["JAVA_HOME"]
+        if "JRE_HOME" in os.environ:
+            del os.environ["JRE_HOME"]
 
     def get_latest_result(self, type: str)-> str:
         base_dir = os.path.join(self.out_path, f"{type}-results")

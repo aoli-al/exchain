@@ -20,7 +20,7 @@ class Tomcat(Benchmark):
         self.hybrid_dst = os.path.join(self.work_dir, "output", "hybrid")
 
     def build(self):
-        subprocess.call("jenv local 11", shell=True)
+        subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
         subprocess.call("ant", cwd=self.work_dir, shell=True)
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen):
@@ -35,6 +35,7 @@ class Tomcat(Benchmark):
                 "JAVA_OPTS":
                 f"-javaagent:{RUNTIME_JAR_PATH}=static:{self.origin_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}",
                 "EXCHAIN_OUT_DIR": self.out_path,
+                "JAVA_HOME": os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11"),
                 **os.environ
             }, cwd=self.work_dir)
         if type == "dynamic":
@@ -54,10 +55,12 @@ class Tomcat(Benchmark):
                 "EXCHAIN_OUT_DIR": self.out_path,
             }, cwd=self.work_dir)
         if type == "origin":
-            return subprocess.Popen([os.path.join(self.inst_dst, "bin", "catalina.sh"), "run"],
+            f = open(self.origin_log_path, "w")
+            return subprocess.Popen([os.path.join(self.src, "bin", "catalina.sh"), "run"],
                                     env={
+                "JAVA_HOME": os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11"),
                 **os.environ
-            }, cwd=self.work_dir)
+            }, cwd=self.work_dir, stdout=f, stderr=f)
 
     def instrument(self):
         subprocess.call("jenv local 16", shell=True, cwd=self.work_dir)

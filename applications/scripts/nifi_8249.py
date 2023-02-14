@@ -14,7 +14,8 @@ class NIFI(Benchmark):
             "org.apache.nifi.processors.standard.TestExecuteSQLRecord",
             "Lorg/apache/",
             additional_args=["-noverify"],
-            is_async=True
+            is_async=True,
+            is_running_service=False
         )
 
     # def pre(self):

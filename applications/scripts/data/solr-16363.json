@@ -48,7 +48,16 @@
         }
       },
       {
-        "py/id": 4
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              1
+            ]
+          }
+        ]
       }
     ]
   },
@@ -70,7 +79,7 @@
         }
       },
       {
-        "py/id": 4
+        "py/id": 8
       }
     ]
   }

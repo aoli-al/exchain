@@ -5,81 +5,6 @@
         "py/object": "objects.Link",
         "src": {
           "py/object": "objects.Exception",
-          "type": "org.apache.wicket.WicketRuntimeException",
-          "method": "org.apache.wicket.Component/internalRenderComponent:2589",
-          "message": "Exception in rendering component: [Component id = model]"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.wicket.WicketRuntimeException",
-          "method": "org.apache.wicket.Page/checkRendering:666",
-          "message": "The component(s) below failed to render. Possible reasons could be that: 1) you have added a component in code but forgot to reference it in the markup (thus the component will never be rendered), 2) if your components were added in a parent container then make sure the markup for the child container includes them in <wicket:extend>.1. [Component id = model]2. [Link [Component id = test]]"
-        }
-      },
-      {
-        "py/reduce": [
-          {
-            "py/type": "objects.LinkType"
-          },
-          {
-            "py/tuple": [
-              1
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
-          "type": "java.lang.RuntimeException",
-          "method": "org.apache.wicket.Component/getDefaultModelObject:1631",
-          "message": "An error occurred while getting the model object for Component: [Component id = model, page = org.apache.wicket.testapplication.HomePage, path = 0:model.Label, isVisible = true, isVersioned = true, markup = [markup = jar:file:/tmp/instrumentation_output/wicket-6249/myproject-1.0-SNAPSHOT-test-jar-with-dependencies.jar!/org/apache/wicket/testapplication/HomePage.html<div wicket:id=\"model\"></div>, index = 0, current =  '<div wicket:id=\"model\">' (line 0, column 0)]]"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.wicket.WicketRuntimeException",
-          "method": "org.apache.wicket.Component/internalRenderComponent:2589",
-          "message": "Exception in rendering component: [Component id = model]"
-        }
-      },
-      {
-        "py/id": 4
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.wicket.WicketRuntimeException",
-          "method": "org.apache.wicket.Page/checkRendering:666",
-          "message": "The component(s) below failed to render. Possible reasons could be that: 1) you have added a component in code but forgot to reference it in the markup (thus the component will never be rendered), 2) if your components were added in a parent container then make sure the markup for the child container includes them in <wicket:extend>.1. [Component id = model]2. [Link [Component id = test]]"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.wicket.WicketRuntimeException",
-          "method": "org.apache.wicket.Component/internalRenderComponent:2589",
-          "message": "Exception in rendering component: [Component id = model]"
-        }
-      },
-      {
-        "py/id": 4
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
           "type": "org.apache.wicket.testapplication.HomePage$SpecificException",
           "method": "org.apache.wicket.testapplication.HomePage$ExceptionalLoad/load:24",
           "message": ""
@@ -123,7 +48,82 @@
         }
       },
       {
-        "py/id": 4
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              1
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.RuntimeException",
+          "method": "org.apache.wicket.Component/getDefaultModelObject:1631",
+          "message": "An error occurred while getting the model object for Component: [Component id = model, page = org.apache.wicket.testapplication.HomePage, path = 0:model.Label, isVisible = true, isVersioned = true, markup = [markup = jar:file:/tmp/instrumentation_output/wicket-6249/myproject-1.0-SNAPSHOT-test-jar-with-dependencies.jar!/org/apache/wicket/testapplication/HomePage.html<div wicket:id=\"model\"></div>, index = 0, current =  '<div wicket:id=\"model\">' (line 0, column 0)]]"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.wicket.WicketRuntimeException",
+          "method": "org.apache.wicket.Component/internalRenderComponent:2589",
+          "message": "Exception in rendering component: [Component id = model]"
+        }
+      },
+      {
+        "py/id": 8
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.wicket.WicketRuntimeException",
+          "method": "org.apache.wicket.Component/internalRenderComponent:2589",
+          "message": "Exception in rendering component: [Component id = model]"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.wicket.WicketRuntimeException",
+          "method": "org.apache.wicket.Page/checkRendering:666",
+          "message": "The component(s) below failed to render. Possible reasons could be that: 1) you have added a component in code but forgot to reference it in the markup (thus the component will never be rendered), 2) if your components were added in a parent container then make sure the markup for the child container includes them in <wicket:extend>.1. [Component id = model]2. [Link [Component id = test]]"
+        }
+      },
+      {
+        "py/id": 8
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.wicket.WicketRuntimeException",
+          "method": "org.apache.wicket.Page/checkRendering:666",
+          "message": "The component(s) below failed to render. Possible reasons could be that: 1) you have added a component in code but forgot to reference it in the markup (thus the component will never be rendered), 2) if your components were added in a parent container then make sure the markup for the child container includes them in <wicket:extend>.1. [Component id = model]2. [Link [Component id = test]]"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.wicket.WicketRuntimeException",
+          "method": "org.apache.wicket.Component/internalRenderComponent:2589",
+          "message": "Exception in rendering component: [Component id = model]"
+        }
+      },
+      {
+        "py/id": 8
       }
     ]
   }

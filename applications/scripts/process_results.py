@@ -116,8 +116,6 @@ def get_exception_distance(result: List[Tuple[Link, LinkType]], path: str) -> in
 def build_expected_dependencies():
     from runner import BENCHMARK_APPLICATIONS
     for name, cls in BENCHMARK_APPLICATIONS.items():
-        if "tomcat" in name:
-            continue
         print(f"\n\n=================== Start processing {name}")
         app = cls()
         expected_dependency= app.read_latest_dynamic_dependency()

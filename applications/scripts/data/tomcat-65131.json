@@ -1,0 +1,33 @@
+[
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.NoSuchMethodException",
+          "method": "java.lang.Class/getConstructor0:3517",
+          "message": "org.apache.coyote.Adapter.<init>()"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.NoSuchMethodException",
+          "method": "java.lang.Class/getConstructor0:3517",
+          "message": "org.apache.coyote.Adapter.<init>()"
+        }
+      },
+      {
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              3
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

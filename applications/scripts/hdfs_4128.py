@@ -12,7 +12,8 @@ class HDFS(Benchmark):
             is_async=True,
             ignored_type=[
                 "org.apache.hadoop.ipc.Client/getRpcResponse:1629",
-                "java.io.FileInputStream/open0:-2"
+                "java.io.FileInputStream/open0:-2",
+                "java.lang.Object/wait:-2"
             ]
         )
 

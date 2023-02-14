@@ -5,46 +5,15 @@
         "py/object": "objects.Link",
         "src": {
           "py/object": "objects.Exception",
-          "type": "java.io.IOException",
-          "method": "org.apache.hadoop.hdfs.server.namenode.FSEditLogLoader/loadEditRecords:262",
-          "message": "Injecting failure during merge"
+          "type": "java.lang.InterruptedException",
+          "method": "java.lang.Object/wait:-2",
+          "message": ""
         },
         "dst": {
           "py/object": "objects.Exception",
-          "type": "java.io.IOException",
-          "method": "org.apache.hadoop.hdfs.server.namenode.MetaRecoveryContext/editLogLoaderPrompt:95",
-          "message": "There appears to be an out-of-order edit in the edit log.  We expected txid 11, but got txid 10."
-        }
-      },
-      {
-        "py/reduce": [
-          {
-            "py/type": "objects.LinkType"
-          },
-          {
-            "py/tuple": [
-              3
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.hadoop.ipc.RemoteException",
-          "method": "org.apache.hadoop.ipc.Client/getRpcResponse:1629",
-          "message": "Specified block size 4096 is less than configured minimum value dfs.namenode.fs-limits.min-block-size=1048576\tat org.apache.hadoop.hdfs.server.namenode.FSNamesystem.startFileInt(FSNamesystem.java:2767)\tat org.apache.hadoop.hdfs.server.namenode.FSNamesystem.startFile(FSNamesystem.java:2703)\tat org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.create(NameNodeRpcServer.java:829)\tat org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolServerSideTranslatorPB.create(ClientNamenodeProtocolServerSideTranslatorPB.java:502)\tat org.apache.hadoop.hdfs.protocol.proto.ClientNamenodeProtocolProtos$ClientNamenodeProtocol$2.callBlockingMethod(ClientNamenodeProtocolProtos.java)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:621)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:589)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:573)\tat org.apache.hadoop.ipc.RPC$Server.call(RPC.java:1213)\tat org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:1205)\tat org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:1128)\tat java.base/java.security.AccessController.doPrivileged(AccessController.java:691)\tat java.base/javax.security.auth.Subject.doAs(Subject.java:427)\tat org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1919)\tat org.apache.hadoop.ipc.Server$Handler.run(Server.java:3121)"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.hadoop.thirdparty.protobuf.ServiceException",
-          "method": "org.apache.hadoop.ipc.ProtobufRpcEngine2$Invoker/invoke:272",
-          "message": "org.apache.hadoop.ipc.RemoteException(java.io.IOException): Specified block size 4096 is less than configured minimum value dfs.namenode.fs-limits.min-block-size=1048576\tat org.apache.hadoop.hdfs.server.namenode.FSNamesystem.startFileInt(FSNamesystem.java:2767)\tat org.apache.hadoop.hdfs.server.namenode.FSNamesystem.startFile(FSNamesystem.java:2703)\tat org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.create(NameNodeRpcServer.java:829)\tat org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolServerSideTranslatorPB.create(ClientNamenodeProtocolServerSideTranslatorPB.java:502)\tat org.apache.hadoop.hdfs.protocol.proto.ClientNamenodeProtocolProtos$ClientNamenodeProtocol$2.callBlockingMethod(ClientNamenodeProtocolProtos.java)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:621)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:589)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:573)\tat org.apache.hadoop.ipc.RPC$Server.call(RPC.java:1213)\tat org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:1205)\tat org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:1128)\tat java.base/java.security.AccessController.doPrivileged(AccessController.java:691)\tat java.base/javax.security.auth.Subject.doAs(Subject.java:427)\tat org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1919)\tat org.apache.hadoop.ipc.Server$Handler.run(Server.java:3121)"
+          "type": "java.lang.InterruptedException",
+          "method": "java.lang.Object/wait:-2",
+          "message": ""
         }
       },
       {
@@ -69,17 +38,70 @@
           "py/object": "objects.Exception",
           "type": "java.io.FileNotFoundException",
           "method": "java.io.FileInputStream/open0:-2",
-          "message": "/usr0/home/aoli/repos/exchain/applications/hdfs-4128/target/test/data/dfs/data/data1/current/BP-648251637-128.2.205.32-1676306999560/scanner.cursor (No such file or directory)"
+          "message": "/usr0/home/aoli/repos/exchain/applications/hdfs-4128/target/test/data/dfs/data/data1/current/BP-1664966938-128.2.205.32-1676336506584/scanner.cursor (No such file or directory)"
         },
         "dst": {
           "py/object": "objects.Exception",
           "type": "java.io.FileNotFoundException",
           "method": "java.io.FileInputStream/open0:-2",
-          "message": "/usr0/home/aoli/repos/exchain/applications/hdfs-4128/target/test/data/dfs/data/data6/current/BP-648251637-128.2.205.32-1676306999560/scanner.cursor (No such file or directory)"
+          "message": "/usr0/home/aoli/repos/exchain/applications/hdfs-4128/target/test/data/dfs/data/data3/current/BP-1664966938-128.2.205.32-1676336506584/scanner.cursor (No such file or directory)"
         }
       },
       {
-        "py/id": 8
+        "py/id": 4
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.hadoop.ipc.RemoteException",
+          "method": "org.apache.hadoop.ipc.Client/getRpcResponse:1629",
+          "message": "Specified block size 4096 is less than configured minimum value dfs.namenode.fs-limits.min-block-size=1048576\tat org.apache.hadoop.hdfs.server.namenode.FSNamesystem.startFileInt(FSNamesystem.java:2767)\tat org.apache.hadoop.hdfs.server.namenode.FSNamesystem.startFile(FSNamesystem.java:2703)\tat org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.create(NameNodeRpcServer.java:829)\tat org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolServerSideTranslatorPB.create(ClientNamenodeProtocolServerSideTranslatorPB.java:502)\tat org.apache.hadoop.hdfs.protocol.proto.ClientNamenodeProtocolProtos$ClientNamenodeProtocol$2.callBlockingMethod(ClientNamenodeProtocolProtos.java)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:621)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:589)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:573)\tat org.apache.hadoop.ipc.RPC$Server.call(RPC.java:1213)\tat org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:1205)\tat org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:1128)\tat java.base/java.security.AccessController.doPrivileged(AccessController.java:691)\tat java.base/javax.security.auth.Subject.doAs(Subject.java:427)\tat org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1919)\tat org.apache.hadoop.ipc.Server$Handler.run(Server.java:3121)"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.hadoop.thirdparty.protobuf.ServiceException",
+          "method": "org.apache.hadoop.ipc.ProtobufRpcEngine2$Invoker/invoke:272",
+          "message": "org.apache.hadoop.ipc.RemoteException(java.io.IOException): Specified block size 4096 is less than configured minimum value dfs.namenode.fs-limits.min-block-size=1048576\tat org.apache.hadoop.hdfs.server.namenode.FSNamesystem.startFileInt(FSNamesystem.java:2767)\tat org.apache.hadoop.hdfs.server.namenode.FSNamesystem.startFile(FSNamesystem.java:2703)\tat org.apache.hadoop.hdfs.server.namenode.NameNodeRpcServer.create(NameNodeRpcServer.java:829)\tat org.apache.hadoop.hdfs.protocolPB.ClientNamenodeProtocolServerSideTranslatorPB.create(ClientNamenodeProtocolServerSideTranslatorPB.java:502)\tat org.apache.hadoop.hdfs.protocol.proto.ClientNamenodeProtocolProtos$ClientNamenodeProtocol$2.callBlockingMethod(ClientNamenodeProtocolProtos.java)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:621)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:589)\tat org.apache.hadoop.ipc.ProtobufRpcEngine2$Server$ProtoBufRpcInvoker.call(ProtobufRpcEngine2.java:573)\tat org.apache.hadoop.ipc.RPC$Server.call(RPC.java:1213)\tat org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:1205)\tat org.apache.hadoop.ipc.Server$RpcCall.run(Server.java:1128)\tat java.base/java.security.AccessController.doPrivileged(AccessController.java:691)\tat java.base/javax.security.auth.Subject.doAs(Subject.java:427)\tat org.apache.hadoop.security.UserGroupInformation.doAs(UserGroupInformation.java:1919)\tat org.apache.hadoop.ipc.Server$Handler.run(Server.java:3121)"
+        }
+      },
+      {
+        "py/id": 4
+      }
+    ]
+  },
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "java.io.IOException",
+          "method": "org.apache.hadoop.hdfs.server.namenode.FSEditLogLoader/loadEditRecords:262",
+          "message": "Injecting failure during merge"
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.io.IOException",
+          "method": "org.apache.hadoop.hdfs.server.namenode.MetaRecoveryContext/editLogLoaderPrompt:95",
+          "message": "There appears to be an out-of-order edit in the edit log.  We expected txid 11, but got txid 10."
+        }
+      },
+      {
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              3
+            ]
+          }
+        ]
       }
     ]
   }
