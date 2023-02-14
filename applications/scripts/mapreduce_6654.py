@@ -1,8 +1,8 @@
-from benchmark import Benchmark
+from benchmark import SingleCommandTest
 import subprocess
 
 
-class MapReduce(Benchmark):
+class MapReduce(SingleCommandTest):
     def __init__(self):
         super().__init__(
             "mapreduce-6654",

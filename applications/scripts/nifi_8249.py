@@ -1,10 +1,10 @@
-from benchmark import Benchmark
+from benchmark import SingleCommandTest
 import subprocess
 import shutil
 import os
 
 
-class NIFI(Benchmark):
+class NIFI(SingleCommandTest):
 
     def __init__(self):
         super().__init__(

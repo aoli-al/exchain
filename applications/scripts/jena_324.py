@@ -1,11 +1,11 @@
-from benchmark import Benchmark
+from benchmark import SingleCommandTest
 import subprocess
 import time
 import os
 import requests
 
 
-class Jena(Benchmark):
+class Jena(SingleCommandTest):
     def __init__(self):
         super().__init__(
             "jena-324",

@@ -1,11 +1,11 @@
-from benchmark import Benchmark
+from benchmark import SingleCommandTest
 import subprocess
 import time
 import os
 import requests
 
 
-class Wicket(Benchmark):
+class Wicket(SingleCommandTest):
     def __init__(self):
         super().__init__(
             "wicket-6249",

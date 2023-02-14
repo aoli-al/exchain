@@ -1,10 +1,10 @@
-from benchmark import Benchmark
+from benchmark import SingleCommandTest
 import subprocess
 import time
 import os
 
 
-class Solr(Benchmark):
+class Solr(SingleCommandTest):
 
     def __init__(self):
         super().__init__(

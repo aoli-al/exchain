@@ -1,4 +1,4 @@
-from benchmark import Benchmark
+from benchmark import SingleCommandTest
 import subprocess
 import time
 import os
@@ -21,7 +21,7 @@ ARGS = ["-noverify",
         "--add-opens", "java.base/java.nio=ALL-UNNAMED"]
 
 
-class Hive(Benchmark):
+class Hive(SingleCommandTest):
 
     def __init__(self):
         super().__init__(

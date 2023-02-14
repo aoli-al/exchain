@@ -1,10 +1,10 @@
-from benchmark import Benchmark
+from benchmark import SingleCommandTest
 import subprocess
 import time
 import os
 
 
-class Fineract(Benchmark):
+class Fineract(SingleCommandTest):
 
     def __init__(self):
         super().__init__(

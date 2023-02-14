@@ -1,8 +1,8 @@
-from benchmark import Benchmark
+from benchmark import SingleCommandTest
 import subprocess
 
 
-class Hadoop(Benchmark):
+class Hadoop(SingleCommandTest):
 
     def __init__(self):
         super().__init__(

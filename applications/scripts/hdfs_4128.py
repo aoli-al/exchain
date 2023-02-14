@@ -1,7 +1,7 @@
-from benchmark import Benchmark
+from benchmark import SingleCommandTest
 import subprocess
 
-class HDFS(Benchmark):
+class HDFS(SingleCommandTest):
     def __init__(self):
         super().__init__(
             "hdfs-4128",

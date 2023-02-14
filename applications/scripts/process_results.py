@@ -107,12 +107,6 @@ def get_exception_distance(result: List[Tuple[Link, LinkType]], path: str) -> in
     return max_distance
 
 
-
-
-
-
-
-
 def build_expected_dependencies():
     from runner import BENCHMARK_APPLICATIONS
     for name, cls in BENCHMARK_APPLICATIONS.items():
