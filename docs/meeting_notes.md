@@ -1359,3 +1359,92 @@ reach corner cases in phosphor because:
     - The execution time increases w.r.t number of sinks/sources
 - Static analysis requires lots of memory
     - The simplest program requires more than 24 GB memory, which prevents me from running the analysis on my desktop or running analysis in parallel on the server.
+
+# Feb 13
+
+
+
+## Improve the performance of the static analysis
+
+- Main issue:
+    - Many exceptions are thrown in the very deep location of the project
+    - Static always starts from main method and takes very long steps to reach
+    the code that throws exceptions.
+
+- Idea:
+    - We may take short cuts by only analyzing the code that throws exception
+
+- How:
+    - Create dummy main methods that invokes methods that throws exceptions sequentially.
+
+- Example:
+
+Origin program:
+
+```java
+void methodWithException1() {
+    throw new RuntimeException();
+}
+
+void func1() {
+    methodWithException1();
+}
+
+void func2() {
+    // normal method
+}
+
+int main() {
+    func1();
+    func2();
+}
+```
+
+Simplified program:
+
+```java
+void methodWithException1() {
+    throw new RuntimeException();
+}
+
+
+int main() {
+    methodWithException();
+}
+```
+
+
+## Reproducing failures in production
+
+- It is hard to reproduce a failure for 1 service
+    - Apache Nifi
+    - They use a customized archive format NAR (Nifi archive)
+    - Many modules are loaded dynamically using a customized class loader
+    - The requests are generated using a Gui client
+
+
+## Adding dummy requests between the root cause and final failure
+
+- Strategy:
+    - replay requests sent by other tests
+- Problem:
+    - dummy requests trigger new exceptions and potential exception chains.
+    - we need to manually analyze them and filter them out.
+
+- We now report the distance between the final failure exception and its root cause.
+
+
+## TODOs and time management
+
+- TODOs
+    - Measure the overhead on different applications
+        - Potentially implement optimizations
+        - Do we need to measure all applications?
+    - Analyze more applications
+        - 5 analyzable services
+        - Reproducing the failure by running service is time consuming
+    - Implement naive solutions
+        - Log-based data mining approaches
+    - Start to write paper and think about the story
+
+
