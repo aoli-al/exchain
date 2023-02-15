@@ -18,10 +18,12 @@ class Test:
                  is_async: bool = False,
                  ignored_type: List[str] = [],
                  is_running_service: bool = True,
-                 is_benchmark: bool = False):
+                 is_benchmark: bool = False,
+                 work_dir: Optional[str] = None):
         self.test_name = test_name
         self.application_namespace = application_namespace
-        self.work_dir = os.path.join(DIR_PATH, "..", self.test_name)
+        self.work_dir = os.path.join(
+            DIR_PATH, "..", self.test_name) if work_dir is None else work_dir
         self.instrumentation_classpath = "/tmp/instrumented_classes/" + self.test_name
         self.origin_classpath = "/tmp/origin_classes/" + self.test_name
         self.hybrid_classpath = "/tmp/hybrid_classes/" + self.test_name
@@ -159,10 +161,10 @@ class Test:
 
 
 class WrappedTest(Test):
-    def __init__(self, test_name: str, application_namespace: str, dist_path: str, start_command: List[str], env_key: str, is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True, is_benchmark: bool = False):
+    def __init__(self, test_name: str, application_namespace: str, dist_path: str, start_command: List[str], env_key: str, is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True, is_benchmark: bool = False, work_dir: Optional[str] = None):
         super().__init__(test_name, application_namespace,
                          is_async, ignored_type, is_running_service,
-                         is_benchmark)
+                         is_benchmark, work_dir)
         self.origin_dist = os.path.join(self.work_dir, dist_path)
         self.dynamic_dist = os.path.join("/tmp/dyn_dist/", self.test_name, "dyn_dist")
         self.hybrid_dist = os.path.join("/tmp/hybrid_dist/", self.test_name, "hybrid_dist")

@@ -3,22 +3,24 @@ import subprocess
 import shutil
 import os
 
+DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
-class HadoopBench(WrappedTest):
+class HadoopTerasort(WrappedTest):
     def __init__(self):
         super().__init__(
-            "hadoop_bench",
+            "hadoo_terasort",
             "Lorg/apache/",
             "hadoop-dist/target/hadoop-3.3.4",
             ["./bin/hadoop", "jar", "./share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.4.jar",
                 "terasort", "/tmp/workload-gen", "/tmp/workload-out"],
             "HADOOP_OPTS",
-            is_benchmark=True
+            is_benchmark=True,
+            work_dir=os.path.join(DIR_PATH, "..", "hadoop_bench")
         )
 
     def build(self):
-        subprocess.call("mvn package -Pdist -DskipTests  -Dmaven.javadoc.skip=true -DskipTests=true", shell=True, cwd=self.work_dir)
-
+        subprocess.call(
+            "mvn package -Pdist -DskipTests  -Dmaven.javadoc.skip=true -DskipTests=true", shell=True, cwd=self.work_dir)
 
     def pre(self):
         shutil.rmtree("/tmp/workload-gen", ignore_errors=True)
@@ -29,4 +31,5 @@ class HadoopBench(WrappedTest):
                         cwd=self.origin_dist, shell=True,
                         env={
                             "JAVA_HOME": os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11")
-                        })
+        })
+
