@@ -63,45 +63,10 @@ public class Main {
     }
 
     public static void main(String[] args) throws Throwable {
-//        O1 obj = new O1();
-//
-//        V1 v1 = new V1(obj);
-//        v1.process();
-//        V1 v2 = new V1(obj);
-//        v2.check();
-
-        final ObjectDemo demo = new ObjectDemo();
-
-        Runnable runA = new Runnable() {
-
-            public void run() {
-                try {
-                    String item = demo.removeElement();
-                    System.out.println("" + item);
-                } catch (InterruptedException ix) {
-                    System.out.println("Interrupted Exception!");
-                } catch (Exception x) {
-                    System.out.println("Exception thrown.");
-                }
-            }
-        };
-
-        try {
-            Thread threadA1 = new Thread(runA, "A");
-            threadA1.start();
-
-            Thread.sleep(500);
-
-
-            threadA1.interrupt();
-        } catch (InterruptedException x) {
+        for (int i = 0; i < 5; i++) {
+            CustomizedThread t = new CustomizedThread(i);
+            t.start();
         }
-        //        MethodHandles.Lookup publicLookup = MethodHandles.lookup();
-        //        final MethodHandle handle = publicLookup.findStatic(ServiceLoader.class, "load",
-        // LOAD_CLASS_CLASSLOADER);
-        //        final ServiceLoader serviceLoader = (ServiceLoader) handle.invokeExact(Main.class,
-        // Main.class.getClassLoader());
-        //        System.out.println(serviceLoader);
     }
 
     public static String concat(String a) {

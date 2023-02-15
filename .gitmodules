@@ -64,3 +64,6 @@
 [submodule "applications/tomcat-65131"]
 	path = applications/tomcat-65131
 	url = git@github.com:aoli-al/tomcat.git
+[submodule "applications/hadoop_bench"]
+	path = applications/hadoop_bench
+	url = https://github.com/apache/hadoop

@@ -79,6 +79,7 @@ object ExceptionLogger {
     private val exceptionStats: File
     private val dynamicDependencyLog: File
     private val affectedVarResults: File
+    val outBasePath: String
     init {
         val basePath =
             when (AffectedVarDriver.type) {
@@ -92,11 +93,11 @@ object ExceptionLogger {
         }
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")
         val path = formatter.format(LocalDateTime.now())
-        val outDir = System.getenv("EXCHAIN_OUT_DIR") ?: "/tmp/"
-        val outPath = "$outDir/$basePath/$path"
+        outBasePath = System.getenv("EXCHAIN_OUT_DIR") ?: "/tmp/" + "$basePath"
+        val outPath = "$outBasePath/$path"
         val dataFolder = File(outPath)
         dataFolder.mkdirs()
-        File("$outDir/$basePath/latest").writeText(path)
+        File("$outBasePath/latest").writeText(path)
         exceptionLog = File("$outPath/exception.json")
         exceptionStats = File("$outPath/stats.csv")
         affectedVarResults = File("$outPath/affected-var-results.json")

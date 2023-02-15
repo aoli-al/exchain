@@ -17,7 +17,8 @@ class Test:
     def __init__(self, test_name: str, application_namespace: str,
                  is_async: bool = False,
                  ignored_type: List[str] = [],
-                 is_running_service: bool = True):
+                 is_running_service: bool = True,
+                 is_benchmark: bool = False):
         self.test_name = test_name
         self.application_namespace = application_namespace
         self.work_dir = os.path.join(DIR_PATH, "..", self.test_name)
@@ -31,6 +32,7 @@ class Test:
         self.is_async = is_async
         self.ignored_type = ignored_type
         self.is_running_service = is_running_service
+        self.is_benchmark = is_benchmark
 
         os.makedirs(self.out_path, exist_ok=True)
         os.makedirs(self.instrumentation_classpath, exist_ok=True)
@@ -104,8 +106,8 @@ class Test:
         pass
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen):
-        time.sleep(200)
-        if not debug:
+        if not self.is_benchmark and not debug:
+            time.sleep(200)
             cmd.kill()
         else:
             cmd.communicate()
@@ -140,7 +142,7 @@ class Test:
 
     def exec(self, type: str, debug: bool) -> subprocess.Popen:
         cmd, env, work_dir = self.get_exec_command(type, debug)
-        if type == "origin":
+        if type == "origin" and not self.is_benchmark:
             f = open(self.origin_log_path, "w")
         else:
             f = sys.stdout.buffer
@@ -157,9 +159,10 @@ class Test:
 
 
 class WrappedTest(Test):
-    def __init__(self, test_name: str, application_namespace: str, dist_path: str, start_command: List[str], env_key: str, is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True):
+    def __init__(self, test_name: str, application_namespace: str, dist_path: str, start_command: List[str], env_key: str, is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True, is_benchmark: bool = False):
         super().__init__(test_name, application_namespace,
-                         is_async, ignored_type, is_running_service)
+                         is_async, ignored_type, is_running_service,
+                         is_benchmark)
         self.origin_dist = os.path.join(self.work_dir, dist_path)
         self.dynamic_dist = os.path.join("/tmp/dyn_dist/", self.test_name, "dyn_dist")
         self.hybrid_dist = os.path.join("/tmp/hybrid_dist/", self.test_name, "hybrid_dist")
@@ -199,9 +202,10 @@ class WrappedTest(Test):
 
 class SingleCommandTest(Test):
 
-    def __init__(self, test_name: str, jar_name: str, origin_jar_path: str, test_class: str, application_namespace: str, additional_args: List[str] = [], additional_classpaths: List[str] = [], is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True, is_single_jar: bool = True):
+    def __init__(self, test_name: str, jar_name: str, origin_jar_path: str, test_class: str, application_namespace: str, additional_args: List[str] = [], additional_classpaths: List[str] = [], is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True, is_single_jar: bool = True, is_benchmark: bool = False):
         super().__init__(test_name, application_namespace,
-                         is_async, ignored_type, is_running_service)
+                         is_async, ignored_type, is_running_service,
+                         is_benchmark)
         self.additional_classpaths = additional_classpaths
         self.additional_args = additional_args
         self.test_class = test_class
