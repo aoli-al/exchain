@@ -30,10 +30,9 @@ class Hive(SingleCommandTest):
             "itests/hive-unit/target/lib",
             "org.apache.hive.jdbc.miniHS2.TestHs2Metrics",
             "Lorg/apache/hadoop:Lorg/apache/hive",
-            False,
             ARGS,
             ["itests/hive-unit/target/testconf", "conf"],
-            is_async=True)
+            True)
 
     def build(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)

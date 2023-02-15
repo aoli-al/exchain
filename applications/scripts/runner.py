@@ -9,7 +9,7 @@ from typing import Dict, Type
 
 # Load all python3 files in the current directory
 
-BENCHMARK_APPLICATIONS: Dict[str, Type[Test]] = {}
+BENCHMARK_APPLICATIONS: Dict[str, Test] = {}
 FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 for file in glob.glob(os.path.join(FILE_PATH, "*.py")):
@@ -18,13 +18,15 @@ for file in glob.glob(os.path.join(FILE_PATH, "*.py")):
     module = __import__(name)
     for _, obj in inspect.getmembers(module):
         if isinstance(obj, type) and issubclass(obj, Test) and obj != Test and obj != SingleCommandTest and obj != WrappedTest:
-            BENCHMARK_APPLICATIONS[name] = obj
+            app = obj()
+            if not app.is_benchmark:
+                BENCHMARK_APPLICATIONS[name] = app
 
 
 @click.group(name="app")
 @click.pass_context
 def application(ctx, app: str):
-    ctx.obj = BENCHMARK_APPLICATIONS[app]()
+    ctx.obj = BENCHMARK_APPLICATIONS[app]
     print("123")
 
 
@@ -33,7 +35,7 @@ def application(ctx, app: str):
 # @click.argument("mode", type=click.Choice(["build", "instrument", "run"]))
 @click.pass_context
 def main(ctx, application: str):
-    ctx.obj = BENCHMARK_APPLICATIONS[application]()
+    ctx.obj = BENCHMARK_APPLICATIONS[application]
 
 
 @main.command(name="build")
