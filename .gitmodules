@@ -67,3 +67,9 @@
 [submodule "applications/hadoop_bench"]
 	path = applications/hadoop_bench
 	url = https://github.com/apache/hadoop
+[submodule "applications/tomcat_bench"]
+	path = applications/tomcat_bench
+	url = git@github.com:apache/tomcat.git
+[submodule "applications/jena_bench"]
+	path = applications/jena_bench
+	url = git@github.com:aoli-al/jena.git
