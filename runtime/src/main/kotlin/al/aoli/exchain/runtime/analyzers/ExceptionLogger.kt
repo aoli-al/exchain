@@ -93,7 +93,7 @@ object ExceptionLogger {
         }
         val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss")
         val path = formatter.format(LocalDateTime.now())
-        outBasePath = System.getenv("EXCHAIN_OUT_DIR") ?: "/tmp/" + "$basePath"
+        outBasePath = (System.getenv("EXCHAIN_OUT_DIR") ?: "/tmp/") + "/$basePath"
         val outPath = "$outBasePath/$path"
         val dataFolder = File(outPath)
         dataFolder.mkdirs()

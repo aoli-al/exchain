@@ -73,3 +73,6 @@
 [submodule "applications/jena_bench"]
 	path = applications/jena_bench
 	url = git@github.com:aoli-al/jena.git
+[submodule "applications/solr_bench"]
+	path = applications/solr_bench
+	url = git@github.com:aoli-al/solr.git
