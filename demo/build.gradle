@@ -55,10 +55,7 @@ task instrumentJarOrigin(type: JavaExec) {
 	jvmArgs "-DPhosphor.INSTRUMENTATION_CLASSPATH=${buildDir}/libs/instrumented_classes"
 	jvmArgs "-DPhosphor.ORIGIN_CLASSPATH=${buildDir}/libs/origin_classes"
 	args src, dst,
-			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory",
-			"-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPostCV",
-			"-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPreCV"
-	dependsOn ":phosphor:mergedJar"
+			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
 	dependsOn jar
 }
 
@@ -83,15 +80,11 @@ task instrumentCustomJarOriginDebug(type: JavaExec) {
 	mainClass = "edu.columbia.cs.psl.phosphor.Instrumenter"
 	var jarPath = "${project.rootProject.projectDir}/dependencies/phosphor/Phosphor/target/Phosphor-0.1.0-SNAPSHOT.jar"
 	classpath jarPath
-//	jvmArgs "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:5005"
-//	var src= "/Users/aoli/tests/classes"
-	var src= jar.getArchiveFile().get().asFile.absolutePath
-	var dst = "/tmp"
+	var src= "/tmp/work_dir"
+	var dst = "/tmp/out"
 	jvmArgs "-DPhosphor.DEBUG=true"
 	args src, dst,
 			"-taintTagFactory", "al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory"
-//			"-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPreCV",
-//			"-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV"
 	dependsOn jar
 }
 

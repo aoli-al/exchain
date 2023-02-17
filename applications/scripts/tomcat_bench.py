@@ -17,9 +17,6 @@ class Tomcat(WrappedTest):
             "JAVA_OPTS",
             is_benchmark=True
         )
-        self.src = os.path.join(self.work_dir, "output", "build")
-        self.inst_dst = os.path.join(self.work_dir, "output", "instrumented")
-        self.hybrid_dst = os.path.join(self.work_dir, "output", "hybrid")
 
     def build(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)

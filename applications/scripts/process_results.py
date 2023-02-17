@@ -110,6 +110,8 @@ def get_exception_distance(result: List[Tuple[Link, LinkType]], path: str) -> in
 def build_expected_dependencies():
     from runner import BENCHMARK_APPLICATIONS
     for name, app in BENCHMARK_APPLICATIONS.items():
+        if app.is_benchmark:
+            continue
         print(f"\n\n=================== Start processing {name}")
         expected_dependency= app.read_latest_dynamic_dependency()
         result = []

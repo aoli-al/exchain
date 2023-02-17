@@ -63,9 +63,20 @@ public class Main {
     }
 
     public static void main(String[] args) throws Throwable {
-        for (int i = 0; i < 5; i++) {
-            CustomizedThread t = new CustomizedThread(i);
-            t.start();
+        int[] a = new int[] {1, 2, 4, 5, 6, 7, 8, 10};
+        int[] b = new int[] {1, 2, 4, 5, 6, 7, 8, 10};
+        for (int i = 0; i < 1000; i++) {
+//            if (Arrays.equals(a, b)) {
+//                System.out.println("true");
+//            } else {
+//                System.out.println("false");
+//            }
+            Method m = Arrays.class.getMethod("equals", int[].class, int[].class);
+            if ((Boolean) (m.invoke(null, a, b))) {
+                System.out.println("true");
+            } else {
+                System.out.println("false");
+            }
         }
     }
 

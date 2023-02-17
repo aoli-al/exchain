@@ -19,8 +19,7 @@ for file in glob.glob(os.path.join(FILE_PATH, "*.py")):
     for _, obj in inspect.getmembers(module):
         if isinstance(obj, type) and issubclass(obj, Test) and obj != Test and obj != SingleCommandTest and obj != WrappedTest:
             app = obj()
-            if not app.is_benchmark:
-                BENCHMARK_APPLICATIONS[name] = app
+            BENCHMARK_APPLICATIONS[name] = app
 
 
 @click.group(name="app")
@@ -45,9 +44,10 @@ def build(app: SingleCommandTest):
 
 
 @main.command(name="instrument")
+@click.option('--debug/--no-debug', default=False, help='Enable debugging.')
 @click.pass_obj
-def instrument(app: SingleCommandTest):
-    app.instrument()
+def instrument(app: SingleCommandTest, debug: bool):
+    app.instrument(debug)
 
 
 @main.command(name="run")

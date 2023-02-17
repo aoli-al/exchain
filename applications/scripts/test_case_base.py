@@ -82,9 +82,13 @@ class Test:
     def build(self):
         pass
 
-    def instrument_dynamic(self, input_path: str, output_path: str):
+    def instrument_dynamic(self, input_path: str, output_path: str, debug=False):
+        debug_options = []
+        if debug:
+            debug_options.append(
+                "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005")
         subprocess.call("jenv local 16", shell=True, cwd=self.work_dir)
-        subprocess.call(["java",
+        subprocess.call(["java", *debug_options,
                         f"-DPhosphor.INSTRUMENTATION_CLASSPATH={self.instrumentation_classpath}",
                          f"-DPhosphor.ORIGIN_CLASSPATH={self.origin_classpath}",
                          "-cp", PHOSPHOR_JAR_PATH, "edu.columbia.cs.psl.phosphor.Instrumenter",
@@ -94,9 +98,13 @@ class Test:
                          #  "-priorClassVisitor", "al.aoli.exchain.phosphor.instrumenter.splitter.MethodSplitPreCV"
                          ], cwd=self.work_dir)
 
-    def instrument_hybrid(self, input_path: str, output_path: str):
+    def instrument_hybrid(self, input_path: str, output_path: str, debug=False):
+        debug_options = []
+        if debug:
+            debug_options.append(
+                "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005")
         subprocess.call("jenv local 16", shell=True, cwd=self.work_dir)
-        subprocess.call(["java",
+        subprocess.call(["java", *debug_options,
                         f"-DPhosphor.INSTRUMENTATION_CLASSPATH={self.hybrid_classpath}",
                          "-cp", PHOSPHOR_JAR_PATH, "edu.columbia.cs.psl.phosphor.Instrumenter",
                          input_path, output_path,
@@ -104,7 +112,7 @@ class Test:
                          "-postClassVisitor", "al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV"
                          ], cwd=self.work_dir)
 
-    def instrument(self):
+    def instrument(self, debug: bool = False):
         pass
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen):
@@ -148,9 +156,7 @@ class Test:
             f = open(self.origin_log_path, "w")
         else:
             f = sys.stdout.buffer
-        print(cmd)
         print(env)
-        print(work_dir)
         return subprocess.Popen(cmd,
                                 stdout=f, stderr=f,
                                 env={
@@ -174,12 +180,12 @@ class WrappedTest(Test):
         os.makedirs(self.hybrid_dist, exist_ok=True)
 
 
-    def instrument(self):
+    def instrument(self, debug: bool = False):
         shutil.copytree(self.origin_dist, self.dynamic_dist, dirs_exist_ok=True)
         shutil.copytree(self.origin_dist, self.hybrid_dist, dirs_exist_ok=True)
 
-        self.instrument_dynamic(self.origin_dist, self.dynamic_dist)
-        self.instrument_hybrid(self.origin_dist, self.hybrid_dist)
+        self.instrument_dynamic(self.origin_dist, self.dynamic_dist, debug)
+        self.instrument_hybrid(self.origin_dist, self.hybrid_dist, debug)
 
     def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str]:
         env = {}
@@ -220,13 +226,13 @@ class SingleCommandTest(Test):
         os.makedirs(self.instrumentation_output, exist_ok=True)
         os.makedirs(self.hybrid_output, exist_ok=True)
 
-    def instrument(self):
+    def instrument(self, debug: bool = False):
         if self.is_single_jar:
             input_name = f"{self.origin_jar_path}/{self.jar_name}"
         else:
             input_name = self.origin_jar_path
-        self.instrument_dynamic(input_name, self.instrumentation_output)
-        self.instrument_hybrid(input_name, self.hybrid_output)
+        self.instrument_dynamic(input_name, self.instrumentation_output, debug)
+        self.instrument_hybrid(input_name, self.hybrid_output, debug)
 
 #
     def get_origin_jar(self) -> str:
