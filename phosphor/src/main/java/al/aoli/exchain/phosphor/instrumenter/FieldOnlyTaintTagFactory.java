@@ -8,4 +8,9 @@ public class FieldOnlyTaintTagFactory extends DynamicSwitchTaintTagFactory {
     public boolean isIgnoredMethod(String owner, String name, String desc) {
         return true;
     }
+
+    @Override
+    public boolean makeFieldTransient() {
+        return false;
+    }
 }

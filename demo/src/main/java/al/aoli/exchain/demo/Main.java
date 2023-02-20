@@ -7,6 +7,7 @@ package al.aoli.exchain.demo;
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
 import org.apache.commons.math3.util.FastMath;
 
+import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
@@ -73,8 +74,34 @@ public class Main {
 
 
 
+    public static class Test implements Serializable {
+        private static final long serialVersionUID = -7151852354574635295L;
+
+        public final String method;
+        public final Object[] args;
+
+        public Test(String method, Object[] args) {
+            this.method = method;
+            this.args = args;
+        }
+
+    }
+
     public static void main(String[] args) throws Throwable {
-        FastMath.log(2.3);
+//        Test t = new Test("fooooo", new Object[]{"123", "456"});
+////        ByteArrayOutputStream st = new ByteArrayOutputStream();
+//        FileOutputStream fout=new FileOutputStream("/tmp/f_inst.txt");
+//        ObjectOutputStream out = new ObjectOutputStream(fout);
+//        out.writeObject(t);
+//        out.flush();
+
+//        byte[] bytes = st.toByteArray();
+        FileInputStream fin =new FileInputStream("/tmp/f_inst.txt");
+//
+//        ObjectInputStream inSt = new ObjectInputStream(new ByteArrayInputStream(bytes));
+        ObjectInputStream inSt = new ObjectInputStream(fin);
+        Object obj = inSt.readObject();
+        System.out.println(obj);
     }
 
     public static String concat(String a) {
