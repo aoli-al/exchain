@@ -9,7 +9,9 @@ from typing import Dict, Type
 
 # Load all python3 files in the current directory
 
-BENCHMARK_APPLICATIONS: Dict[str, Test] = {}
+TEST_APPLICATIONS: Dict[str, Test] = {}
+BENCH_APPLICATIONS: Dict[str, Test] = {}
+ALL_APPLICATIONS: Dict[str, Test] = {}
 FILE_PATH = os.path.dirname(os.path.abspath(__file__))
 
 for file in glob.glob(os.path.join(FILE_PATH, "*.py")):
@@ -19,22 +21,26 @@ for file in glob.glob(os.path.join(FILE_PATH, "*.py")):
     for _, obj in inspect.getmembers(module):
         if isinstance(obj, type) and issubclass(obj, Test) and obj != Test and obj != SingleCommandTest and obj != WrappedTest:
             app = obj()
-            BENCHMARK_APPLICATIONS[name] = app
+            if app.is_benchmark:
+                BENCH_APPLICATIONS[name] = app
+            else:
+                TEST_APPLICATIONS[name] = app
+            ALL_APPLICATIONS[name] = app
+
 
 
 @click.group(name="app")
 @click.pass_context
 def application(ctx, app: str):
-    ctx.obj = BENCHMARK_APPLICATIONS[app]
-    print("123")
+    ctx.obj = ALL_APPLICATIONS[app]
 
 
 @click.group(name="mode")
-@click.argument("application", type=click.Choice([app for app in BENCHMARK_APPLICATIONS.keys()]))
+@click.argument("application", type=click.Choice([app for app in ALL_APPLICATIONS.keys()]))
 # @click.argument("mode", type=click.Choice(["build", "instrument", "run"]))
 @click.pass_context
 def main(ctx, application: str):
-    ctx.obj = BENCHMARK_APPLICATIONS[application]
+    ctx.obj = ALL_APPLICATIONS[application]
 
 
 @main.command(name="build")

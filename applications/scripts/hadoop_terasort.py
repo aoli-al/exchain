@@ -2,13 +2,14 @@ from test_case_base import WrappedTest
 import subprocess
 import shutil
 import os
+import time
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class HadoopTerasort(WrappedTest):
     def __init__(self):
         super().__init__(
-            "hadoo_terasort",
+            "hadoop_terasort",
             "Lorg/apache/",
             "hadoop-dist/target/hadoop-3.3.4",
             ["./bin/hadoop", "jar", "./share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.4.jar",
@@ -26,10 +27,17 @@ class HadoopTerasort(WrappedTest):
         shutil.rmtree("/tmp/workload-gen", ignore_errors=True)
         shutil.rmtree("/tmp/workload-out", ignore_errors=True)
         print(self.origin_dist)
-
         subprocess.call(["./bin/hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.4.jar teragen 10000000 /tmp/workload-gen"],
                         cwd=self.origin_dist, shell=True,
                         env={
                             "JAVA_HOME": os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11")
         })
+        self.start_time = time.time()
+
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen):
+        # super().post(type, debug, cmd)
+        out, err = cmd.communicate()
+        exec_time = time.time() - self.start_time
+        with open(self.perf_result_path(type), "w") as f:
+            f.write(f"exec_time, {exec_time}\n")
 

@@ -76,3 +76,6 @@
 [submodule "applications/solr_bench"]
 	path = applications/solr_bench
 	url = git@github.com:aoli-al/solr.git
+[submodule "applications/fineract_bench"]
+	path = applications/fineract_bench
+	url = git@github.com:aoli-al/fineract.git

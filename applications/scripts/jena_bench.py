@@ -20,9 +20,9 @@ class Jena(SingleCommandTest):
         )
 
     def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str]:
-        (cmd, env, work_dir) = super().get_exec_command(type, debug)
+        (cmd, env, work_dir, f) = super().get_exec_command(type, debug)
         env["PERF_OUT_FILE"] = os.path.join(self.out_path, f"{type}-perf.txt")
-        return cmd, env, work_dir
+        return cmd, env, work_dir, f
 
     def build(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)

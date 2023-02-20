@@ -1,6 +1,6 @@
 import subprocess
 from commons import *
-from typing import List, Optional
+from typing import List, Optional, Any
 import glob
 import time
 import os
@@ -10,6 +10,10 @@ import shutil
 from process_results import *
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+
+
+class Bench:
+    pass
 
 
 class Test:
@@ -50,6 +54,9 @@ class Test:
         base_dir = os.path.join(self.out_path, f"{type}-results")
         latest = open(os.path.join(base_dir, "latest")).read().strip()
         return os.path.join(base_dir, latest)
+
+    def perf_result_path(self, type: str) -> str:
+        return os.path.join(self.out_path, f"{type}-perf.txt")
 
     def read_ground_truth(self) -> List[Tuple[Link, LinkType]]:
         data = jsonpickle.decode(open(self.ground_truth_path).read())
@@ -120,7 +127,7 @@ class Test:
             time.sleep(200)
             cmd.kill()
         else:
-            cmd.communicate()
+            out, err = cmd.communicate()
 
     def pre(self):
         pass
@@ -130,8 +137,12 @@ class Test:
         cmd = self.exec(type, debug)
         self.post(type, debug, cmd)
 
+    def process_bench_result(self, type: str, data: str):
+        pass
+
     def post_analysis(self, type: str, debug: bool = False):
-        print(self.out_path)
+        if self.is_benchmark:
+            return
         if type == "static":
             args = [
                 f"--args={self.origin_classpath} {self.out_path}/static-results"]
@@ -147,18 +158,14 @@ class Test:
                         cwd=os.path.join(DIR_PATH, "../.."), timeout=60 * 60 * 8)
 
 
-    def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str]:
-        return ([], {}, "")
+    def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
+        return ([], {}, "", sys.stdout.buffer)
 
     def exec(self, type: str, debug: bool) -> subprocess.Popen:
-        cmd, env, work_dir = self.get_exec_command(type, debug)
-        if type == "origin" and not self.is_benchmark:
-            f = open(self.origin_log_path, "w")
-        else:
-            f = sys.stdout.buffer
-        print(env)
+        cmd, env, work_dir, f = self.get_exec_command(type, debug)
         return subprocess.Popen(cmd,
-                                stdout=f, stderr=f,
+                                stdout=f,
+                                stderr=f,
                                 env={
                                     "EXCHAIN_OUT_DIR": self.out_path,
                                     **env
@@ -187,7 +194,7 @@ class WrappedTest(Test):
         self.instrument_dynamic(self.origin_dist, self.dynamic_dist, debug)
         self.instrument_hybrid(self.origin_dist, self.hybrid_dist, debug)
 
-    def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str]:
+    def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
         env = {}
         if type == "static":
             env["JAVA_HOME"] = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11")
@@ -206,7 +213,15 @@ class WrappedTest(Test):
             work_dir = self.origin_dist
         if debug:
             env[self.env_key] += " -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:5005"
-        return (self.start_command, env, work_dir)
+        if type == "origin" and not self.is_benchmark:
+            f = open(self.origin_log_path, "w")
+        elif self.is_benchmark:
+            f = subprocess.PIPE
+            # f = open(self.origin_log_path, "w")
+            f = sys.stdout.buffer
+        else:
+            f = sys.stdout.buffer
+        return (self.start_command, env, work_dir, f)
 
 
 
@@ -270,7 +285,7 @@ class SingleCommandTest(Test):
             f"-agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}",
             self.test_class]
 
-    def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str]:
+    def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
         if type == "origin":
             cmd = self.origin_commands()
             java = "java"
@@ -289,8 +304,10 @@ class SingleCommandTest(Test):
                 0, "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=5005")
         cmd = [java, *self.additional_args, *cmd]
         print(" ".join(cmd))
-        if type == "origin":
+        if type == "origin" and not self.is_benchmark:
             f = open(self.origin_log_path, "w")
+        elif self.is_benchmark:
+            f = subprocess.PIPE
         else:
             f = sys.stdout.buffer
-        return (cmd, os.environ, self.work_dir)
+        return (cmd, os.environ, self.work_dir, f)

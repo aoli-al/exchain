@@ -3,6 +3,7 @@ import subprocess
 import shutil
 import time
 import os
+import re
 from commons import *
 
 
@@ -24,5 +25,12 @@ class Tomcat(WrappedTest):
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen):
         time.sleep(10)
-        subprocess.call("ab -c 10 -n 100000 http://localhost:8080/", shell=True)
+        cmd = subprocess.Popen("ab -c 10 -n 100000 http://localhost:8080/", shell=True,
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        out, err = cmd.communicate()
+        result = re.search(
+            r"Time per request:\s+(\d+\.?\d*) \[ms\] \(mean\)", out.decode("utf-8"))
+        tpr = float(result.group(1))
         cmd.kill()
+        with open(self.perf_result_path(type), "w") as f:
+            f.write(f"tpr, {tpr}\n")

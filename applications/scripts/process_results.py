@@ -106,10 +106,20 @@ def get_exception_distance(result: List[Tuple[Link, LinkType]], path: str) -> in
                 src_found = True
     return max_distance
 
+def read_perf_result(path: str):
+    with open(path) as f:
+        result = {}
+        for line in f:
+            [url, time] = line.split(", ")
+            if url not in result:
+                result[url] = []
+            result[url].append(int(time))
+    return result
+
 
 def build_expected_dependencies():
-    from runner import BENCHMARK_APPLICATIONS
-    for name, app in BENCHMARK_APPLICATIONS.items():
+    from runner import TEST_APPLICATIONS
+    for name, app in TEST_APPLICATIONS.items():
         if app.is_benchmark:
             continue
         print(f"\n\n=================== Start processing {name}")
