@@ -5,6 +5,8 @@ package al.aoli.exchain.demo;
 // import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
 
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
+import org.apache.commons.math3.util.FastMath;
+
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
@@ -61,23 +63,18 @@ public class Main {
             System.out.println(f.get(this));
         }
     }
+    private static final double[][] LN_MANT = new double[][] {
+            {1, 2},
+            {2, 3}
+    };
+    private static final double[] LN_FOO = new double[] {
+            1, 2, 3
+    };
+
+
 
     public static void main(String[] args) throws Throwable {
-        int[] a = new int[] {1, 2, 4, 5, 6, 7, 8, 10};
-        int[] b = new int[] {1, 2, 4, 5, 6, 7, 8, 10};
-        for (int i = 0; i < 1000; i++) {
-//            if (Arrays.equals(a, b)) {
-//                System.out.println("true");
-//            } else {
-//                System.out.println("false");
-//            }
-            Method m = Arrays.class.getMethod("equals", int[].class, int[].class);
-            if ((Boolean) (m.invoke(null, a, b))) {
-                System.out.println("true");
-            } else {
-                System.out.println("false");
-            }
-        }
+        FastMath.log(2.3);
     }
 
     public static String concat(String a) {

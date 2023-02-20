@@ -13,6 +13,7 @@ extern exchain::ThreadPool *thread_pool;
 #ifdef __cplusplus
 extern "C" {
     JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_initializedCallback(JNIEnv *env);
+    JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_shutdown(JNIEnv *env);
     JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_registerWorkingThread(JNIEnv *env, jthread clazz);
     JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_unregisterWorkingThread(JNIEnv *env, jthread clazz);
 }
