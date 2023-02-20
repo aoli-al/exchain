@@ -92,11 +92,8 @@ task instrumentCustomJarOriginDebug(type: JavaExec) {
 task runOriginJar(type: JavaExec) {
 	var runtime = project(":runtime")
 	classpath "${buildDir}/libs/${project.name}-${version}.jar"
-	jvmArgs "-javaagent:${runtime.buildDir}/libs/runtime-shadow." +
-			"jar=static:/Users/aoli/repos/exchain/demo/build/libs/origin_classes"
 	mainClass = "al.aoli.exchain.demo.Main"
 	var nat= project(":native")
-	jvmArgs "-agentpath:${nat.buildDir}/lib/main/debug/lib${nat.name}.dylib=exchain:Lal/aoli/exchain/demo"
 	var instrumentation = project(":instrumentation")
 	dependsOn jar
 }
