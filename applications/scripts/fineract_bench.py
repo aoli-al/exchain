@@ -53,6 +53,12 @@ class FineractBench(SingleCommandTest):
                                 ** os.environ,
                             },
                             cwd=self.work_dir, shell=True)
+            subprocess.call("./gradlew --rerun-tasks integrationTest",
+                            env={
+                                "PERF_OUT_FILE": self.perf_result_path(type),
+                                ** os.environ,
+                            },
+                            cwd=self.work_dir, shell=True)
             cmd.kill()
         else:
             cmd.communicate()
