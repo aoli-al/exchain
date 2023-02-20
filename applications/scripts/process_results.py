@@ -126,7 +126,7 @@ def read_aggregate_perf_result_file(path):
     with open(path) as f:
         for line in f:
             [name, data] = line.split(", ")
-            items[name] = float(data)
+            items[name] = float(data.strip())
     return items
 
 def read_separate_perf_result(sources: List[str]):
