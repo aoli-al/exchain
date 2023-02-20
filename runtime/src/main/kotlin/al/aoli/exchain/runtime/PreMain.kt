@@ -16,9 +16,4 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
             AffectedVarDriver.type = Type.Hybrid
         }
     }
-
-    Runtime.getRuntime().addShutdownHook(Thread() {
-        ExceptionLogger.stop()
-        NativeRuntime.shutdown()
-    })
 }
