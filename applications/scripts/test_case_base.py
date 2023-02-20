@@ -212,7 +212,10 @@ class WrappedTest(Test):
             env["JAVA_HOME"] = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11")
             work_dir = self.origin_dist
         if debug:
-            env[self.env_key] += " -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:5005"
+            if self.env_key not in env:
+                env[self.env_key] = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:5005"
+            else:
+                env[self.env_key] += " -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:5005"
         if type == "origin" and not self.is_benchmark:
             f = open(self.origin_log_path, "w")
         elif self.is_benchmark:
