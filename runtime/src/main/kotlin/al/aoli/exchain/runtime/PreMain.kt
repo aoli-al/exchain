@@ -1,6 +1,7 @@
 package al.aoli.exchain.runtime
 
 import al.aoli.exchain.runtime.analyzers.AffectedVarDriver
+import al.aoli.exchain.runtime.analyzers.ExceptionLogger
 import al.aoli.exchain.runtime.objects.Type
 import java.lang.instrument.Instrumentation
 
@@ -15,4 +16,9 @@ fun premain(arguments: String?, instrumentation: Instrumentation) {
             AffectedVarDriver.type = Type.Hybrid
         }
     }
+
+    Runtime.getRuntime().addShutdownHook(Thread() {
+        ExceptionLogger.stop()
+        NativeRuntime.shutdown()
+    })
 }

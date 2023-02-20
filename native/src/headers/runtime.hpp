@@ -3,10 +3,12 @@
 #include <jni.h>
 #include <jvmti.h>
 #include <set>
+#include "thread_pool.hpp"
 
 
 extern bool initialized;
 extern std::set<jthread> working_threads;
+extern exchain::ThreadPool *thread_pool;
 
 #ifdef __cplusplus
 extern "C" {

@@ -14,6 +14,10 @@ JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_initializedCal
     initialized = true;
 }
 
+JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_shutdown(JNIEnv *env) {
+    thread_pool->Shutdown();
+}
+
 JNIEXPORT void JNICALL Java_al_aoli_exchain_runtime_NativeRuntime_registerWorkingThread(JNIEnv *env, jthread thread) {
     PLOG_INFO << "Worker thread: " << thread << " registered!";
     working_threads.insert(thread);

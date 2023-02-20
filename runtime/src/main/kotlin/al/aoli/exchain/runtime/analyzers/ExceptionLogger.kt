@@ -8,9 +8,14 @@ import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.concurrent.Executors
+import java.util.concurrent.ThreadFactory
 
 object ExceptionLogger {
-    val executor = Executors.newSingleThreadExecutor()
+    val executor = Executors.newSingleThreadExecutor(ThreadFactory {
+        val t = Executors.defaultThreadFactory().newThread(it)
+        t.isDaemon = true
+        t
+    })
 
     fun logException(e: Throwable): Int {
         val label = System.identityHashCode(e)

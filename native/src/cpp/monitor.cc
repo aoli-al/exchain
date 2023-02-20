@@ -18,7 +18,7 @@
 #include "utils.hpp"
 
 static JavaVM *jvm = nullptr;
-static exchain::ThreadPool *thread_pool = nullptr;
+exchain::ThreadPool *thread_pool = nullptr;
 
 void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
                                jmethodID method, jlocation location,

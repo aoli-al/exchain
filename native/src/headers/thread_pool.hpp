@@ -29,6 +29,8 @@ class ThreadPool {
     std::vector<std::thread> threads_;
     std::set<jlong> processing_threads_;
     std::chrono::time_point<std::chrono::system_clock> last_updated_time_ = std::chrono::system_clock::now();
+    bool shutdown_ = false;
+
 
    public:
     ThreadPool(int count, JavaVM *jvm) : count_(count), jvm_(jvm) {
@@ -73,6 +75,14 @@ class ThreadPool {
         return processing_threads_.find(thread_id) != processing_threads_.end();
     }
 
+    void Shutdown() {
+        shutdown_ = true;
+        task_available_cv_.notify_all();
+        for (auto&& t: threads_) {
+            t.join();
+        }
+    }
+
    private:
     bool ShouldStopWorker() {
         return last_updated_time_ + 10s < std::chrono::system_clock::now();
@@ -82,7 +92,7 @@ class ThreadPool {
 
     void Worker() {
         JNIEnv *jni;
-        if (auto result = jvm_->AttachCurrentThread((void **)&jni, NULL) != 0) {
+        if (auto result = jvm_->AttachCurrentThreadAsDaemon((void **)&jni, NULL) != 0) {
             PLOG_ERROR << "Failed to attach current thread: " << result;
             return;
         }
@@ -103,11 +113,15 @@ class ThreadPool {
             std::function<void(JNIEnv *)> task;
             std::unique_lock<std::mutex> lock(tasks_mutex);
             task_available_cv_.wait(lock, [this] { return !tasks_.empty(); });
+            if (shutdown_) {
+                break;
+            }
             task = std::move(tasks_.front());
             tasks_.pop();
             lock.unlock();
             task(jni);
         }
+        jvm_->DetachCurrentThread();
     }
 };
 }  // namespace exchain
