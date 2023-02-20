@@ -14,7 +14,7 @@ cmake {
         }
         native_debug {
             cmakeLists.set(file('src/CMakeLists.txt'))
-            cmakeArgs.add("-DCMAKE_BUILD_TYPE=Release")
+            cmakeArgs.add("-DCMAKE_BUILD_TYPE=Debug")
             targetMachines.add(machines.host)
         }
     }
