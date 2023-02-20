@@ -106,15 +106,60 @@ def get_exception_distance(result: List[Tuple[Link, LinkType]], path: str) -> in
                 src_found = True
     return max_distance
 
+import re
+
 def read_perf_result(path: str):
     with open(path) as f:
         result = {}
         for line in f:
             [url, time] = line.split(", ")
+            re_result = re.search(r"^(([^:/?#]+):)?(//([^/?#]*))?(([^?#]*)(\?([^#]*))?(#(.*))?)", url)
+            url = re_result.group(5)
             if url not in result:
                 result[url] = []
             result[url].append(int(time))
     return result
+
+
+def read_aggregate_perf_result_file(path):
+    items = {}
+    with open(path) as f:
+        for line in f:
+            [name, data] = line.split(", ")
+            items[name] = float(data)
+    return items
+
+def read_separate_perf_result(sources: List[str]):
+    result = [0]
+    origin_result = None
+    for source in sources:
+        diff = []
+        data = read_perf_result(source)
+        if origin_result is None:
+            origin_result = data
+        else:
+            for key in origin_result:
+                if key not in data:
+                    continue
+                origin_avg = sum(origin_result[key]) / len(origin_result[key])
+                data_avg = sum(data[key]) / len(data[key])
+                diff.append((data_avg - origin_avg) / origin_avg)
+            result.append(sum(diff) / len(diff))
+    return result
+
+
+def read_aggregate_perf_result(sources: List[str]):
+    result = {}
+    for source in sources:
+        data = read_aggregate_perf_result_file(source)
+        for name, value in data.items():
+            if name not in result:
+                result[name] = [value]
+            else:
+                diff = (value - result[name][0]) / result[name][0]
+                result[name].append((value, diff))
+    return result
+
 
 
 def build_expected_dependencies():
