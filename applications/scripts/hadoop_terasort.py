@@ -20,6 +20,7 @@ class HadoopTerasort(WrappedTest):
         )
 
     def build(self):
+        subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
         subprocess.call(
             "mvn package -Pdist -DskipTests  -Dmaven.javadoc.skip=true -DskipTests=true", shell=True, cwd=self.work_dir)
 
