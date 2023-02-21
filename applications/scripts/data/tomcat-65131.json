@@ -5,15 +5,15 @@
         "py/object": "objects.Link",
         "src": {
           "py/object": "objects.Exception",
-          "type": "java.lang.NoSuchMethodException",
-          "method": "java.lang.Class/getConstructor0:3517",
-          "message": "org.apache.coyote.Adapter.<init>()"
+          "type": "javax.net.ssl.SSLException",
+          "method": "org.apache.tomcat.util.net.SecureNioChannel/processSNI:330",
+          "message": "injected ssl exception"
         },
         "dst": {
           "py/object": "objects.Exception",
-          "type": "java.lang.NoSuchMethodException",
-          "method": "java.lang.Class/getConstructor0:3517",
-          "message": "org.apache.coyote.Adapter.<init>()"
+          "type": "java.lang.NullPointerException",
+          "method": "org.apache.tomcat.util.net.SecureNioChannel/close:538",
+          "message": "Cannot invoke \"javax.net.ssl.SSLEngine.closeOutbound()\" because \"this.sslEngine\" is null"
         }
       },
       {

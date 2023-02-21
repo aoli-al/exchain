@@ -110,14 +110,12 @@ import re
 
 def read_perf_result(path: str):
     with open(path) as f:
-        result = {}
+        result = []
         for line in f:
             [url, time] = line.split(", ")
             re_result = re.search(r"^(([^:/?#]+):)?(//([^/?#]*))?(([^?#]*)(\?([^#]*))?(#(.*))?)", url)
             url = re_result.group(5)
-            if url not in result:
-                result[url] = []
-            result[url].append(int(time))
+            result.append(int(time))
     return result
 
 
@@ -130,41 +128,40 @@ def read_aggregate_perf_result_file(path):
     return items
 
 def read_separate_perf_result(sources: List[str]):
-    result = [0]
+    result = []
     origin_result = None
     for source in sources:
         diff = []
         data = read_perf_result(source)
         if origin_result is None:
             origin_result = data
+            origin_avg = sum(origin_result) / len(origin_result)
+            result.append(map_data(origin_avg))
         else:
-            for key in origin_result:
-                if key not in data:
-                    continue
-                origin_avg = sum(origin_result[key]) / len(origin_result[key])
-                data_avg = sum(data[key]) / len(data[key])
-                if origin_avg == 0:
-                    continue
-                diff.append((data_avg - origin_avg) / origin_avg)
-            if len(diff) != 0:
-                result.append(sum(diff) / len(diff))
-            else:
-                result.append(0)
-    return result
+            data_avg = sum(data) / len(data)
+            result.append(map_data((data_avg, (data_avg - origin_avg) / origin_avg)))
+    return {"tpr": result}
 
 
 def read_aggregate_perf_result(sources: List[str]):
     result = {}
+    origin_result = {}
     for source in sources:
         data = read_aggregate_perf_result_file(source)
         for name, value in data.items():
             if name not in result:
-                result[name] = [value]
+                result[name] = [map_data(value)]
+                origin_result[name] = value
             else:
-                diff = (value - result[name][0]) / result[name][0]
-                result[name].append((value, diff))
+                diff = (value - origin_result[name]) / origin_result[name]
+                result[name].append(map_data((value, diff)))
     return result
 
+def map_data(data):
+    if isinstance(data, tuple):
+        return f"{data[0]:.1f}, {data[1] * 100:.1f}%"
+    else:
+        return f"{data:.1f}"
 
 
 def build_expected_dependencies():
