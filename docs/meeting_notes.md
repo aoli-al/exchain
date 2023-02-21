@@ -1458,3 +1458,36 @@ int dummyMain() {
     - We have ~2 months left
     - Maybe try to have a complete story first and then try to strengthen the story.
 
+
+# Feb 21
+
+- TODOs
+    - Benchmark ✅
+    - Think about the baseline approach (what is our story) 🚧
+    - Improve static analysis 🚧
+
+- Find 1~2 real issues about manual debugging
+- Ding's paper about logging (exceptions before failure)
+- Final exception is very far from the root cause
+
+
+- Benchmark
+    - 6 benchmark implemented (covered 7 applications)
+        - missing applications: nifi, wicket, hive
+    - 3 ways:
+        - run existing benchmarks
+            - hadoop (2), solr
+        - use benchmark tools:
+            - tomcat
+        - use integration tests:
+            - fineract, jena
+    - issues:
+        - more bugs found in underlying tools
+        - the quality of benchmark varies
+        - different benchmark uses different measurement
+            - throughput
+            - time per request
+            - execution time
+
+
+
