@@ -5,15 +5,15 @@
         "py/object": "objects.Link",
         "src": {
           "py/object": "objects.Exception",
-          "type": "java.lang.RuntimeException",
-          "method": "org.apache.hadoop.hive.common.metrics.metrics2.CodahaleMetrics$CodahaleMetricsScope/open:126",
-          "message": "cannot open scope"
+          "type": "org.apache.hadoop.hive.ql.parse.ParseException",
+          "method": "org.apache.hadoop.hive.ql.parse.ParseDriver/parse:125",
+          "message": "org.apache.hadoop.hive.ql.parse.ParseError@106c37dc"
         },
         "dst": {
           "py/object": "objects.Exception",
-          "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
-          "method": "org.apache.hadoop.hive.ql.DriverUtils/createProcessorException:181",
-          "message": "FAILED: RuntimeException cannot open scope"
+          "type": "java.lang.RuntimeException",
+          "method": "org.apache.hadoop.hive.common.metrics.metrics2.CodahaleMetrics$CodahaleMetricsScope/open:126",
+          "message": "cannot open scope"
         }
       },
       {
@@ -36,46 +36,15 @@
         "py/object": "objects.Link",
         "src": {
           "py/object": "objects.Exception",
-          "type": "java.lang.NullPointerException",
-          "method": "org.antlr.runtime.DFA/predict:74",
-          "message": "Cannot invoke \"edu.columbia.cs.psl.phosphor.struct.TaggedShortArray.get(int, edu.columbia.cs.psl.phosphor.runtime.Taint, edu.columbia.cs.psl.phosphor.runtime.PhosphorStackFrame)\" because \"this.specialPHOSPHOR_WRAPPER\" is null"
+          "type": "org.apache.hadoop.hive.ql.parse.ParseException",
+          "method": "org.apache.hadoop.hive.ql.parse.ParseDriver/parse:125",
+          "message": "org.apache.hadoop.hive.ql.parse.ParseError@106c37dc"
         },
         "dst": {
           "py/object": "objects.Exception",
           "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
           "method": "org.apache.hadoop.hive.ql.DriverUtils/createProcessorException:181",
-          "message": "FAILED: NullPointerException Cannot invoke \"edu.columbia.cs.psl.phosphor.struct.TaggedShortArray.get(int, edu.columbia.cs.psl.phosphor.runtime.Taint, edu.columbia.cs.psl.phosphor.runtime.PhosphorStackFrame)\" because \"this.specialPHOSPHOR_WRAPPER\" is null"
-        }
-      },
-      {
-        "py/reduce": [
-          {
-            "py/type": "objects.LinkType"
-          },
-          {
-            "py/tuple": [
-              1
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
-          "method": "org.apache.hadoop.hive.ql.DriverUtils/createProcessorException:181",
-          "message": "FAILED: RuntimeException cannot open scope"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.hive.service.cli.HiveSQLException",
-          "method": "org.apache.hive.service.cli.operation.Operation/toSQLException:372",
-          "message": "Error while compiling statement: FAILED: RuntimeException cannot open scope"
+          "message": "FAILED: ParseException org.apache.hadoop.hive.ql.parse.ParseError@400e60d2"
         }
       },
       {
@@ -88,38 +57,16 @@
       {
         "py/object": "objects.Link",
         "src": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.hadoop.hive.ql.parse.ParseException",
-          "method": "org.apache.hadoop.hive.ql.parse.ParseDriver/parse:125",
-          "message": "line 1:0 cannot recognize input near 's129V' '<EOF>' '<EOF>'"
-        },
-        "dst": {
           "py/object": "objects.Exception",
           "type": "java.lang.RuntimeException",
           "method": "org.apache.hadoop.hive.common.metrics.metrics2.CodahaleMetrics$CodahaleMetricsScope/open:126",
           "message": "cannot open scope"
-        }
-      },
-      {
-        "py/id": 4
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.hadoop.hive.ql.parse.ParseException",
-          "method": "org.apache.hadoop.hive.ql.parse.ParseDriver/parse:125",
-          "message": "line 1:0 cannot recognize input near 's129V' '<EOF>' '<EOF>'"
         },
         "dst": {
           "py/object": "objects.Exception",
           "type": "org.apache.hadoop.hive.ql.processors.CommandProcessorException",
           "method": "org.apache.hadoop.hive.ql.DriverUtils/createProcessorException:181",
-          "message": "FAILED: ParseException line 1:0 cannot recognize input near 's129V' '<EOF>' '<EOF>'"
+          "message": "FAILED: RuntimeException cannot open scope"
         }
       },
       {
@@ -135,7 +82,7 @@
           "py/object": "objects.Exception",
           "type": "org.apache.hive.service.cli.HiveSQLException",
           "method": "org.apache.hive.service.cli.operation.Operation/toSQLException:372",
-          "message": "Error while compiling statement: FAILED: ParseException line 1:0 cannot recognize input near 's129V' '<EOF>' '<EOF>'"
+          "message": "Error while compiling statement: FAILED: ParseException org.apache.hadoop.hive.ql.parse.ParseError@400e60d2"
         },
         "dst": {
           "py/object": "objects.Exception",

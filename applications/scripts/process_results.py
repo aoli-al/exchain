@@ -110,14 +110,12 @@ import re
 
 def read_perf_result(path: str):
     with open(path) as f:
-        result = {}
+        result = []
         for line in f:
             [url, time] = line.split(", ")
             re_result = re.search(r"^(([^:/?#]+):)?(//([^/?#]*))?(([^?#]*)(\?([^#]*))?(#(.*))?)", url)
             url = re_result.group(5)
-            if url not in result:
-                result[url] = []
-            result[url].append(int(time))
+            result.append(int(time))
     return result
 
 
@@ -138,13 +136,9 @@ def read_separate_perf_result(sources: List[str]):
         if origin_result is None:
             origin_result = data
         else:
-            for key in origin_result:
-                if key not in data:
-                    continue
-                origin_avg = sum(origin_result[key]) / len(origin_result[key])
-                data_avg = sum(data[key]) / len(data[key])
-                diff.append((data_avg - origin_avg) / origin_avg)
-            result.append(sum(diff) / len(diff))
+            origin_avg = sum(origin_result) / len(origin_result)
+            data_avg = sum(data) / len(data)
+            result.append((data_avg - origin_avg) / origin_avg)
     return result
 
 
