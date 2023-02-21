@@ -21,7 +21,8 @@ void ExceptionProcessor::FullPass() {
     if (ProcessorBase::CheckJvmTIError(
             jvmti_->GetStackTrace(thread_, 0, kMaxStackDepth, frames, &count),
             "failed to get stack trace.")) {
-        // PLOG_INFO << "Stack count: " << count;
+        // PLOG_ERROR << "Exception: " << throw_method_ << " " << catch_method_
+        //            << " Stack count: " << count;
         bool is_application_code_visited = false;
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
             auto method_signature = GetMethodSignature(frames[stack_idx].method);
@@ -100,7 +101,8 @@ bool ExceptionProcessor::ShouldIgnoreClass(std::string class_name) {
     //        method_name.starts_with("Lcom/sun") ||
     //        method_name.starts_with("Lkotlin") ||
     return class_name.starts_with("Lorg/apache/zookeeper") ||
-           class_name.starts_with("Ljava/lang/Class");
+           class_name.starts_with("Ljava/lang/Class") ||
+           class_name.starts_with("Lorg/apache/solr/parser");
 }
 
 bool ExceptionProcessor::ShouldTerminateEarly(std::string class_name,

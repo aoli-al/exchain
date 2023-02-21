@@ -13,4 +13,9 @@ public class FieldOnlyTaintTagFactory extends DynamicSwitchTaintTagFactory {
     public boolean makeFieldTransient() {
         return false;
     }
+
+    @Override
+    public boolean disableClinitRetransform() {
+        return true;
+    }
 }
