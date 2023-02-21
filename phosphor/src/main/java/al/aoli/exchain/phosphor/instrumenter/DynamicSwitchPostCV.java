@@ -82,7 +82,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                                     StringHelper.concat(visitor.name, visitor.descriptor)))) {
                 visitor.isSecondPass = false;
                 visitor.isInstrumentedCode = false;
-                visitor.originNode.accept(new ReflectionFixingMethodVisitor(visitor, owner));
+                visitor.originNode.accept(new ReflectionFixingMethodVisitor(visitor, owner, visitor.name));
                 visitor.isInstrumentedCode = true;
                 visitor.isSecondPass = true;
                 visitor.instrumentedNode.accept(visitor);
@@ -115,7 +115,7 @@ public class DynamicSwitchPostCV extends ClassVisitor {
                                         visitor.descriptor,
                                         visitor.signature,
                                         visitor.exceptions),
-                                owner);
+                                owner, originMethodName);
                 visitor.originNode.accept(
                         new ReplayMethodVisitor(
                                 visitor.access,
