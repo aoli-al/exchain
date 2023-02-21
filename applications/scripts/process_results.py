@@ -143,8 +143,13 @@ def read_separate_perf_result(sources: List[str]):
                     continue
                 origin_avg = sum(origin_result[key]) / len(origin_result[key])
                 data_avg = sum(data[key]) / len(data[key])
+                if origin_avg == 0:
+                    continue
                 diff.append((data_avg - origin_avg) / origin_avg)
-            result.append(sum(diff) / len(diff))
+            if len(diff) != 0:
+                result.append(sum(diff) / len(diff))
+            else:
+                result.append(0)
     return result
 
 
