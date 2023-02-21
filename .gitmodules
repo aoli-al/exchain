@@ -79,3 +79,6 @@
 [submodule "applications/fineract_bench"]
 	path = applications/fineract_bench
 	url = git@github.com:aoli-al/fineract.git
+[submodule "applications/hive_bench"]
+	path = applications/hive_bench
+	url = git@github.com:aoli-al/hive.git

@@ -21,21 +21,6 @@ test {
 	useJUnitPlatform()
 }
 
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-task createShadow(type: ShadowJar) {
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	archiveBaseName.set('runtime-shadow')
-	archiveClassifier.set('')
-	archiveVersion.set('')
-	relocate 'org.objectweb.asm', 'al.aoli.exchain.instrumentation.asm'
-	dependsOn ':native:build'
-	exclude "module-info.class"
-	from sourceSets.main.output
-	from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
-	manifest {
-		attributes "Premain-Class": "al.aoli.exchain.runtime.PreMainKt"
-	}
-}
 
 //task mergedJar(type: Jar) {
 //	archiveBaseName.set("runtime-merged")
@@ -122,4 +107,22 @@ task createInstrumentedJDKWithDynSwitch(type: JavaExec) {
 
 jar {
 	archiveClassifier.set("slim")
+}
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+task createShadow(type: ShadowJar) {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	archiveBaseName.set('runtime-shadow')
+	archiveClassifier.set('')
+	archiveVersion.set('')
+	relocate 'org.objectweb.asm', 'al.aoli.exchain.instrumentation.asm'
+	dependsOn ':native:build'
+	exclude "module-info.class"
+	from sourceSets.main.output
+	from { project.configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+	manifest {
+		attributes "Premain-Class": "al.aoli.exchain.runtime.PreMainKt"
+	}
+	dependsOn createInstrumentedJDK
+	dependsOn createFieldOnlyInstrumentedJDK
 }
