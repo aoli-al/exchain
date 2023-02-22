@@ -25,8 +25,8 @@ class Tomcat(WrappedTest):
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen):
         time.sleep(10)
-        cmd = subprocess.Popen("ab -k -c 149 -n 100000 http://localhost:8080/", shell=True)
-        cmd = subprocess.Popen("ab -k -c 149 -n 1000000 http://localhost:8080/", shell=True,
+        cmd = subprocess.Popen("ab -k -c 149 -n 100000 http://localhost:8080/examples/servlets/nonblocking/numberwriter", shell=True)
+        cmd = subprocess.Popen("ab -k -c 149 -n 100000 http://localhost:8080/examples/servlets/nonblocking/numberwriter", shell=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = cmd.communicate()
         result = re.search(
