@@ -4,6 +4,7 @@ import shutil
 import time
 import os
 import re
+import signal
 from commons import *
 
 
@@ -25,13 +26,22 @@ class Tomcat(WrappedTest):
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen):
         time.sleep(10)
-        cmd = subprocess.Popen("ab -k -c 149 -n 100000 http://localhost:8080/examples/servlets/nonblocking/numberwriter", shell=True)
-        cmd = subprocess.Popen("ab -k -c 149 -n 100000 http://localhost:8080/examples/servlets/nonblocking/numberwriter", shell=True,
+        cmd = subprocess.call("ab -k -c 149 -n 10000 http://localhost:8080/", shell=True)
+        cmd = subprocess.Popen("ab -k -c 149 -n 10000 http://localhost:8080/", shell=True,
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = cmd.communicate()
         result = re.search(
             r"Time per request:\s+(\d+\.?\d*) \[ms\] \(mean\)", out.decode("utf-8"))
         tpr = float(result.group(1))
-        cmd.kill()
+        if type == "dynamic":
+            work_dir = self.dynamic_dist
+        elif type == "hybrid":
+            work_dir = self.hybrid_dist
+        else:
+            work_dir = self.origin_dist
+        # cmd.send_signal(signal.SIGINT)
+        # cmd.kill()
+        _, env, work_dir, _ = self.get_exec_command(type, False)
+        subprocess.call(["bin/catalina.sh", "stop"], cwd=work_dir, env=env)
         with open(self.perf_result_path(type), "w") as f:
             f.write(f"tpr, {tpr}\n")

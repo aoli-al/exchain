@@ -46,8 +46,8 @@ class Solr(WrappedTest):
         print("==========================")
         print(err.decode("utf-8"))
 
-        result = re.search(r"\(min, avg, max\) = \((\d+\.?\d*), (\d+\.?\d*), (\d+\.?\d*)\),", out.decode("utf-8"))
-        throughput = float(result.group(2))
+        result = re.search(r"Iteration   1: (\d+\.?\d*) ops/s", out.decode("utf-8"))
+        throughput = float(result.group(1))
         with open(self.perf_result_path(type), "w") as f:
             f.write(f"throughput, {throughput}\n")
 
