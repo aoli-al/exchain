@@ -16,7 +16,7 @@ class FineractBench(SingleCommandTest):
             "Lorg/apache/fineract:Lorg/springframework/core:Lretrofit/client",
             additional_args=[
                 "--add-opens=java.base/java.lang=ALL-UNNAMED",
-                
+
             ],
             is_benchmark=True)
 
@@ -40,7 +40,7 @@ class FineractBench(SingleCommandTest):
         cmd, env, work_dir, _ = super().get_exec_command(type, debug)
         return cmd, env, work_dir, open("/tmp/fineract.out", "w")
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         if type == "dynamic":
             time.sleep(300)
         else:
@@ -49,13 +49,13 @@ class FineractBench(SingleCommandTest):
             subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
             subprocess.call("./gradlew --rerun-tasks integrationTest",
                             env={
-                                "PERF_OUT_FILE": self.perf_result_path(type),
+                                "PERF_OUT_FILE": self.perf_result_path(type, iter),
                                 ** os.environ,
                             },
                             cwd=self.work_dir, shell=True)
             subprocess.call("./gradlew --rerun-tasks integrationTest",
                             env={
-                                "PERF_OUT_FILE": self.perf_result_path(type),
+                                "PERF_OUT_FILE": self.perf_result_path(type, iter),
                                 ** os.environ,
                             },
                             cwd=self.work_dir, shell=True)

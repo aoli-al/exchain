@@ -38,8 +38,6 @@ public class HomePage3 extends WebPage
     @Override
     protected void onBeforeRender()
     {
-        System.out.println( "Model still attached? " + ldm.isAttached() );
-
         super.onBeforeRender();
     }
 
@@ -47,8 +45,6 @@ public class HomePage3 extends WebPage
     protected void onDetach()
     {
         super.onDetach();
-
-        System.out.println( "Page detaching" );
     }
 
     private class LDM extends LoadableDetachableModel<String>

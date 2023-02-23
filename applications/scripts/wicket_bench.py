@@ -1,28 +1,25 @@
-from test_case_base import WrappedTest
+from test_case_base import SingleCommandTest
 import subprocess
-import shutil
 import time
 import os
+import requests
 import re
-import signal
-from commons import *
 
 
-class Tomcat(WrappedTest):
-
+class Wicket(SingleCommandTest):
     def __init__(self):
         super().__init__(
-            "tomcat_bench",
-            "Lorg/apache/tomcat",
-            "output/build",
-            ["bin/catalina.sh", "run"],
-            "JAVA_OPTS",
+            "wicket_bench",
+            "myproject-1.0-SNAPSHOT-test-jar-with-dependencies.jar",
+            "target",
+            "org.apache.wicket.myapplication.Start",
+            "Lorg/apache/",
             is_benchmark=True
         )
 
     def build(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
-        subprocess.call("ant", cwd=self.work_dir, shell=True)
+        subprocess.call(["mvn", "install", "-DskipTests"], cwd=self.work_dir)
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         time.sleep(10)

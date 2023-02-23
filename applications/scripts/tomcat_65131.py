@@ -21,7 +21,7 @@ class Tomcat(WrappedTest):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
         subprocess.call("ant", cwd=self.work_dir, shell=True)
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         time.sleep(10)
         subprocess.call("curl -q -k https://localhost:8443", shell=True)
         cmd.kill()

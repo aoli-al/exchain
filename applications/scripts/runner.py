@@ -59,9 +59,11 @@ def instrument(app: SingleCommandTest, debug: bool):
 @main.command(name="run")
 @click.option('--type', type=click.Choice(DEFAULT_TYPES), default="origin", help='Type of run.')
 @click.option('--debug/--no-debug', default=False, help='Enable debugging.')
+@click.option('--iter', type=int, default=1)
 @click.pass_obj
-def run(app: SingleCommandTest, type: str, debug: bool):
-    app.run_test(type, debug)
+def run(app: SingleCommandTest, type: str, debug: bool, iter: int):
+    for i in range(iter):
+        app.run_test(type, debug, i)
 
 
 @main.command(name="analyze")

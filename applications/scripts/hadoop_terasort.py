@@ -35,10 +35,10 @@ class HadoopTerasort(WrappedTest):
         })
         self.start_time = time.time()
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         # super().post(type, debug, cmd)
         out, err = cmd.communicate()
         exec_time = time.time() - self.start_time
-        with open(self.perf_result_path(type), "w") as f:
+        with open(self.perf_result_path(type, iter), "w") as f:
             f.write(f"exec_time, {exec_time}\n")
 

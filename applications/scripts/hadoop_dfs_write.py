@@ -28,11 +28,11 @@ class HadoopDFSWrite(WrappedTest):
     def pre(self):
         shutil.rmtree("/tmp/dfs-write", ignore_errors=True)
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         out, err = cmd.communicate()
         shutil.rmtree("/tmp/dfs-write", ignore_errors=True)
         result = self.find_result(err.decode("utf-8"))
-        with open(self.perf_result_path(type), "w") as f:
+        with open(self.perf_result_path(type, iter), "w") as f:
             f.write(f"throughput, {result[0]}\n")
             f.write(f"exec_time, {result[1]}\n")
 

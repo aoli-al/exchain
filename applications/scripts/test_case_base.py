@@ -55,8 +55,8 @@ class Test:
         latest = open(os.path.join(base_dir, "latest")).read().strip()
         return os.path.join(base_dir, latest)
 
-    def perf_result_path(self, type: str) -> str:
-        return os.path.join(self.out_path, f"{type}-perf.txt")
+    def perf_result_path(self, type: str, iter: int) -> str:
+        return os.path.join(self.out_path, f"{type}-perf.{iter}.txt")
 
     def read_ground_truth(self) -> List[Tuple[Link, LinkType]]:
         data = jsonpickle.decode(open(self.ground_truth_path).read())
@@ -122,7 +122,7 @@ class Test:
     def instrument(self, debug: bool = False):
         pass
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         if not self.is_benchmark and not debug:
             time.sleep(200)
             cmd.kill()
@@ -132,10 +132,10 @@ class Test:
     def pre(self):
         pass
 
-    def run_test(self, type: str, debug: bool = False):
+    def run_test(self, type: str, debug: bool = False, iter: int = 0):
         self.pre()
         cmd = self.exec(type, debug)
-        self.post(type, debug, cmd)
+        self.post(type, debug, cmd, iter)
 
     def process_bench_result(self, type: str, data: str):
         pass
@@ -221,7 +221,7 @@ class WrappedTest(Test):
         elif self.is_benchmark:
             f = subprocess.PIPE
             # f = open(self.origin_log_path, "w")
-            # f = sys.stdout.buffer
+            f = sys.stdout.buffer
         else:
             f = sys.stdout.buffer
         return (self.start_command, env, work_dir, f)
@@ -311,6 +311,7 @@ class SingleCommandTest(Test):
             f = open(self.origin_log_path, "w")
         elif self.is_benchmark:
             f = subprocess.PIPE
+            f = sys.stdout.buffer
         else:
             f = sys.stdout.buffer
         return (cmd, os.environ, self.work_dir, f)
