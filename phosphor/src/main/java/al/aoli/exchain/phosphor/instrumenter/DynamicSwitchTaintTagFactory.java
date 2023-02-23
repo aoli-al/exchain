@@ -16,6 +16,11 @@ public class DynamicSwitchTaintTagFactory extends DataAndControlFlowTagFactory {
     }
 
     @Override
+    public boolean makeFieldTransient() {
+        return true;
+    }
+
+    @Override
     public boolean isIgnoredClass(String className) {
         if (className.startsWith("al/aoli/exchain/instrumentation")
                 || className.startsWith("al/aoli/exchain/runtime")
