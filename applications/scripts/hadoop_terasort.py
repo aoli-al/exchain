@@ -3,6 +3,7 @@ import subprocess
 import shutil
 import os
 import time
+import re
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -37,8 +38,9 @@ class HadoopTerasort(WrappedTest):
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         # super().post(type, debug, cmd)
         out, err = cmd.communicate()
-        # print(out.decode("utf-8"))
+        print(out.decode("utf-8"))
         # print(err.decode('utf-8'))
-        # with open(self.perf_result_path(type, iter), "w") as f:
-        #     f.write(f"exec_time, {exec_time}\n")
+        result = re.search(r"run time:(\d+\.?\d*)", out.decode('utf-8'))
+        with open(self.perf_result_path(type, iter), "w") as f:
+            f.write(f"exec_time, {result.group(1)}\n")
 
