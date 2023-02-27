@@ -40,9 +40,6 @@
 [submodule "applications/solr-16363"]
 	path = applications/solr-16363
 	url = git@github.com:aoli-al/solr.git
-[submodule "applications/wicket-6908"]
-	path = applications/wicket-6908
-	url = git@github.com:aoli-al/wicket.git
 [submodule "applications/zookeeper-2247"]
 	path = applications/zookeeper-2247
 	url = git@github.com:aoli-al/zookeeper.git
@@ -66,7 +63,7 @@
 	url = git@github.com:aoli-al/tomcat.git
 [submodule "applications/hadoop_bench"]
 	path = applications/hadoop_bench
-	url = https://github.com/apache/hadoop
+	url = git@github.com:aoli-al/hadoop.git
 [submodule "applications/tomcat_bench"]
 	path = applications/tomcat_bench
 	url = git@github.com:apache/tomcat.git
@@ -82,3 +79,6 @@
 [submodule "applications/hive_bench"]
 	path = applications/hive_bench
 	url = git@github.com:aoli-al/hive.git
+[submodule "applications/TINKERPOP-2597"]
+	path = applications/TINKERPOP-2597
+	url = git@github.com:aoli-al/tinkerpop.git
