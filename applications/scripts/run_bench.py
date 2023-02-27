@@ -14,8 +14,9 @@ import subprocess
 @click.option("--analyze/--no-analyze", default=True, help="Run the project")
 @click.option("--skip-app", multiple=True, help="Skip specific appliaction")
 @click.option("--skip-type", multiple=True, help="Skip specific type")
+@click.option('--iter', type=int, default=1)
 def bench(dataset: str, build: bool, instrument: bool, run: bool, analyze: bool,
-          skip_app: List[str], skip_type: List[str]):
+          skip_app: List[str], skip_type: List[str], iter: int):
     if dataset == "all":
         data = ALL_APPLICATIONS.items()
     elif dataset == "bench":
@@ -34,7 +35,8 @@ def bench(dataset: str, build: bool, instrument: bool, run: bool, analyze: bool,
         for t in DEFAULT_TYPES:
             if t not in skip_type:
                 if run:
-                    app.run_test(t, False)
+                    for i in range(iter):
+                        app.run_test(t, False, i)
                 if analyze:
                     app.post_analysis(t)
 

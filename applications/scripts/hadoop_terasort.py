@@ -33,12 +33,12 @@ class HadoopTerasort(WrappedTest):
                         env={
                             "JAVA_HOME": os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11")
         })
-        self.start_time = time.time()
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         # super().post(type, debug, cmd)
         out, err = cmd.communicate()
-        exec_time = time.time() - self.start_time
-        with open(self.perf_result_path(type, iter), "w") as f:
-            f.write(f"exec_time, {exec_time}\n")
+        # print(out.decode("utf-8"))
+        # print(err.decode('utf-8'))
+        # with open(self.perf_result_path(type, iter), "w") as f:
+        #     f.write(f"exec_time, {exec_time}\n")
 

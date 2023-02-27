@@ -108,7 +108,7 @@ def get_exception_distance(result: List[Tuple[Link, LinkType]], path: str) -> in
 
 import re
 
-def read_perf_result(path: str):
+def read_separate_perf_result(path: str):
     with open(path) as f:
         result = []
         for line in f:
@@ -116,53 +116,90 @@ def read_perf_result(path: str):
             re_result = re.search(r"^(([^:/?#]+):)?(//([^/?#]*))?(([^?#]*)(\?([^#]*))?(#(.*))?)", url)
             url = re_result.group(5)
             result.append(int(time))
-    return result
+    return {"tpr": sum(result) / len(result)}
 
 
-def read_aggregate_perf_result_file(path):
+def read_aggregate_perf_result(path):
     items = {}
     with open(path) as f:
         for line in f:
             [name, data] = line.split(", ")
             items[name] = float(data.strip())
+            break
     return items
 
-def read_separate_perf_result(sources: List[str]):
-    result = []
-    origin_result = None
-    for source in sources:
-        diff = []
-        data = read_perf_result(source)
-        if origin_result is None:
-            origin_result = data
-            origin_avg = sum(origin_result) / len(origin_result)
-            result.append(map_data(origin_avg))
-        else:
-            data_avg = sum(data) / len(data)
-            result.append(map_data((data_avg, (data_avg - origin_avg) / origin_avg)))
-    return {"tpr": result}
 
-
-def read_aggregate_perf_result(sources: List[str]):
-    result = {}
-    origin_result = {}
-    for source in sources:
-        data = read_aggregate_perf_result_file(source)
-        for name, value in data.items():
-            if name not in result:
-                result[name] = [map_data(value)]
-                origin_result[name] = value
+import pandas as pd
+def read_perf_result(app):
+    types = ["origin", "static", "hybrid", "dynamic"]
+    perf_result = [app.test_name]
+    origin_result = 0
+    for t in types:
+        data = {}
+        for i in range(10):
+            path = app.perf_result_path(t, i)
+            if app.test_name in ["fineract_bench", "jena_bench"]:
+                result = read_separate_perf_result(path)
             else:
-                diff = (value - origin_result[name]) / origin_result[name]
-                result[name].append(map_data((value, diff)))
-    return result
+                result = read_aggregate_perf_result(path)
+            for key, value in  result.items():
+                if key not in data:
+                    data[key] = []
+                data[key].append(value)
+        df = pd.DataFrame(data)
+        for key in result.keys():
+            mean = df[key].mean()
+            perf_result.append(f"{mean:.1f}")
+            perf_result.append(f"{df[key].std():.1f}")
+            if t == "origin":
+                origin_result = mean
+            else:
+                perf_result.append(
+                    f"{(mean - origin_result) / origin_result * 100:.1f}" + "%")
+    return perf_result
+
+
+
+
+
+
+
+
+# def read_separate_perf_result(sources: List[str]):
+#     result = []
+#     origin_result = None
+#     for source in sources:
+#         diff = []
+#         data = read_perf_result(source)
+#         if origin_result is None:
+#             origin_result = data
+#             origin_avg = sum(origin_result) / len(origin_result)
+#             result.append(map_data(origin_avg))
+#         else:
+#             data_avg = sum(data) / len(data)
+#             result.append(map_data((data_avg, (data_avg - origin_avg) / origin_avg)))
+#     return {"tpr": result}
+
+
+# def read_aggregate_perf_result(sources: List[str]):
+#     result = {}
+#     origin_result = {}
+#     for source in sources:
+#         data = read_aggregate_perf_result_file(source)
+#         for name, value in data.items():
+#             if name not in result:
+#                 result[name] = [map_data(value)]
+#                 origin_result[name] = value
+#             else:
+#                 diff = (value - origin_result[name]) / origin_result[name]
+#                 result[name].append(map_data((value, diff)))
+#     return result
 
 def map_data(data):
     if isinstance(data, tuple):
         return f"{data[0]:.1f}, {data[1] * 100:.1f}%"
     else:
         return f"{data:.1f}"
-
 
 def build_expected_dependencies():
     from runner import TEST_APPLICATIONS
