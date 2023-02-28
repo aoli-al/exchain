@@ -151,13 +151,13 @@ object AffectedVarDriver {
 
     fun updateTaint(obj: PowerSetTree.SetNode, exception: Any): Taint<*> {
         val label = System.identityHashCode(exception)
-        exceptionStore[label] = exception
+//        exceptionStore[label] = exception
         return obj.union(Taint.withLabel(label))
     }
 
     fun updateAffectedFields(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
         val label = System.identityHashCode(exception)
-        exceptionStore[label] = exception
+//        exceptionStore[label] = exception
         if (obj != null) {
             for (name in affectedVarResult.affectedFieldName) {
                 try {
@@ -215,11 +215,35 @@ object AffectedVarDriver {
 
     fun taintObject(obj: TaintedWithObjTag, exception: Any) {
         val label = System.identityHashCode(exception)
-        exceptionStore[label] = exception
+//        exceptionStore[label] = exception
         if (obj.phosphoR_TAG != null) {
             obj.phosphoR_TAG = (obj.phosphoR_TAG as Taint<Int>).union(Taint.withLabel(label))
         } else {
             obj.phosphoR_TAG = Taint.withLabel(label)
+        }
+    }
+
+    fun taintObjectWithLabel(obj: TaintedWithObjTag, label: Int) {
+        if (obj.phosphoR_TAG != null) {
+            obj.phosphoR_TAG = (obj.phosphoR_TAG as Taint<Int>).union(Taint.withLabel(label))
+        } else {
+            obj.phosphoR_TAG = Taint.withLabel(label)
+        }
+    }
+
+    fun processException(obj: Any?) {
+        if (type == Type.Static) return
+        if (obj == null || obj !is Exception || obj !is TaintedWithObjTag) return
+        val label = System.identityHashCode(obj)
+        exceptionStore[label] = obj
+        taintObjectWithLabel(obj, label)
+        for (declaredField in obj.javaClass.declaredFields) {
+            if (declaredField.trySetAccessible()) {
+                val field = declaredField.get(obj);
+                if (field is TaintedWithObjTag) {
+                    taintObjectWithLabel(field, label)
+                }
+            }
         }
     }
 

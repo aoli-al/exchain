@@ -24,11 +24,18 @@ class Wicket(SingleCommandTest):
         time.sleep(10)
         if not debug:
             s = requests.Session()
+            s2 = requests.Session()
             s.get("http://localhost:8080")
             s.get("http://localhost:8080/?0-1.-test")
             s.get("http://localhost:8080/wicket/page?1-999.-btn")
+            s2.get("http://localhost:8080/?0")
+            print(s2.get("http://localhost:8080/?0-1.-test2").text)
+
+
             s.get("http://localhost:8080/wicket/page?1-999.-btn")
+
             s.close()
+            s2.close()
             time.sleep(1)
 
             cmd.kill()

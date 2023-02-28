@@ -110,7 +110,11 @@ object ExceptionRuntime {
         } catch (e: Throwable) {
             false
         }
+    }
 
+    @JvmStatic
+    fun processException(obj: Any?) {
+        AffectedVarDriver.processException(obj)
     }
 
     @JvmStatic

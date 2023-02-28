@@ -61,6 +61,7 @@ class ExceptionProcessor : ProcessorBase {
     int ComputeExceptionId(jobject obj);
     void FullPass();
     void LoggingPass();
+    void ProcessException();
 
    public:
     void Process();

@@ -42,8 +42,16 @@ object ExceptionLogger {
         executor.shutdown()
     }
 
+    val dependencyCache = mutableSetOf<Pair<Int, Int>>()
+
     fun logDependency(e1: Int, e2: Int) {
-        executor.submit { dynamicDependencyLog.appendText("$e1, $e2\n") }
+        executor.submit {
+            val pair = Pair(e1, e2)
+            if (pair !in dependencyCache) {
+                dependencyCache.add(pair)
+                dynamicDependencyLog.appendText("$e1, $e2\n")
+            }
+        }
     }
 
     fun logAffectedVarResult(result: AffectedVarResult) {
