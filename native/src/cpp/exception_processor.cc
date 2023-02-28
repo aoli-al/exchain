@@ -48,6 +48,8 @@ void ExceptionProcessor::FullPass() {
             return;
         }
 
+        ProcessException();
+
         for (int stack_idx = 0; stack_idx < count; stack_idx++) {
             jint flags;
             jvmti_->GetMethodModifiers(frames[stack_idx].method, &flags);
@@ -62,6 +64,12 @@ void ExceptionProcessor::FullPass() {
     }
     is_cause_identified_ = false;
     return;
+}
+
+void ExceptionProcessor::ProcessException() {
+    static auto method_id = jni_->GetStaticMethodID(
+        runtime_class_, kProcessException, kProcessExceptionDescriptor);
+    jni_->CallStaticVoidMethod(runtime_class_, method_id, exception_);
 }
 
 void ExceptionProcessor::LoggingPass() {

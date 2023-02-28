@@ -25,6 +25,8 @@ const static char *kTaintFieldsMethodDescriptor =
     "(Ljava/lang/Object;Lal/aoli/exchain/"
     "runtime/objects/AffectedVarResult;Ljava/lang/"
     "Object;)V";
+const static char *kProcessException = "processException";
+const static char *kProcessExceptionDescriptor = "(Ljava/lang/Object;)V";
 const static char *kAnalyzeSourceVarsMethodName = "analyzeSourceVars";
 const static char *kAnalyzeSourceVarsMethodDescriptor =
     "(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/String;)Z";

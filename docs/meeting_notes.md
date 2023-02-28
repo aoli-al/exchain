@@ -1491,3 +1491,58 @@ int dummyMain() {
 
 
 
+# Feb 28
+
+
+- Benchmark & dataset
+    - 11 reproduced issues
+        - from 10 different applications
+        - We add WICKET-6908 because I want to use it as an example in the paper
+            - https://issues.apache.org/jira/browse/WICKET-6908
+            - `I spent the better part of my day investigating a bug report regarding a hibernate LazyInitializationException`
+            - `When the users double-clicks on one of the links, the first click is OK, and the second click throws a StalePageException during request cycle processing.`
+                - Actually the first click triggers an exception that is not properly handled.
+            - Manually identify the affected var
+                - `models should be detached`
+    - 7 benchmarks
+        - from 7 different application
+        - missing applications:
+            - HIVE
+                - Cannot run benchmark on the latest version
+                - HIVE runs on top of Hadoop, HDFS, and Yarn (we need to instrument all 4 applications with a specific version)
+            - NIFI
+                - Cannot instrument the full application
+            - Jena
+                - Cannot find meaningful workload
+
+
+- Related works:
+    - Practical Root Cause Localization for Microservice Systems via Trace Analysis
+        - Identify which microservice is the root cause. Insight: a microservice with more abnormal traces it the root cause. Solution: use unsupervised learning to identify abnormal traces.
+        - https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9521340
+        - IWQOS 2019
+        - Li, Zeyan and Chen, Junjie and Jiao, Rui and Zhao, Nengwen and Wang, Zhijun and Zhang, Shuwei and Wu, Yanjun and Jiang, Long and Yan, Leiqin and Wang, Zikai and Chen, Zhekang and Zhang, Wenchi and Nie, Xiaohui and Sui, Kaixin and Pei, Dan
+    - HALO: Hierarchy-aware Fault Localization for Cloud Systems
+        - Localize failures by aggregating telemetric data.
+        - https://dl.acm.org/doi/pdf/10.1145/3447548.3467190
+        - KDD 2021
+        - Xu Zhang, Chao Du, Yifan Li, Yong Xu, Hongyu Zhang, Si Qin, Ze Li, Qingwei Lin, Yingnong Dang, Andrew Zhou, S. Rajmohan, Dongmei Zhang
+    - Causal Inference-Based Root Cause Analysis for Online Service Systems with Intervention Recognition
+        - I don't really understand what they are trying to do rn.
+        - https://arxiv.org/pdf/2206.05871.pdf
+        - KDD 2022
+    - Sage: Practical and Scalable ML-Driven Performance Debugging in Microservices
+        - Identify the microservices that introduces the failure using causal inference. High-level idea: use machine learning to answer questions like: if the CPU utilization of node A becomes X does this solve the failure? If yes, then the root cause is node A (counterfactual analysis).
+        - https://dl.acm.org/doi/pdf/10.1145/3445814.3446700
+        - ASPLOS 2021
+    - Graph based Incident Extraction and Diagnosis in Large-Scale
+Online Systems
+        - Extract the issue based on alters for large distributed applications.
+        - https://dl.acm.org/doi/pdf/10.1145/3551349.3556904
+        - ASE 2022
+
+
+- Paper writing:
+    - Introduction
+        - What are the related works
+        - How to introduce dynamic/hybrid/static data-flow propagation.
