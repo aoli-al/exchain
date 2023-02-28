@@ -14,19 +14,22 @@ import subprocess
 @click.option("--analyze/--no-analyze", default=True, help="Run the project")
 @click.option("--skip-app", multiple=True, help="Skip specific appliaction")
 @click.option("--skip-type", multiple=True, help="Skip specific type")
+@click.option("--only-app", multiple=True, help="Only run specifc application",
+              default=ALL_APPLICATIONS.keys())
 @click.option('--iter', type=int, default=1)
 def bench(dataset: str, build: bool, instrument: bool, run: bool, analyze: bool,
-          skip_app: List[str], skip_type: List[str], iter: int):
+          skip_app: List[str], skip_type: List[str], only_app: List[str], iter: int):
     if dataset == "all":
         data = ALL_APPLICATIONS.items()
     elif dataset == "bench":
         data = BENCH_APPLICATIONS.items()
     else:
         data = TEST_APPLICATIONS.items()
+    print(only_app)
 
     for name, app in data:
         print(f"Start processing {name}")
-        if name in skip_app:
+        if name in skip_app or name not in only_app:
             continue
         if build:
             app.build()

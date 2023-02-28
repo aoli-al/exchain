@@ -221,7 +221,7 @@ class WrappedTest(Test):
         elif self.is_benchmark:
             f = subprocess.PIPE
             # f = open(self.origin_log_path, "w")
-            f = sys.stdout.buffer
+            # f = sys.stdout.buffer
         else:
             f = sys.stdout.buffer
         return (self.start_command, env, work_dir, f)
@@ -311,7 +311,6 @@ class SingleCommandTest(Test):
             f = open(self.origin_log_path, "w")
         elif self.is_benchmark:
             f = subprocess.PIPE
-            f = sys.stdout.buffer
         else:
             f = sys.stdout.buffer
         return (cmd, os.environ, self.work_dir, f)
