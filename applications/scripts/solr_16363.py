@@ -13,9 +13,9 @@ class Solr(SingleCommandTest):
             "solr/benchmark/build/libs/",
             "org.apache.solr.bench.index.CloudIndexing",
             "Lorg/apache/solr",
-            False,
+            is_single_jar=False,
             is_async=True,
-            ignored_type= [
+            ignored_type=[
             "org.apache.solr.cloud.ZkTestServer$ZKServerMain/getLocalPort:398",
             "org.apache.zookeeper.KeeperException/create:118"
             ])

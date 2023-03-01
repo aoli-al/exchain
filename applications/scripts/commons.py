@@ -4,6 +4,8 @@ import sys
 
 BASE_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
+EXCHAIN_WORKDIR = os.path.join(os.path.expanduser('~'), "tmp")
+
 INSTRUMENTED_JAVA_HOME = os.path.join(BASE_FOLDER, "../..", "runtime/build/jre-inst/")
 INSTRUMENTED_JAVA_EXEC = os.path.join(BASE_FOLDER, "../..", "runtime/build/jre-inst/bin/java")
 HYBRID_JAVA_EXEC = os.path.join(BASE_FOLDER, "../..", "runtime/build/jre-inst-field-only/bin/java")
