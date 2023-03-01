@@ -28,9 +28,9 @@ class Test:
         self.application_namespace = application_namespace
         self.work_dir = os.path.join(
             DIR_PATH, "..", self.test_name) if work_dir is None else work_dir
-        self.instrumentation_classpath = "/tmp/instrumented_classes/" + self.test_name
-        self.origin_classpath = "/tmp/origin_classes/" + self.test_name
-        self.hybrid_classpath = "/tmp/hybrid_classes/" + self.test_name
+        self.instrumentation_classpath = EXCHAIN_WORKDIR + "/instrumented_classes/" + self.test_name
+        self.origin_classpath = EXCHAIN_WORKDIR + "/origin_classes/" + self.test_name
+        self.hybrid_classpath = EXCHAIN_WORKDIR + "/hybrid_classes/" + self.test_name
         self.out_path = os.path.join(EXCHAIN_OUT_DIR, self.test_name)
         self.ground_truth_path = os.path.join(
             BASE_FOLDER, "data", f"{self.test_name}.json")
@@ -179,8 +179,8 @@ class WrappedTest(Test):
                          is_async, ignored_type, is_running_service,
                          is_benchmark, work_dir)
         self.origin_dist = os.path.join(self.work_dir, dist_path)
-        self.dynamic_dist = os.path.join("/tmp/dyn_dist/", self.test_name, "dyn_dist")
-        self.hybrid_dist = os.path.join("/tmp/hybrid_dist/", self.test_name, "hybrid_dist")
+        self.dynamic_dist = os.path.join(EXCHAIN_WORKDIR + "/dyn_dist/", self.test_name, "dyn_dist")
+        self.hybrid_dist = os.path.join(EXCHAIN_WORKDIR + "/hybrid_dist/", self.test_name, "hybrid_dist")
         self.start_command = start_command
         self.env_key = env_key
         os.makedirs(self.dynamic_dist, exist_ok=True)
@@ -241,8 +241,8 @@ class SingleCommandTest(Test):
         self.origin_jar_path = origin_jar_path
         self.origin_jar_path = os.path.join(self.work_dir, origin_jar_path)
         self.is_single_jar = is_single_jar
-        self.hybrid_output = "/tmp/hybrid_output/" + self.test_name
-        self.instrumentation_output = "/tmp/instrumentation_output/" + self.test_name
+        self.hybrid_output = EXCHAIN_WORKDIR + "/hybrid_output/" + self.test_name
+        self.instrumentation_output = EXCHAIN_WORKDIR + "/instrumentation_output/" + self.test_name
         os.makedirs(self.instrumentation_output, exist_ok=True)
         os.makedirs(self.hybrid_output, exist_ok=True)
 
