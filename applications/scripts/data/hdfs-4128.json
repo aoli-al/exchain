@@ -6,14 +6,14 @@
         "src": {
           "py/object": "objects.Exception",
           "type": "java.io.IOException",
-          "method": "jdk.internal.reflect.NativeConstructorAccessorImpl/newInstance0:-2",
-          "message": "DestHost:destPort localhost:45943 , LocalHost:localPort aoli-desktop/172.26.66.222:0. Failed on local exception: java.io.IOException: Error reading responses"
+          "method": "org.apache.hadoop.hdfs.server.namenode.FSEditLogLoader/loadEditRecords:262",
+          "message": "Injecting failure during merge"
         },
         "dst": {
           "py/object": "objects.Exception",
-          "type": "org.apache.hadoop.thirdparty.protobuf.ServiceException",
-          "method": "org.apache.hadoop.ipc.ProtobufRpcEngine2$Invoker/invoke:272",
-          "message": "java.io.IOException: DestHost:destPort localhost:45943 , LocalHost:localPort aoli-desktop/172.26.66.222:0. Failed on local exception: java.io.IOException: Error reading responses"
+          "type": "java.io.IOException",
+          "method": "org.apache.hadoop.hdfs.server.namenode.MetaRecoveryContext/editLogLoaderPrompt:95",
+          "message": "There appears to be an out-of-order edit in the edit log.  We expected txid 11, but got txid 10."
         }
       },
       {
@@ -27,50 +27,6 @@
             ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
-          "type": "java.lang.LinkageError",
-          "method": "java.lang.ClassLoader/defineClass1:-2",
-          "message": "loader 'app' attempted duplicate class definition for org.apache.hadoop.security.SaslRpcClient. (org.apache.hadoop.security.SaslRpcClient is in unnamed module of loader 'app')"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
-          "type": "java.io.IOException",
-          "method": "jdk.internal.reflect.NativeConstructorAccessorImpl/newInstance0:-2",
-          "message": "DestHost:destPort localhost:45943 , LocalHost:localPort aoli-desktop/172.26.66.222:0. Failed on local exception: java.io.IOException: Error reading responses"
-        }
-      },
-      {
-        "py/id": 4
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
-          "type": "java.lang.LinkageError",
-          "method": "java.lang.ClassLoader/defineClass1:-2",
-          "message": "loader 'app' attempted duplicate interface definition for org.apache.hadoop.util.Progressable. (org.apache.hadoop.util.Progressable is in unnamed module of loader 'app')"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
-          "type": "java.io.IOException",
-          "method": "org.apache.hadoop.hdfs.ExceptionLastSeen/set:46",
-          "message": "java.lang.LinkageError: loader 'app' attempted duplicate interface definition for org.apache.hadoop.util.Progressable. (org.apache.hadoop.util.Progressable is in unnamed module of loader 'app')"
-        }
-      },
-      {
-        "py/id": 4
       }
     ]
   }
