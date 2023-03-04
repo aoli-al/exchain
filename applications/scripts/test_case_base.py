@@ -145,10 +145,10 @@ class Test:
             return
         if type == "static":
             args = [
-                f"--args={self.origin_classpath} {self.out_path}/static-results"]
+                f"--args={self.origin_classpath} {self.out_path}/static-results {self.application_namespace}"]
         elif type == "hybrid":
             args = [
-                f"--args={self.hybrid_classpath} {self.out_path}/hybrid-results"]
+                f"--args={self.hybrid_classpath} {self.out_path}/hybrid-results {self.application_namespace}"]
         else:
             return
         if debug:

@@ -40,6 +40,7 @@ fun setupSoot(sourceDirectory: String): List<String> {
 fun loadAndProcess(options: AnalyzerOptions) {
     val libs = setupSoot(options.classPath)
     val dataDirectory = options.reportPath
+    val entryPoints = options.programEntryPoint.split(":").toList()
     AffectedVarDriver.instrumentedClassPath = options.classPath
     AffectedVarDriver.type = Type.Dynamic
 
@@ -119,18 +120,35 @@ fun loadAndProcess(options: AnalyzerOptions) {
             Dependencies()
         }
 
-    val entryPoints = processedResults.filter() {
-        it.affectedFieldLine.isNotEmpty() ||
-                it.affectedStaticFieldLine.isNotEmpty() ||
-                it.sourceLines.isNotEmpty() ||
-                it.affectedLocalLine.isNotEmpty()
-    }.map { it.getSootMethodSignature() }
+    val sootEntryPoints = mutableListOf<String>()
+
+    var lastProcessedResult: AffectedVarResult? = null
+    var shouldAdd = false
+    var currentException = -1
+    for (processedResult in processedResults) {
+        if (currentException != processedResult.label) {
+            if (shouldAdd && lastProcessedResult != null) {
+                sootEntryPoints.add(lastProcessedResult.getSootMethodSignature())
+            }
+            lastProcessedResult = null
+            shouldAdd = false
+        }
+        for (entryPoint in entryPoints) {
+            if (processedResult.clazz.startsWith(entryPoint)) {
+                lastProcessedResult = processedResult
+            }
+        }
+        if (processedResult.affectedLocalLine.isNotEmpty() || processedResult.affectedFieldLine.isNotEmpty()
+            || processedResult.affectedStaticFieldLine.isNotEmpty() || processedResult.sourceLines.isNotEmpty()) {
+            shouldAdd = true;
+        }
+    }
 
     try {
         infoFlow.computeInfoflow(
             libPath,
             libPath,
-            SequentialEntryPointCreator(entryPoints),
+            SequentialEntryPointCreator(sootEntryPoints),
             SourceSinkManager(processedResults, SourceVarAnalyzer(processedResults))
         )
     } catch (e: RuntimeException) {
@@ -169,6 +187,7 @@ fun loadAndProcess(options: AnalyzerOptions) {
 class AnalyzerOptions : CliktCommand() {
     val classPath: String by argument(help = "Project classpath")
     val reportPath: String by argument(help = "Production report path")
+    val programEntryPoint: String by argument(help = "Program entry point")
 
     override fun run() {
         loadAndProcess(this)
