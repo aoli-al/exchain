@@ -1,0 +1,33 @@
+[
+  {
+    "py/tuple": [
+      {
+        "py/object": "objects.Link",
+        "src": {
+          "py/object": "objects.Exception",
+          "type": "org.apache.wicket.core.request.mapper.StalePageException",
+          "method": "",
+          "message": "A request to page '[Page class = org.apache.wicket.testapplication.TestPage, id = 1, render count = 2]' has been made with stale 'renderCount'. The page will be re-rendered."
+        },
+        "dst": {
+          "py/object": "objects.Exception",
+          "type": "java.lang.RuntimeException",
+          "method": "org.apache.wicket.testapplication.TestPage/onBeforeRender:49",
+          "message": "model still attached!"
+        }
+      },
+      {
+        "py/reduce": [
+          {
+            "py/type": "objects.LinkType"
+          },
+          {
+            "py/tuple": [
+              3
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

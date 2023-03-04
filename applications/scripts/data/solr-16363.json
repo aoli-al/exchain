@@ -17,69 +17,7 @@
         }
       },
       {
-        "py/reduce": [
-          {
-            "py/type": "objects.LinkType"
-          },
-          {
-            "py/tuple": [
-              3
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
-          "type": "java.lang.IllegalStateException",
-          "method": "org.apache.solr.cloud.ZkTestServer$ZKServerMain/getLocalPort:398",
-          "message": "A port has not yet been selected"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
-          "type": "java.lang.IllegalStateException",
-          "method": "org.apache.solr.cloud.ZkTestServer$ZKServerMain/getLocalPort:404",
-          "message": "A port has not yet been selected"
-        }
-      },
-      {
-        "py/reduce": [
-          {
-            "py/type": "objects.LinkType"
-          },
-          {
-            "py/tuple": [
-              1
-            ]
-          }
-        ]
-      }
-    ]
-  },
-  {
-    "py/tuple": [
-      {
-        "py/object": "objects.Link",
-        "src": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.zookeeper.KeeperException$NoNodeException",
-          "method": "org.apache.zookeeper.KeeperException/create:118",
-          "message": "KeeperErrorCode = NoNode for /clusterprops.json"
-        },
-        "dst": {
-          "py/object": "objects.Exception",
-          "type": "org.apache.zookeeper.KeeperException$NoNodeException",
-          "method": "org.apache.zookeeper.KeeperException/create:118",
-          "message": "KeeperErrorCode = NoNode for /collections/testCollection/collectionprops.json"
-        }
-      },
-      {
-        "py/id": 8
+        "py/id": 4
       }
     ]
   }

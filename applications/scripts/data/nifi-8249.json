@@ -5,15 +5,15 @@
         "py/object": "objects.Link",
         "src": {
           "py/object": "objects.Exception",
-          "type": "org.apache.nifi.processor.exception.ProcessException",
-          "method": "org.apache.nifi.processors.standard.AbstractExecuteSQL/lambda$onTrigger$1:321",
-          "message": "java.io.IOException: java.io.IOException: Could not obtain next record from ResultSet"
+          "type": "java.sql.SQLDataException",
+          "method": "org.apache.derby.impl.jdbc.SQLExceptionFactory/getSQLException:-1",
+          "message": "Invalid character string format for type INTEGER."
         },
         "dst": {
           "py/object": "objects.Exception",
-          "type": "org.apache.nifi.processor.exception.FlowFileHandlingException",
-          "method": "org.apache.nifi.util.MockProcessSession/commitInternal:285",
-          "message": "Cannot commit session because the following FlowFiles have not been removed or transferred: [1, 2]"
+          "type": "java.io.IOException",
+          "method": "org.apache.nifi.processors.standard.sql.RecordSqlWriter$ResultSetRecordSetWithCallback/next:158",
+          "message": "Could not obtain next record from ResultSet"
         }
       },
       {
@@ -36,15 +36,15 @@
         "py/object": "objects.Link",
         "src": {
           "py/object": "objects.Exception",
-          "type": "java.sql.SQLDataException",
-          "method": "org.apache.derby.impl.jdbc.SQLExceptionFactory/getSQLException:-1",
-          "message": "Invalid character string format for type INTEGER."
+          "type": "org.apache.nifi.processor.exception.ProcessException",
+          "method": "org.apache.nifi.processors.standard.AbstractExecuteSQL/lambda$onTrigger$1:321",
+          "message": "java.io.IOException: java.io.IOException: Could not obtain next record from ResultSet"
         },
         "dst": {
           "py/object": "objects.Exception",
-          "type": "java.io.IOException",
-          "method": "org.apache.nifi.processors.standard.sql.RecordSqlWriter$ResultSetRecordSetWithCallback/next:158",
-          "message": "Could not obtain next record from ResultSet"
+          "type": "org.apache.nifi.processor.exception.FlowFileHandlingException",
+          "method": "org.apache.nifi.util.MockProcessSession/commitInternal:285",
+          "message": "Cannot commit session because the following FlowFiles have not been removed or transferred: [1, 2]"
         }
       },
       {

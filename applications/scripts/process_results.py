@@ -60,18 +60,21 @@ def process_dependency_result(result: List[Link], ground_truth: List[Tuple[Link,
     tp = 0
     fp = 0
     fn = 0
+    interesting_dst = set()
+    for link in ground_truth:
+        interesting_dst.add(link[0].dst)
     for link in result:
         identified = False
+        should_identify = False
+        if link.dst in interesting_dst:
+            should_identify = True
         for expected in ground_truth:
             if link == expected[0]:
                 identified = True
-                if expected[1] != LinkType.IGNORE:
-                    tp += 1
-        if not identified:
+                tp += 1
+        if not identified and should_identify:
             fp += 1
     for link in ground_truth:
-        if link[1] == LinkType.IGNORE:
-            continue
         if link[0] not in result:
             fn += 1
     return (tp, fp, fn)
@@ -212,11 +215,11 @@ def build_expected_dependencies():
         for dependency in expected_dependency:
             type = LinkType.KEY
             if "phosphor" in dependency.src.message or "phosphor" in dependency.dst.message:
-                type = LinkType.IGNORE
+                continue
             if dependency.src.method in app.ignored_type:
-                type = LinkType.IGNORE
+                continue
             if dependency.dst.method in app.ignored_type:
-                type = LinkType.IGNORE
+                continue
             result.append((dependency, type))
 
         data = jsonpickle.encode(result, indent=2)

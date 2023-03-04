@@ -32,7 +32,8 @@ class Hive(SingleCommandTest):
             "Lorg/apache/hadoop:Lorg/apache/hive",
             ARGS,
             ["itests/hive-unit/target/testconf", "conf"],
-            True)
+            is_async=True,
+            is_single_jar=False)
 
     def build(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
