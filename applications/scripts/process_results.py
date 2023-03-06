@@ -63,7 +63,7 @@ def process_dependency_result(result: List[Link], ground_truth: List[Tuple[Link,
     interesting_dst = set()
     for link in ground_truth:
         interesting_dst.add(link[0].dst)
-    for link in result:
+    for link in set(result):
         identified = False
         should_identify = False
         if link.dst in interesting_dst:
@@ -162,6 +162,21 @@ def read_perf_result(app):
     return perf_result
 
 
+def save_as_latex_table(data, path):
+    with open(path, "w") as f:
+        for row in data:
+            formatted_result = []
+            for item in row:
+                if isinstance(item, bool):
+                    if item:
+                        formatted_result.append("\\cmark")
+                    else:
+                        formatted_result.append("\\xmark")
+                else:
+                    formatted_result.append(str(item))
+            f.write(" & ".join(formatted_result))
+            if row != data[-1]:
+                f.write(" \\\\\n")
 
 
 

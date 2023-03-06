@@ -19,7 +19,7 @@ EXCHAIN_OUT_DIR = os.path.join(BASE_FOLDER, "../results")
 
 TEST_NAME = os.getcwd().split("/")[-1]
 
-DEFAULT_TYPES = ["origin", "dynamic", "hybrid", "static"]
+DEFAULT_TYPES = ["origin","static", "hybrid", "dynamic"]
 
 
 if sys.platform == "linux" or sys.platform == "linux2":
