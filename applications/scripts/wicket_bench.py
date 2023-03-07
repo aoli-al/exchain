@@ -21,6 +21,9 @@ class Wicket(SingleCommandTest):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
         subprocess.call(["mvn", "install", "-DskipTests"], cwd=self.work_dir)
 
+    def convert_measurement(self, input: float) -> float:
+        return 1000 / input
+
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         time.sleep(10)
         measure = subprocess.Popen("ab -k -c 200 -n 10000 http://localhost:8080/", shell=True,

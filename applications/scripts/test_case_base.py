@@ -12,9 +12,6 @@ from process_results import *
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
-class Bench:
-    pass
-
 
 class Test:
 
@@ -49,6 +46,9 @@ class Test:
             del os.environ["JAVA_HOME"]
         if "JRE_HOME" in os.environ:
             del os.environ["JRE_HOME"]
+
+    def convert_measurement(self, input: float) -> float:
+        return input
 
     def get_latest_result(self, type: str) -> str:
         base_dir = os.path.join(self.out_path, f"{type}-results")
@@ -143,19 +143,25 @@ class Test:
     def post_analysis(self, type: str, debug: bool = False):
         if self.is_benchmark:
             return
+        out_path = os.path.join(self.out_path, f"{type}-results")
         if type == "static":
             args = [
-                f"--args={self.origin_classpath} {self.out_path}/static-results {self.application_namespace}"]
+                f"--args={self.origin_classpath} {out_path} {self.application_namespace}"]
         elif type == "hybrid":
             args = [
-                f"--args={self.hybrid_classpath} {self.out_path}/hybrid-results {self.application_namespace}"]
+                f"--args={self.hybrid_classpath} {out_path} {self.application_namespace}"]
         else:
             return
         if debug:
             args.insert(0, "--debug-jvm")
 
+        start_time = time.time()
         subprocess.call(["./gradlew", "static-analyzer:run", *args],
                         cwd=os.path.join(DIR_PATH, "../.."), timeout=60 * 60 * 8)
+        finish_time = time.time()
+        with open(os.path.join(out_path, "time.txt"), "w") as f:
+            f.write(str(finish_time - start_time))
+
 
 
     def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:

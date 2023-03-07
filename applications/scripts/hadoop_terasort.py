@@ -10,7 +10,7 @@ DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 class HadoopTerasort(WrappedTest):
     def __init__(self):
         super().__init__(
-            "hadoop_terasort",
+            "mapreduce_terasort",
             "Lorg/apache/",
             "hadoop-dist/target/hadoop-3.3.4",
             ["./bin/hadoop", "jar", "./share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.4.jar",
@@ -24,6 +24,9 @@ class HadoopTerasort(WrappedTest):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
         subprocess.call(
             "mvn package -Pdist -DskipTests  -Dmaven.javadoc.skip=true -DskipTests=true", shell=True, cwd=self.work_dir)
+
+    def convert_measurement(self, input: float) -> float:
+        return 10000000 / input
 
     def pre(self):
         shutil.rmtree("/tmp/workload-gen", ignore_errors=True)

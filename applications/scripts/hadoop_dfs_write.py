@@ -10,7 +10,7 @@ DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 class HadoopDFSWrite(WrappedTest):
     def __init__(self):
         super().__init__(
-            "hadoop_dfs_write",
+            "hdfs_dfs_write",
             "Lorg/apache/",
             "hadoop-dist/target/hadoop-3.3.4",
             ["./bin/hadoop", "jar", "./share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.3.4-tests.jar",

@@ -40,6 +40,9 @@ class FineractBench(SingleCommandTest):
         cmd, env, work_dir, _ = super().get_exec_command(type, debug)
         return cmd, env, work_dir, open("/tmp/fineract.out", "w")
 
+    def convert_measurement(self, input: float) -> float:
+        return 1000 / input
+
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         if type == "dynamic":
             time.sleep(300)
