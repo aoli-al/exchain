@@ -4,6 +4,7 @@ import json
 import os
 from commons import *
 from objects import *
+from statsmodels.stats.diagnostic import lilliefors
 
 BASE_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
@@ -63,7 +64,7 @@ def process_dependency_result(result: List[Link], ground_truth: List[Tuple[Link,
     interesting_dst = set()
     for link in ground_truth:
         interesting_dst.add(link[0].dst)
-    for link in result:
+    for link in set(result):
         identified = False
         should_identify = False
         if link.dst in interesting_dst:
@@ -74,10 +75,11 @@ def process_dependency_result(result: List[Link], ground_truth: List[Tuple[Link,
                 tp += 1
         if not identified and should_identify:
             fp += 1
+            print(link)
     for link in ground_truth:
         if link[0] not in result:
             fn += 1
-    return (tp, fp, fn)
+    return (tp > 0, fp > 0)
 
 def check_root_cause_in_log(result: List[Tuple[Link, LinkType]], log_path: str) -> bool:
     with open(log_path) as f:
@@ -135,7 +137,7 @@ def read_aggregate_perf_result(path):
 import pandas as pd
 def read_perf_result(app):
     types = ["origin", "static", "hybrid", "dynamic"]
-    perf_result = [app.test_name]
+    perf_result = [app.test_name.split("_")[0].upper()]
     origin_result = 0
     for t in types:
         data = {}
@@ -148,20 +150,36 @@ def read_perf_result(app):
             for key, value in  result.items():
                 if key not in data:
                     data[key] = []
-                data[key].append(value)
+                data[key].append(app.convert_measurement(value))
         df = pd.DataFrame(data)
         for key in result.keys():
             mean = df[key].mean()
             perf_result.append(f"{mean:.1f}")
             perf_result.append(f"{df[key].std():.1f}")
+            print(lilliefors(df[key]))
             if t == "origin":
                 origin_result = mean
             else:
                 perf_result.append(
-                    f"{(mean - origin_result) / origin_result * 100:.1f}" + "%")
+                    f"{(mean - origin_result) / origin_result * 100:.1f}" + "\%")
     return perf_result
 
 
+def save_as_latex_table(data, path):
+    with open(path, "w") as f:
+        for row in data:
+            formatted_result = []
+            for item in row:
+                if isinstance(item, bool):
+                    if item:
+                        formatted_result.append("\\cmark")
+                    else:
+                        formatted_result.append("\\xmark")
+                else:
+                    formatted_result.append(str(item))
+            f.write(" & ".join(formatted_result))
+            if row != data[-1]:
+                f.write(" \\\\\n")
 
 
 
