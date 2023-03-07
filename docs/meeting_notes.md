@@ -1546,3 +1546,51 @@ Online Systems
     - Introduction
         - What are the related works
         - How to introduce dynamic/hybrid/static data-flow propagation.
+
+
+# Mar 7
+
+- Static analysis
+    - Instead of using the method the throws the exception as an entry point, we use the root method now. (result does not change)
+    - Root method: the first method in the call stack that has the application package name.
+
+
+Origin program
+```java
+void methodWithException1() {
+    // logic
+    throw new RuntimeException();
+    // logic
+}
+
+void func1() {
+    methodWithException1();
+}
+
+void func2() {
+    // normal method
+}
+
+int main() {
+    func1();
+    func2();
+}
+```
+
+Simplified program:
+
+```java
+void methodWithException1() {
+    // logic
+    throw new RuntimeException();
+    // logic
+}
+
+void func1() {
+    methodWithException1();
+}
+
+int dummyMain() {
+    func1();
+}
+```
