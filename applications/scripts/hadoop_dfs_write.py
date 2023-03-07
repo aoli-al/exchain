@@ -31,9 +31,10 @@ class HadoopDFSWrite(WrappedTest):
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         out, err = cmd.communicate()
         shutil.rmtree("/tmp/dfs-write", ignore_errors=True)
-        result = self.find_result(err.decode("utf-8"))
+        result, latency = self.find_result(err.decode("utf-8"))
         with open(self.perf_result_path(type, iter), "w") as f:
             f.write(f"throughput, {result}\n")
+            f.write(f"exec_time, {latency}\n")
 
 
     def find_result(self, out: str):
@@ -42,6 +43,6 @@ class HadoopDFSWrite(WrappedTest):
         throughput = float(result.group(1))
         result = re.search(r"Test exec time sec: (\d+\.?\d*)", out)
         exec_time = float(result.group(1))
-        return throughput
+        return throughput, exec_time
 
 

@@ -33,15 +33,18 @@ class HadoopNNBench(WrappedTest):
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         out, err = cmd.communicate()
         shutil.rmtree("/tmp/nnbench", ignore_errors=True)
-        result = self.find_result(err.decode("utf-8"))
+        throughput, latency = self.find_result(err.decode("utf-8"))
         with open(self.perf_result_path(type, iter), "w") as f:
-            f.write(f"tps, {result}\n")
+            f.write(f"latency, {latency}\n")
+            f.write(f"throughput, {throughput}\n")
 
 
     def find_result(self, out: str):
         print(out)
         result = re.search(r"TPS: Create/Write/Close: (\d+\.?\d*)", out)
         throughput = float(result.group(1))
-        return throughput
+        result = re.search(r"Avg exec time \(ms\): Create/Write/Close: (\d+\.?\d*)", out)
+        latency = float(result.group(1))
+        return throughput, latency
 
 

@@ -37,7 +37,11 @@ class Tomcat(WrappedTest):
         print(out.decode("utf-8"))
         result = re.search(
             r"Time per request:\s+(\d+\.?\d*) \[ms\] \(mean\)", out.decode("utf-8"))
-        tpr = float(result.group(1))
-        cmd.kill()
+        latency = float(result.group(1))
+        result = re.search(
+            r"Requests per second:\s+(\d+\.?\d*) \[#/sec\]", out.decode("utf-8"))
+        throughput = float(result.group(1))
         with open(self.perf_result_path(type, iter), "w") as f:
-            f.write(f"tpr, {tpr}\n")
+            f.write(f"latency, {latency}\n")
+            f.write(f"throughput, {throughput}\n")
+        cmd.kill()

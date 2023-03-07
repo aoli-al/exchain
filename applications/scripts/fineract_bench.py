@@ -2,6 +2,7 @@ from test_case_base import SingleCommandTest
 import subprocess
 import time
 import os
+import re
 
 from typing import *
 
@@ -49,19 +50,21 @@ class FineractBench(SingleCommandTest):
         else:
             time.sleep(60)
         if not debug:
-            subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
-            subprocess.call("./gradlew --rerun-tasks integrationTest",
-                            env={
-                                "PERF_OUT_FILE": self.perf_result_path(type, iter),
-                                ** os.environ,
-                            },
-                            cwd=self.work_dir, shell=True)
-            subprocess.call("./gradlew --rerun-tasks integrationTest",
-                            env={
-                                "PERF_OUT_FILE": self.perf_result_path(type, iter),
-                                ** os.environ,
-                            },
-                            cwd=self.work_dir, shell=True)
+            subprocess.call(
+                "ab -p test.json -T application/json -H Fineract-Platform-TenantId:default -c 200 -n 10000 https://localhost:8443/fineract-provider/api/v1/authentication", shell=True)
+            measure = subprocess.Popen(
+                "ab -p test.json -T application/json -H Fineract-Platform-TenantId:default -c 200 -n 10000 https://localhost:8443/fineract-provider/api/v1/authentication", shell=True,
+                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            out, err = measure.communicate()
+            result = re.search(
+                r"Time per request:\s+(\d+\.?\d*) \[ms\] \(mean\)", out.decode("utf-8"))
+            latency = float(result.group(1))
+            result = re.search(
+                r"Requests per second:\s+(\d+\.?\d*) \[#/sec\]", out.decode("utf-8"))
+            throughput = float(result.group(1))
+            with open(self.perf_result_path(type, iter), "w") as f:
+                f.write(f"latency, {latency}\n")
+                f.write(f"throughput, {throughput}\n")
             cmd.kill()
         else:
             cmd.communicate()
