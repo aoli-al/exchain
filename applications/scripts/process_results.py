@@ -143,10 +143,7 @@ def read_perf_result(app):
         data = {}
         for i in range(10):
             path = app.perf_result_path(t, i)
-            if app.test_name in ["fineract_bench", "jena_bench"]:
-                result = read_separate_perf_result(path)
-            else:
-                result = read_aggregate_perf_result(path)
+            result = read_aggregate_perf_result(path)
             for key, value in  result.items():
                 if key not in data:
                     data[key] = []
@@ -156,7 +153,6 @@ def read_perf_result(app):
             mean = df[key].mean()
             perf_result.append(f"{mean:.1f}")
             perf_result.append(f"{df[key].std():.1f}")
-            print(lilliefors(df[key]))
             if t == "origin":
                 origin_result = mean
             else:
