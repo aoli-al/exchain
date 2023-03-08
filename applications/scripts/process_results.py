@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Set
+from typing import Dict, List, Tuple, Set, Any
 import jsonpickle
 import json
 import os
@@ -135,9 +135,9 @@ def read_aggregate_perf_result(path):
 
 
 import pandas as pd
-def read_perf_result(app):
+def read_perf_result(app, perf_result: Dict[str, Any]):
     types = ["origin", "static", "hybrid", "dynamic"]
-    perf_result = [app.test_name.split("_")[0].upper()]
+    name = app.test_name.split("_")[0].upper()
     origin_result = 0
     for t in types:
         data = {}
@@ -147,18 +147,21 @@ def read_perf_result(app):
             for key, value in  result.items():
                 if key not in data:
                     data[key] = []
-                data[key].append(app.convert_measurement(value))
-        df = pd.DataFrame(data)
-        for key in result.keys():
-            mean = df[key].mean()
-            perf_result.append(f"{mean:.1f}")
-            perf_result.append(f"{df[key].std():.1f}")
-            if t == "origin":
-                origin_result = mean
-            else:
+                data[key].append(value)
+        for key, value in data.items():
+            df = pd.DataFrame(value)
+            mean = df.mean()
+            std = df.std()
+            if key not in perf_result:
+                perf_result[key] = {}
+            if name not in perf_result[key]:
+                perf_result[key][name] = []
+            perf_result[key][name].append(mean)
+            perf_result[key][name].append(std)
+            if t != "origin":
+                origin_result = perf_result[key][name][0]
                 perf_result.append(
                     f"{(mean - origin_result) / origin_result * 100:.1f}" + "\%")
-    return perf_result
 
 
 def save_as_latex_table(data, path):
