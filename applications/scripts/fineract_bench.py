@@ -51,9 +51,9 @@ class FineractBench(SingleCommandTest):
             time.sleep(60)
         if not debug:
             subprocess.call(
-                "ab -k -s 300 -p test.json -T application/json -H Fineract-Platform-TenantId:default -c 200 -n 10000 https://localhost:8443/fineract-provider/api/v1/authentication", shell=True)
+                "ab -s 300 -p test.json -T application/json -H Fineract-Platform-TenantId:default -c 100 -n 10000 https://localhost:8443/fineract-provider/api/v1/authentication", shell=True)
             measure = subprocess.Popen(
-                "ab -k -s 300 -p test.json -T application/json -H Fineract-Platform-TenantId:default -c 200 -n 10000 https://localhost:8443/fineract-provider/api/v1/authentication", shell=True,
+                "ab -s 300 -p test.json -T application/json -H Fineract-Platform-TenantId:default -c 100 -n 10000 https://localhost:8443/fineract-provider/api/v1/authentication", shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = measure.communicate()
             result = re.search(

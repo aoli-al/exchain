@@ -130,7 +130,6 @@ def read_aggregate_perf_result(path):
         for line in f:
             [name, data] = line.split(", ")
             items[name] = float(data.strip())
-            break
     return items
 
 
@@ -150,8 +149,8 @@ def read_perf_result(app, perf_result: Dict[str, Any]):
                 data[key].append(value)
         for key, value in data.items():
             df = pd.DataFrame(value)
-            mean = df.mean()
-            std = df.std()
+            mean = float(df.mean())
+            std = float(df.std())
             if key not in perf_result:
                 perf_result[key] = {}
             if name not in perf_result[key]:
@@ -160,8 +159,8 @@ def read_perf_result(app, perf_result: Dict[str, Any]):
             perf_result[key][name].append(std)
             if t != "origin":
                 origin_result = perf_result[key][name][0]
-                perf_result.append(
-                    f"{(mean - origin_result) / origin_result * 100:.1f}" + "\%")
+                perf_result[key][name].append(
+                    f"{((mean - origin_result) / origin_result * 100):.1f}" + "\%")
 
 
 def save_as_latex_table(data, path):
@@ -181,6 +180,24 @@ def save_as_latex_table(data, path):
                 f.write(" \\\\\n")
 
 
+
+def save_perf_data_to_latex_table(data, path):
+    with open(path, "w") as f:
+        for t, value in data.items():
+            first = True
+            for v, item in value.items():
+                formatted_result = []
+                if first:
+                    data = "\\multirow{" + str(len(value)) + "}{*}{\\rotatebox[origin=c]{90}{" + t + "}}"
+                    first = False
+                else:
+                    data = ""
+                for x in [v, data, *item]:
+                    if isinstance(x, float):
+                        x = f"{x:.1f}"
+                    formatted_result.append(x)
+                f.write(" & ".join(formatted_result))
+                f.write(" \\\\\n")
 
 
 
