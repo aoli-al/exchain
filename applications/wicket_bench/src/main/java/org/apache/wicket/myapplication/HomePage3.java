@@ -83,7 +83,6 @@ public final class HomePage3 extends WebPage
         add(new Image("okButton", getOkButtonImage()));
 
         // Add cancel button image
-        add(new Image("cancelButton", new SharedResourceReference("cancelButton")));
 
         // image loaded as resource ref via model.
         add(new Image("imageModelResourceReference", new Model<>(RESOURCE_REF)));
