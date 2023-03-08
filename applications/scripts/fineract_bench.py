@@ -28,9 +28,9 @@ class FineractBench(SingleCommandTest):
 
     def pre(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
-        subprocess.call("docker rm -f mysql-5.7", shell=True)
+        subprocess.call("docker stop mysql-5.7", shell=True)
         subprocess.call(
-            "docker run --name mysql-5.7 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.7", shell=True)
+            "docker run --rm --name mysql-5.7 -p 3306:3306 -e MYSQL_ROOT_PASSWORD=mysql -d mysql:5.7", shell=True)
         time.sleep(10)
         subprocess.call(
             "./gradlew createDB -PdbName=fineract_tenants", shell=True, cwd=self.work_dir)
