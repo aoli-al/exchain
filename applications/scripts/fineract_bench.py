@@ -14,7 +14,7 @@ class FineractBench(SingleCommandTest):
             "fineract-provider.jar",
             "fineract-provider/build/libs",
             "org.springframework.boot.loader.JarLauncher",
-            "Lorg/apache/fineract:Lorg/springframework/core:Lretrofit/client",
+            "Lorg/apache/fineract",
             additional_args=[
                 "--add-opens=java.base/java.lang=ALL-UNNAMED",
 
@@ -36,10 +36,8 @@ class FineractBench(SingleCommandTest):
             "./gradlew createDB -PdbName=fineract_tenants", shell=True, cwd=self.work_dir)
         subprocess.call(
             "./gradlew createDB -PdbName=fineract_default", shell=True, cwd=self.work_dir)
+        subprocess.call("jenv local 16", shell=True, cwd=self.work_dir)
 
-    def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
-        cmd, env, work_dir, _ = super().get_exec_command(type, debug)
-        return cmd, env, work_dir, open("/tmp/fineract.out", "w")
 
     def convert_measurement(self, input: float) -> float:
         return 1000 / input
