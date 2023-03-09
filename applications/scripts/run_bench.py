@@ -17,8 +17,10 @@ import subprocess
 @click.option("--only-app", multiple=True, help="Only run specifc application",
               default=ALL_APPLICATIONS.keys())
 @click.option('--iter', type=int, default=1)
+@click.option("--naive/--no-naitve", default=True, help="Build the project")
 def bench(dataset: str, build: bool, instrument: bool, run: bool, analyze: bool,
-          skip_app: List[str], skip_type: List[str], only_app: List[str], iter: int):
+          skip_app: List[str], skip_type: List[str], only_app: List[str], iter: int,
+          naive: bool):
     if dataset == "all":
         data = ALL_APPLICATIONS.items()
     elif dataset == "bench":
@@ -41,7 +43,7 @@ def bench(dataset: str, build: bool, instrument: bool, run: bool, analyze: bool,
                     for i in range(iter):
                         app.run_test(t, False, i)
                 if analyze:
-                    app.post_analysis(t)
+                    app.post_analysis(t, naive=naive)
 
 if __name__ == "__main__":
     bench()

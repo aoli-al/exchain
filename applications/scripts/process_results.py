@@ -180,6 +180,10 @@ def save_as_latex_table(data, path):
                 f.write(" \\\\\n")
 
 
+def map_name(input):
+    if input == "exec_time":
+        return "time"
+    return input
 
 def save_perf_data_to_latex_table(data, path):
     with open(path, "w") as f:
@@ -188,7 +192,7 @@ def save_perf_data_to_latex_table(data, path):
             for v, item in value.items():
                 formatted_result = []
                 if first:
-                    data = "\\multirow{" + str(len(value)) + "}{*}{\\rotatebox[origin=c]{90}{" + t + "}}"
+                    data = "\\multirow{" + str(len(value)) + "}{*}{\\rotatebox[origin=c]{90}{" + map_name(t) + "}}"
                     first = False
                 else:
                     data = ""
