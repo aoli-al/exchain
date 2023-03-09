@@ -20,7 +20,8 @@ class Test:
                  ignored_type: List[str] = [],
                  is_running_service: bool = True,
                  is_benchmark: bool = False,
-                 work_dir: Optional[str] = None):
+                 work_dir: Optional[str] = None,
+                 test_class: str = ""):
         self.test_name = test_name
         self.application_namespace = application_namespace
         self.work_dir = os.path.join(
@@ -36,6 +37,7 @@ class Test:
         self.ignored_type = ignored_type
         self.is_running_service = is_running_service
         self.is_benchmark = is_benchmark
+        self.test_class = test_class
 
         os.makedirs(self.out_path, exist_ok=True)
         os.makedirs(self.instrumentation_classpath, exist_ok=True)
@@ -140,26 +142,36 @@ class Test:
     def process_bench_result(self, type: str, data: str):
         pass
 
-    def post_analysis(self, type: str, debug: bool = False):
+    def post_analysis(self, type: str, debug: bool = False, naive: bool = False):
         if self.is_benchmark:
             return
         out_path = os.path.join(self.out_path, f"{type}-results")
         if type == "static":
-            args = [
-                f"--args={self.origin_classpath} {out_path} {self.application_namespace}"]
+            class_path = self.origin_classpath
         elif type == "hybrid":
-            args = [
-                f"--args={self.hybrid_classpath} {out_path} {self.application_namespace}"]
+            class_path = self.hybrid_classpath
         else:
             return
+        if naive:
+            ns = self.test_class + " --naive"
+        else:
+            ns = self.application_namespace
+        args = [
+            f"--args={class_path} {out_path} {ns}"]
+
         if debug:
             args.insert(0, "--debug-jvm")
 
         start_time = time.time()
+        print(args)
         subprocess.call(["./gradlew", "static-analyzer:run", *args],
                         cwd=os.path.join(DIR_PATH, "../.."), timeout=60 * 60 * 8)
         finish_time = time.time()
-        with open(os.path.join(out_path, "time.txt"), "w") as f:
+        if naive:
+            out = "time.naive.txt"
+        else:
+            out = "time.txt"
+        with open(os.path.join(out_path, out), "w") as f:
             f.write(str(finish_time - start_time))
 
 
@@ -180,10 +192,10 @@ class Test:
 
 
 class WrappedTest(Test):
-    def __init__(self, test_name: str, application_namespace: str, dist_path: str, start_command: List[str], env_key: str, is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True, is_benchmark: bool = False, work_dir: Optional[str] = None):
+    def __init__(self, test_name: str, application_namespace: str, dist_path: str, start_command: List[str], env_key: str, is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True, is_benchmark: bool = False, work_dir: Optional[str] = None, test_class: str = ""):
         super().__init__(test_name, application_namespace,
                          is_async, ignored_type, is_running_service,
-                         is_benchmark, work_dir)
+                         is_benchmark, work_dir, test_class)
         self.origin_dist = os.path.join(self.work_dir, dist_path)
         self.dynamic_dist = os.path.join(EXCHAIN_WORKDIR + "/dyn_dist/", self.test_name, "dyn_dist")
         self.hybrid_dist = os.path.join(EXCHAIN_WORKDIR + "/hybrid_dist/", self.test_name, "hybrid_dist")
@@ -239,10 +251,9 @@ class SingleCommandTest(Test):
     def __init__(self, test_name: str, jar_name: str, origin_jar_path: str, test_class: str, application_namespace: str, additional_args: List[str] = [], additional_classpaths: List[str] = [], is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True, is_single_jar: bool = True, is_benchmark: bool = False):
         super().__init__(test_name, application_namespace,
                          is_async, ignored_type, is_running_service,
-                         is_benchmark)
+                         is_benchmark, test_class=test_class)
         self.additional_classpaths = additional_classpaths
         self.additional_args = additional_args
-        self.test_class = test_class
         self.jar_name = jar_name
         self.origin_jar_path = origin_jar_path
         self.origin_jar_path = os.path.join(self.work_dir, origin_jar_path)

@@ -15,6 +15,7 @@ class Tomcat(WrappedTest):
             "output/build",
             ["bin/catalina.sh", "run"],
             "JAVA_OPTS",
+            test_class="org.apache.catalina.startup.Bootstrap"
         )
 
     def build(self):

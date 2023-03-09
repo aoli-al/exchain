@@ -69,9 +69,10 @@ def run(app: SingleCommandTest, type: str, debug: bool, iter: int):
 @main.command(name="analyze")
 @click.option('--type', type=click.Choice(["hybrid", "static"]), help='Type of analysis.')
 @click.option('--debug/--no-debug', default=False, help='Enable debugging.')
+@click.option('--naive', default=False, help='Enable naive analyze.')
 @click.pass_obj
-def analyze(app: SingleCommandTest, type: str, debug: bool):
-    app.post_analysis(type, debug)
+def analyze(app: SingleCommandTest, type: str, debug: bool, naive: bool):
+    app.post_analysis(type, debug, naive)
 
 
 if __name__ == '__main__':
