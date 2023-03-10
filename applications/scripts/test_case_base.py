@@ -201,6 +201,7 @@ class Test:
         cmd, env, work_dir, f = self.get_exec_command(type, debug)
         e = {
             "EXCHAIN_OUT_DIR": self.out_path,
+            "EXCHAIN_TYPE": type,
             **env
         }
         if disable_cache:

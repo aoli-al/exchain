@@ -11,15 +11,28 @@ import edu.columbia.cs.psl.phosphor.struct.PowerSetTree
 import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag
 import java.io.File
 import java.io.IOException
+import java.lang.RuntimeException
 import kotlin.Exception
 
 private val logger = Logger()
 
 object AffectedVarDriver {
     var instrumentedClassPath: String? = null
-    var type = Type.Dynamic
-    val store: AffectedVarStore = CachedAffectedVarStore()
     val exceptionSourceIdentified = mutableMapOf<Int, Boolean>()
+    var type: Type
+    val store: AffectedVarStore
+
+    init {
+        val t = System.getenv("EXCHAIN_TYPE")
+        type = when (t) {
+            "dynamic" -> Type.Dynamic
+            "static" -> Type.Static
+            "hybrid" -> Type.Hybrid
+            else -> throw RuntimeException("Wrong exchain type")
+        }
+        store = CachedAffectedVarStore()
+    }
+
     fun analyzeAffectedVar(
         e: Throwable,
         clazz: String,
