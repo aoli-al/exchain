@@ -15,8 +15,12 @@ class CachedAffectedVarStore : AffectedVarStore {
     val affectedVarResult: MutableMap<String, AffectedVarResult>
     var storeType = object : TypeToken<MutableMap<String, AffectedVarResult>>() {}.type
     val storeFileName = ExceptionLogger.outBasePath + "/cached_affected_var_store.json"
+    private var enabled = false
 
     init {
+        if (System.getenv("EXCHAIN_ENABLED_CACHE") == "true") {
+            enabled = true
+        }
         affectedVarResult =
             try {
                 val f = File(storeFileName)
@@ -36,6 +40,9 @@ class CachedAffectedVarStore : AffectedVarStore {
         catchLocation: Long,
         isThrowInsn: Boolean
     ): AffectedVarResult? {
+        if (!enabled) {
+            return null
+        }
         val sig = "$clazz:$method:$throwLocation:$catchLocation:$isThrowInsn"
         return affectedVarResult[sig]
     }
@@ -48,6 +55,9 @@ class CachedAffectedVarStore : AffectedVarStore {
         isThrowInsn: Boolean,
         result: AffectedVarResult
     ) {
+        if (!enabled) {
+            return
+        }
         val sig = "$clazz:$method:$throwLocation:$catchLocation:$isThrowInsn"
         affectedVarResult[sig] = result
         executor.submit {
