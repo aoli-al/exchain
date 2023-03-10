@@ -18,7 +18,7 @@ class CachedAffectedVarStore : AffectedVarStore {
     private var enabled = false
 
     init {
-        if (System.getenv("EXCHAIN_ENABLED_CACHE") == "true") {
+        if (System.getenv("EXCHAIN_ENABLE_CACHE") == "true") {
             enabled = true
         }
         affectedVarResult =
