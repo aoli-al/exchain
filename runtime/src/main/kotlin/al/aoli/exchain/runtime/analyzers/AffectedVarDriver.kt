@@ -18,11 +18,7 @@ private val logger = Logger()
 object AffectedVarDriver {
     var instrumentedClassPath: String? = null
     var type = Type.Dynamic
-    val store: AffectedVarStore = if (type == Type.Dynamic) {
-        InMemoryAffectedVarStore()
-    } else {
-        CachedAffectedVarStore()
-    }
+    val store: AffectedVarStore = CachedAffectedVarStore()
     val exceptionSourceIdentified = mutableMapOf<Int, Boolean>()
     fun analyzeAffectedVar(
         e: Throwable,
