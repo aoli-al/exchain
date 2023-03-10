@@ -28,11 +28,11 @@ class HadoopDFSWrite(WrappedTest):
     def pre(self):
         shutil.rmtree("/tmp/dfs-write", ignore_errors=True)
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         out, err = cmd.communicate()
         shutil.rmtree("/tmp/dfs-write", ignore_errors=True)
         result, latency = self.find_result(err.decode("utf-8"))
-        with open(self.perf_result_path(type, iter), "w") as f:
+        with open(self.perf_result_path(type, iter, disable_cache), "w") as f:
             f.write(f"throughput, {result}\n")
             f.write(f"exec_time, {latency}\n")
 

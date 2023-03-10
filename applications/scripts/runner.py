@@ -60,10 +60,10 @@ def instrument(app: SingleCommandTest, debug: bool):
 @click.option('--type', type=click.Choice(DEFAULT_TYPES), default="origin", help='Type of run.')
 @click.option('--debug/--no-debug', default=False, help='Enable debugging.')
 @click.option('--iter', type=int, default=1)
+@click.option('--cache/--no-cache', default=True, help='Enable debugging.')
 @click.pass_obj
-def run(app: SingleCommandTest, type: str, debug: bool, iter: int):
-    for i in range(iter):
-        app.run_test(type, debug, i)
+def run(app: SingleCommandTest, type: str, debug: bool, iter: int, cache: bool):
+    app.run_test(type, debug, iter, not cache)
 
 
 @main.command(name="analyze")

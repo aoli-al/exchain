@@ -57,8 +57,11 @@ class Test:
         latest = open(os.path.join(base_dir, "latest")).read().strip()
         return os.path.join(base_dir, latest)
 
-    def perf_result_path(self, type: str, iter: int) -> str:
-        return os.path.join(self.out_path, f"{type}-perf.{iter}.txt")
+    def perf_result_path(self, type: str, iter: int, disable_cache: bool) -> str:
+        if disable_cache:
+            return os.path.join(self.out_path, f"{type}-perf-no-cache.{iter}.txt")
+        else:
+            return os.path.join(self.out_path, f"{type}-perf.{iter}.txt")
 
     def read_ground_truth(self) -> List[Tuple[Link, LinkType]]:
         data = jsonpickle.decode(open(self.ground_truth_path).read())
@@ -86,6 +89,13 @@ class Test:
         exception_data = read_exceptions(os.path.join(path, "exception.json"))
         dependencies = read_static_dependencies(os.path.join(
             path, "dependency.json"), exception_data)
+        return list(dependencies)
+
+    def read_latest_naive_static_dependency(self) -> List[Link]:
+        path = self.get_latest_result("static")
+        exception_data = read_exceptions(os.path.join(path, "exception.json"))
+        dependencies = read_static_dependencies(os.path.join(
+            path, "dependency.naive.json"), exception_data)
         return list(dependencies)
 
     def build(self):
@@ -124,7 +134,7 @@ class Test:
     def instrument(self, debug: bool = False):
         pass
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         if not self.is_benchmark and not debug:
             time.sleep(200)
             cmd.kill()
@@ -134,10 +144,11 @@ class Test:
     def pre(self):
         pass
 
-    def run_test(self, type: str, debug: bool = False, iter: int = 0):
-        self.pre()
-        cmd = self.exec(type, debug)
-        self.post(type, debug, cmd, iter)
+    def run_test(self, type: str, debug: bool = False, iter: int = 1, disable_cache: bool = False):
+        for i in range(iter):
+            self.pre()
+            cmd = self.exec(type, debug, disable_cache)
+            self.post(type, debug, cmd, i, disable_cache)
 
     def process_bench_result(self, type: str, data: str):
         pass
@@ -145,6 +156,9 @@ class Test:
     def post_analysis(self, type: str, debug: bool = False, naive: bool = False):
         if self.is_benchmark:
             return
+
+
+
         out_path = os.path.join(self.out_path, f"{type}-results")
         if type == "static":
             class_path = self.origin_classpath
@@ -154,8 +168,12 @@ class Test:
             return
         if naive:
             ns = self.test_class + " --naive"
+            if os.path.exists(os.path.join(self.get_latest_result(type), "dependency.naive.json")):
+                return
         else:
             ns = self.application_namespace
+            if os.path.exists(os.path.join(self.get_latest_result(type), "dependency.json")):
+                return
         args = [
             f"--args={class_path} {out_path} {ns}"]
 
@@ -179,15 +197,21 @@ class Test:
     def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
         return ([], {}, "", sys.stdout.buffer)
 
-    def exec(self, type: str, debug: bool) -> subprocess.Popen:
+    def exec(self, type: str, debug: bool, disable_cache: bool) -> subprocess.Popen:
         cmd, env, work_dir, f = self.get_exec_command(type, debug)
+        e = {
+            "EXCHAIN_OUT_DIR": self.out_path,
+            **env
+        }
+        if disable_cache:
+            e["EXCHAIN_ENABLE_CACHE"] = "false"
+        else:
+            e["EXCHAIN_ENABLE_CACHE"] = "true"
+
         return subprocess.Popen(cmd,
                                 stdout=f,
                                 stderr=f,
-                                env={
-                                    "EXCHAIN_OUT_DIR": self.out_path,
-                                    **env
-                                }, cwd=work_dir)
+                                env=e, cwd=work_dir)
 
 
 
@@ -328,7 +352,7 @@ class SingleCommandTest(Test):
             f = open(self.origin_log_path, "w")
         elif self.is_benchmark:
             f = subprocess.PIPE
-            # f = sys.stdout.buffer
+            f = sys.stdout.buffer
         else:
             f = sys.stdout.buffer
         return (cmd, os.environ, self.work_dir, f)

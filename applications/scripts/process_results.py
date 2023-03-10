@@ -79,7 +79,7 @@ def process_dependency_result(result: List[Link], ground_truth: List[Tuple[Link,
     for link in ground_truth:
         if link[0] not in result:
             fn += 1
-    return (tp > 0, fp > 0)
+    return (tp > 0, fp)
 
 def check_root_cause_in_log(result: List[Tuple[Link, LinkType]], log_path: str) -> bool:
     with open(log_path) as f:
@@ -109,7 +109,7 @@ def get_exception_distance(result: List[Tuple[Link, LinkType]], path: str) -> in
                 distance += 1
             if link.src == exception:
                 src_found = True
-    return max_distance
+    return max_distance + 1
 
 import re
 
@@ -141,7 +141,7 @@ def read_perf_result(app, perf_result: Dict[str, Any]):
     for t in types:
         data = {}
         for i in range(10):
-            path = app.perf_result_path(t, i)
+            path = app.perf_result_path(t, i, False)
             result = read_aggregate_perf_result(path)
             for key, value in  result.items():
                 if key not in data:
@@ -187,21 +187,28 @@ def map_name(input):
 
 def save_perf_data_to_latex_table(data, path):
     with open(path, "w") as f:
-        for t, value in data.items():
+        keys = ['exec_time', 'latency', 'throughput', ]
+        for t in keys:
+            print(data)
+            print(t)
+            value = data[t]
             first = True
             for v, item in value.items():
                 formatted_result = []
                 if first:
-                    data = "\\multirow{" + str(len(value)) + "}{*}{\\rotatebox[origin=c]{90}{" + map_name(t) + "}}"
+                    row = "\\multirow{" + str(len(value)) + "}{*}{\\rotatebox[origin=c]{90}{" + map_name(t) + "}}"
                     first = False
                 else:
-                    data = ""
-                for x in [v, data, *item]:
+                    row = ""
+                    f.write(" \\\\\n")
+                for x in [v, row, *item]:
                     if isinstance(x, float):
                         x = f"{x:.1f}"
                     formatted_result.append(x)
                 f.write(" & ".join(formatted_result))
+            if t != keys[-1]:
                 f.write(" \\\\\n")
+                f.write("\\hline\n")
 
 
 

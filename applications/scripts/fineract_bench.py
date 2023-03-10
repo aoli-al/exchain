@@ -3,6 +3,7 @@ import subprocess
 import time
 import os
 import re
+import sys
 
 from typing import *
 
@@ -38,29 +39,34 @@ class FineractBench(SingleCommandTest):
             "./gradlew createDB -PdbName=fineract_default", shell=True, cwd=self.work_dir)
         subprocess.call("jenv local 16", shell=True, cwd=self.work_dir)
 
+    def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
+        cmd, env, work_dir, _ = super().get_exec_command(type, debug)
+        return cmd, env, work_dir, sys.stdout.buffer
+
 
     def convert_measurement(self, input: float) -> float:
         return 1000 / input
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         if type == "dynamic":
             time.sleep(300)
         else:
             time.sleep(60)
         if not debug:
             subprocess.call(
-                "ab -s 300 -p test.json -T application/json -H Fineract-Platform-TenantId:default -c 100 -n 10000 https://localhost:8443/fineract-provider/api/v1/authentication", shell=True)
+                "ab -s 300 -p test.json -T application/json -H Fineract-Platform-TenantId:default -c 20 -n 1000 https://localhost:8443/fineract-provider/api/v1/authentication", shell=True)
             measure = subprocess.Popen(
-                "ab -s 300 -p test.json -T application/json -H Fineract-Platform-TenantId:default -c 100 -n 10000 https://localhost:8443/fineract-provider/api/v1/authentication", shell=True,
+                "ab -s 300 -p test.json -T application/json -H Fineract-Platform-TenantId:default -c 20 -n 1000 https://localhost:8443/fineract-provider/api/v1/authentication", shell=True,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             out, err = measure.communicate()
+            print(out.decode("utf-8"))
             result = re.search(
                 r"Time per request:\s+(\d+\.?\d*) \[ms\] \(mean\)", out.decode("utf-8"))
             latency = float(result.group(1))
             result = re.search(
                 r"Requests per second:\s+(\d+\.?\d*) \[#/sec\]", out.decode("utf-8"))
             throughput = float(result.group(1))
-            with open(self.perf_result_path(type, iter), "w") as f:
+            with open(self.perf_result_path(type, iter, disable_cache), "w") as f:
                 f.write(f"latency, {latency}\n")
                 f.write(f"throughput, {throughput}\n")
             cmd.kill()

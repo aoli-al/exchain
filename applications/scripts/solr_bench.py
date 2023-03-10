@@ -39,7 +39,7 @@ class Solr(WrappedTest):
         subprocess.call(["./gradlew", ":solr:benchmark:jar"], cwd=self.work_dir)
         subprocess.call(["./gradlew", ":solr:benchmark:copyDependencies"], cwd=self.work_dir)
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         out, err = cmd.communicate()
         print("==========================")
         print(out.decode("utf-8"))
@@ -48,6 +48,6 @@ class Solr(WrappedTest):
 
         result = re.search(r"Iteration   1: (\d+\.?\d*) ops/s", out.decode("utf-8"))
         throughput = float(result.group(1))
-        with open(self.perf_result_path(type, iter), "w") as f:
+        with open(self.perf_result_path(type, iter, disable_cache), "w") as f:
             f.write(f"throughput, {throughput}\n")
 

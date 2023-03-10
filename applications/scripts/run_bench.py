@@ -40,8 +40,7 @@ def bench(dataset: str, build: bool, instrument: bool, run: bool, analyze: bool,
         for t in DEFAULT_TYPES:
             if t not in skip_type:
                 if run:
-                    for i in range(iter):
-                        app.run_test(t, False, i)
+                    app.run_test(t, False, iter)
                 if analyze:
                     app.post_analysis(t, naive=naive)
 

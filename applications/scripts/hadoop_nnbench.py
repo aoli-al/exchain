@@ -30,11 +30,11 @@ class HadoopNNBench(WrappedTest):
     def pre(self):
         shutil.rmtree("/tmp/nnbench", ignore_errors=True)
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         out, err = cmd.communicate()
         shutil.rmtree("/tmp/nnbench", ignore_errors=True)
         throughput, latency = self.find_result(err.decode("utf-8"))
-        with open(self.perf_result_path(type, iter), "w") as f:
+        with open(self.perf_result_path(type, iter, disable_cache), "w") as f:
             f.write(f"latency, {latency}\n")
             f.write(f"throughput, {throughput}\n")
 

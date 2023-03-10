@@ -2,6 +2,8 @@ from test_case_base import SingleCommandTest
 import subprocess
 import time
 import os
+import sys
+from typing import *
 
 
 class Fineract(SingleCommandTest):
@@ -29,6 +31,11 @@ class Fineract(SingleCommandTest):
             "./gradlew createDB -PdbName=fineract_tenants", shell=True, cwd=self.work_dir)
         subprocess.call(
             "./gradlew createDB -PdbName=fineract_default", shell=True, cwd=self.work_dir)
+
+    def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
+        cmd, env, work_dir, _ = super().get_exec_command(type, debug)
+        return cmd, env, work_dir, sys.stdout.buffer
+
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
         if type == "dynamic":

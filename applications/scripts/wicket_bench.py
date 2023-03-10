@@ -24,11 +24,11 @@ class Wicket(SingleCommandTest):
     def convert_measurement(self, input: float) -> float:
         return 1000 / input
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         time.sleep(10)
-        subprocess.call("ab -s 300 -c 100 -n 10000 http://localhost:8080/", shell=True)
-        measure = subprocess.Popen("ab -s 300 -c 100 -n 10000 http://localhost:8080/", shell=True,
-                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.call("ab -s 300 -c 200 -n 10000 http://localhost:8080/", shell=True)
+        measure = subprocess.Popen("ab -s 300 -c 200 -n 10000 http://localhost:8080/", shell=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = measure.communicate()
         print(out.decode("utf-8"))
         result = re.search(
@@ -37,7 +37,7 @@ class Wicket(SingleCommandTest):
         result = re.search(
             r"Requests per second:\s+(\d+\.?\d*) \[#/sec\]", out.decode("utf-8"))
         throughput = float(result.group(1))
-        with open(self.perf_result_path(type, iter), "w") as f:
+        with open(self.perf_result_path(type, iter, disable_cache), "w") as f:
             f.write(f"latency, {latency}\n")
             f.write(f"throughput, {throughput}\n")
         cmd.kill()
