@@ -175,8 +175,11 @@ def save_as_latex_table(data, path):
                         formatted_result.append("\\cmark")
                     else:
                         formatted_result.append("\\xmark")
+                elif isinstance(item, float):
+                    formatted_result.append(f"{item:.1f}")
                 else:
                     formatted_result.append(str(item))
+
             f.write(" & ".join(formatted_result))
             if row != data[-1]:
                 f.write(" \\\\\n")

@@ -30,7 +30,11 @@ object AffectedVarDriver {
             "hybrid" -> Type.Hybrid
             else -> throw RuntimeException("Wrong exchain type")
         }
-        store = CachedAffectedVarStore()
+        if (type == Type.Dynamic) {
+          store = InMemoryAffectedVarStore()
+        } else {
+          store = CachedAffectedVarStore
+        }
     }
 
     fun analyzeAffectedVar(
