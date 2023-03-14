@@ -131,15 +131,24 @@ def read_aggregate_perf_result(path):
     with open(path) as f:
         for line in f:
             [name, data] = line.split(", ")
+            name = map_name(name)
             items[name] = float(data.strip())
     return items
 
+def map_type(t):
+    if t == "static":
+        return "\sc{Static}"
+    if t == "dynamic":
+        return "\sc{Dynamic}"
+    else:
+        return "\sc{ExChain}"
+
 
 import pandas as pd
-def read_perf_result(app, perf_result: Dict[str, Any]):
+def read_perf_result(app, perf_result: Dict[str, List[Any]]):
     types = ["origin", "static", "hybrid", "dynamic"]
     name = app.test_name.split("_")[0].upper()
-    origin_result = 0
+    origin_result = {}
     for t in types:
         data = {}
         for i in range(10):
@@ -152,17 +161,14 @@ def read_perf_result(app, perf_result: Dict[str, Any]):
         for key, value in data.items():
             df = pd.DataFrame(value)
             mean = float(df.mean())
-            std = float(df.std())
             if key not in perf_result:
-                perf_result[key] = {}
-            if name not in perf_result[key]:
-                perf_result[key][name] = []
-            perf_result[key][name].append(mean)
-            perf_result[key][name].append(std)
-            if t != "origin":
-                origin_result = perf_result[key][name][0]
-                perf_result[key][name].append(
-                    f"{((mean - origin_result) / origin_result * 100):.1f}" + "\%")
+                perf_result[key] = []
+            if t == "origin":
+                origin_result[key] = mean
+            else:
+                for v in value:
+                    perf_result[key].append([name, map_type(t), v / origin_result[key]])
+
 
 
 def save_as_latex_table(data, path):
@@ -187,12 +193,33 @@ def save_as_latex_table(data, path):
 
 def map_name(input):
     if input == "exec_time":
-        return "time"
+        return "latency"
     return input
+
+def save_perf_data_to_pdf(data, path):
+    for key, value in data.items():
+        df = pd.DataFrame(value, columns=["Application", "System", key.capitalize()])
+        sns.set(rc={'figure.figsize':(8,4), "text.usetex": True})
+        axis = sns.barplot(
+            data = df,
+            x="Application",
+            hue="System",
+            y=key.capitalize()
+        )
+        axis.set_yscale("log")
+        hatches = ['//', '+', 'o', 'O', '.']
+        for i, bar in enumerate(axis.patches):
+            hatch = hatches[i // 6]
+            bar.set_hatch(hatch)
+        axis.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1), ncol=3, fancybox=True, shadow=True)
+        fig = axis.get_figure()
+        fig.savefig(os.path.join(path, key + ".pdf"), bbox_inches='tight', pad_inches=0.1)
+        fig.clf()
+
 
 def save_perf_data_to_latex_table(data, path):
     with open(path, "w") as f:
-        keys = ['exec_time', 'latency', 'throughput', ]
+        keys = ['latency', 'throughput', ]
         for t in keys:
             print(data)
             print(t)
