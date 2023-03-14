@@ -18,9 +18,10 @@ import subprocess
               default=ALL_APPLICATIONS.keys())
 @click.option('--iter', type=int, default=1)
 @click.option("--naive/--no-naitve", default=True, help="Build the project")
+@click.option("--cache/--no-cache", default=True, help="Build the project")
 def bench(dataset: str, build: bool, instrument: bool, run: bool, analyze: bool,
           skip_app: List[str], skip_type: List[str], only_app: List[str], iter: int,
-          naive: bool):
+          naive: bool, cache: bool):
     if dataset == "all":
         data = ALL_APPLICATIONS.items()
     elif dataset == "bench":
@@ -40,7 +41,7 @@ def bench(dataset: str, build: bool, instrument: bool, run: bool, analyze: bool,
         for t in DEFAULT_TYPES:
             if t not in skip_type:
                 if run:
-                    app.run_test(t, False, iter)
+                    app.run_test(t, False, iter, not cache)
                 if analyze:
                     app.post_analysis(t, naive=naive)
 

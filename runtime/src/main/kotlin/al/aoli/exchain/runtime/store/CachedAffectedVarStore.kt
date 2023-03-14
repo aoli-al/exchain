@@ -8,7 +8,7 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.Executors
 
-class CachedAffectedVarStore : AffectedVarStore {
+object CachedAffectedVarStore : AffectedVarStore {
 
     val executor = Executors.newSingleThreadExecutor()
 
@@ -25,11 +25,13 @@ class CachedAffectedVarStore : AffectedVarStore {
             try {
                 val f = File(storeFileName)
                 if (f.isFile) {
-                    Gson().fromJson(f.readText(), storeType)
+                    val text = f.readText()
+                    println(text)
+                    Gson().fromJson(text, storeType)
                 } else {
                     mutableMapOf()
                 }
-            } catch (e: IOException) {
+            } catch (e: Exception) {
                 mutableMapOf()
             }
     }
