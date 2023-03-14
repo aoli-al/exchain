@@ -38,6 +38,7 @@ class Test:
         self.is_running_service = is_running_service
         self.is_benchmark = is_benchmark
         self.test_class = test_class
+        self.code_ql_out_dir = EXCHAIN_WORKDIR + "/codeql/" + self.test_name
 
         os.makedirs(self.out_path, exist_ok=True)
         os.makedirs(self.instrumentation_classpath, exist_ok=True)
@@ -51,6 +52,17 @@ class Test:
 
     def convert_measurement(self, input: float) -> float:
         return input
+
+
+    def analyze(self):
+        types = ["assign", "call", "return"]
+        for t in types:
+            for v in ["all", "local"]:
+                command = f"/home/aoli/.config/Code/User/globalStorage/github.vscode-codeql/distribution1/codeql/codeql query run --database={self.code_ql_out_dir} -- /home/aoli/repos/vscode-codeql-starter/codeql-custom-queries-java/{t}_{v}.ql"
+                cmd = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+                out, err = cmd.communicate()
+                out = out.decode("utf-8")
+                print(self.test_name, t, v, len(out.split("/n")))
 
     def get_latest_result(self, type: str) -> str:
         base_dir = os.path.join(self.out_path, f"{type}-results")
@@ -73,6 +85,15 @@ class Test:
         dependencies = read_dynamic_dependencies(os.path.join(
             path, "dynamic_dependency.json"), exception_data)
         return list(dependencies)
+
+    def create_codeql_db(self):
+        subprocess.call(["/home/aoli/.config/Code/User/globalStorage/github.vscode-codeql/distribution1/codeql/codeql",
+        "database",
+        "create",
+        "--overwrite",
+                         "--language=java",
+                         f"{self.code_ql_out_dir}"],
+                        cwd=self.work_dir)
 
     def read_latest_hybrid_dependency(self) -> Tuple[List[Link], List[Link]]:
         path = self.get_latest_result("hybrid")
