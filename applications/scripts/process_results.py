@@ -1,8 +1,10 @@
 from typing import Dict, List, Tuple, Set, Any
+import itertools
 import jsonpickle
 import json
 import os
 from commons import *
+import seaborn as sns
 from objects import *
 from statsmodels.stats.diagnostic import lilliefors
 
@@ -213,6 +215,26 @@ def save_perf_data_to_latex_table(data, path):
                 f.write(" \\\\\n")
                 f.write("\\hline\n")
 
+
+def draw_dist(data, path):
+    sns.set(rc={'figure.figsize':(8,4)})
+    axis = sns.barplot(
+        data = data,
+        x="Name",
+        y="Ratio",
+        hue="Type",
+    )
+    axis.set(xlabel = "Application")
+    axis.set(ylabel = "Ratio (%)")
+    hatches = ['//', '+', 'o', 'O', '.']
+    for i, bar in enumerate(axis.patches):
+        hatch = hatches[i // 8]
+        bar.set_hatch(hatch)
+    axis.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1), ncol=3, fancybox=True, shadow=True)
+
+
+    fig = axis.get_figure()
+    fig.savefig(path, bbox_inches='tight', pad_inches=0.1)
 
 
 
