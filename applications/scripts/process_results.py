@@ -211,7 +211,8 @@ def save_perf_data_to_pdf(data, path):
         for i, bar in enumerate(axis.patches):
             hatch = hatches[i // 6]
             bar.set_hatch(hatch)
-        axis.legend(loc='upper center', bbox_to_anchor=(0.5, 1.1), ncol=3, fancybox=True, shadow=True)
+        axis.legend(loc='upper center', bbox_to_anchor=(
+            0.5, 1.1), ncol=3, fancybox=True, shadow=True)
         fig = axis.get_figure()
         fig.savefig(os.path.join(path, key + ".pdf"), bbox_inches='tight', pad_inches=0.1)
         fig.clf()
