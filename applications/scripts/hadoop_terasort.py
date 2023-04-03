@@ -38,6 +38,12 @@ class HadoopTerasort(WrappedTest):
                             "JAVA_HOME": os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11")
         })
 
+    def get_measure(self, type: str) -> str:
+        if type == "latency":
+            return "ms"
+        else:
+            return "mb/s"
+
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         # super().post(type, debug, cmd)
         out, err = cmd.communicate()

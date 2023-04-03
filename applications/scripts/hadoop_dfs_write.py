@@ -36,6 +36,12 @@ class HadoopDFSWrite(WrappedTest):
             f.write(f"throughput, {result}\n")
             f.write(f"exec_time, {latency}\n")
 
+    def get_measure(self, type: str) -> str:
+        if type == "latency":
+            return "s"
+        else:
+            return "mb/s"
+
 
     def find_result(self, out: str):
         print(out)

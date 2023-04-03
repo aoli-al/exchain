@@ -47,6 +47,12 @@ class FineractBench(SingleCommandTest):
     def convert_measurement(self, input: float) -> float:
         return 1000 / input
 
+    def get_measure(self, type: str) -> str:
+        if type == "latency":
+            return "ms"
+        else:
+            return "ops/s"
+
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         if type == "dynamic":
             time.sleep(300)

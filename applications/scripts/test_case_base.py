@@ -113,7 +113,7 @@ class Test:
         return list(dependencies)
 
     def read_latest_naive_static_dependency(self) -> List[Link]:
-        path = self.get_latest_result("static")
+        path = self.get_latest_result("hybrid")
         exception_data = read_exceptions(os.path.join(path, "exception.json"))
         dependencies = read_static_dependencies(os.path.join(
             path, "dependency.naive.json"), exception_data)

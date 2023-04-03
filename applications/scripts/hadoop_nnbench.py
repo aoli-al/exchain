@@ -38,6 +38,11 @@ class HadoopNNBench(WrappedTest):
             f.write(f"latency, {latency}\n")
             f.write(f"throughput, {throughput}\n")
 
+    def get_measure(self, type: str) -> str:
+        if type == "latency":
+            return "ms"
+        else:
+            return "ops/s"
 
     def find_result(self, out: str):
         print(out)

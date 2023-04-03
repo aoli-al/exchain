@@ -39,6 +39,12 @@ class Solr(WrappedTest):
         subprocess.call(["./gradlew", ":solr:benchmark:jar"], cwd=self.work_dir)
         subprocess.call(["./gradlew", ":solr:benchmark:copyDependencies"], cwd=self.work_dir)
 
+    def get_measure(self, type: str) -> str:
+        if type == "latency":
+            return "ms"
+        else:
+            return "ops/s"
+
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         out, err = cmd.communicate()
         print("==========================")
