@@ -140,13 +140,16 @@ def map_type(t):
         return "$\\textsc{ExChain}^{Static}$"
     if t == "dynamic":
         return "$\\textsc{ExChain}^{Dynamic}$"
+    if "debug" in t:
+        return "JVMTi"
+    if "noopt" in t:
+        return "NoOpt"
     else:
         return "\sc{ExChain}"
 
 
 import pandas as pd
-def read_perf_result(app, perf_result: Dict[str, List[Any]]):
-    types = ["origin", "static", "hybrid", "dynamic"]
+def read_perf_result(app, perf_result: Dict[str, List[Any]], types = ["origin", "static", "hybrid", "dynamic"]):
     name = app.test_name.split("_")[0].upper()
     origin_result = {}
     for t in types:
@@ -195,6 +198,33 @@ def map_name(input):
     if input == "exec_time":
         return "latency"
     return input
+
+def save_stacked_perf_to_pdf(data, path):
+    df = pd.DataFrame(data, columns=["Application", "System", "Latency"])
+    sns.set(rc={'figure.figsize':(8,4), "text.usetex": True})
+    axis = sns.barplot(
+        data = df,
+        x="Application",
+        hue="System",
+        y="Latency",
+        hue_order=[
+            "JVMTi",
+            "$\\textsc{ExChain}^{Static}$",
+            "NoOpt",
+            "\sc{ExChain}"],
+        stacked=True
+    )
+    axis.set_yscale("log")
+    hatches = ['//', '+', 'o', 'O', '.']
+    for i, bar in enumerate(axis.patches):
+        hatch = hatches[i // 6]
+        bar.set_hatch(hatch)
+    axis.legend(loc='upper center', bbox_to_anchor=(
+        0.5, 1.1), ncol=3, fancybox=True, shadow=True)
+    fig = axis.get_figure()
+    fig.savefig(os.path.join("stacked-latency.pdf"), bbox_inches='tight', pad_inches=0.1)
+    fig.clf()
+
 
 def save_perf_data_to_pdf(data, path):
     for key, value in data.items():

@@ -12,6 +12,27 @@ from process_results import *
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 
+INTRINSICS = [
+    "UseLibmIntrinsic",
+    "UseMD5Intrinsics",
+    "UseMathExactIntrinsics",
+    "UseMontgomeryMultiplyIntrinsic",
+    "UseMontgomerySquareIntrinsic",
+    "UseMulAddIntrinsic",
+    "UseMultiplyToLenIntrinsic",
+    "UseSHA1Intrinsics",
+    "UseSHA256Intrinsics",
+    "UseSHA3Intrinsics",
+    "UseSHA512Intrinsics",
+    "UseSSE42Intrinsics",
+    "UseSignumIntrinsic",
+    "UseSquareToLenIntrinsic",
+    "UseVectorizedMismatchIntrinsic"
+]
+NO_OPT_ARGS = "-XX:+UnlockDiagnosticVMOptions " + " ".join([
+    f"-XX:-{x}" for x in INTRINSICS
+])
+
 
 class Test:
 
@@ -272,9 +293,16 @@ class WrappedTest(Test):
             env["JAVA_HOME"] = HYBRID_JAVA_HOME
             env[self.env_key] = f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV -javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}"
             work_dir = self.hybrid_dist
-        if type == "origin":
-            env["JAVA_HOME"] = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11")
+        if "origin" in type:
+            env["JAVA_HOME"] = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "16")
             work_dir = self.origin_dist
+            if "debug" in type or "noopt" in type:
+                if self.env_key not in env:
+                    env[self.env_key] = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=localhost:5005"
+                else:
+                    env[self.env_key] += " -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=localhost:5005"
+                if "noopt" in type:
+                    env[self.env_key] += " " + NO_OPT_ARGS
         if debug:
             if self.env_key not in env:
                 env[self.env_key] = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:5005"
@@ -352,9 +380,14 @@ class SingleCommandTest(Test):
             self.test_class]
 
     def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
-        if type == "origin":
+        if "origin" in type:
             cmd = self.origin_commands()
             java = "java"
+            if "debug" in type or "noopt" in type:
+                cmd.insert(
+                    0, "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005")
+                if "noopt" in type:
+                    cmd[1:1] = NO_OPT_ARGS.split(" ")
         elif type == "static":
             cmd = self.static_commands()
             java = "java"

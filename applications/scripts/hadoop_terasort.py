@@ -48,7 +48,7 @@ class HadoopTerasort(WrappedTest):
         # super().post(type, debug, cmd)
         out, err = cmd.communicate()
         print(out.decode("utf-8"))
-        # print(err.decode('utf-8'))
+        print(err.decode('utf-8'))
         result = re.search(r"run time:(\d+\.?\d*)", out.decode('utf-8'))
         with open(self.perf_result_path(type, iter, disable_cache), "w") as f:
             f.write(f"exec_time, {result.group(1)}\n")
