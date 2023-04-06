@@ -82,3 +82,9 @@
 [submodule "applications/TINKERPOP-2597"]
 	path = applications/TINKERPOP-2597
 	url = git@github.com:aoli-al/tinkerpop.git
+[submodule "applications/wicket-gzoltar-1"]
+	path = applications/wicket-gzoltar-1
+	url = git@github.com:aoli-al/wicket.git
+[submodule "applications/wicket-gzoltar-2"]
+	path = applications/wicket-gzoltar-2
+	url = git@github.com:aoli-al/wicket.git
