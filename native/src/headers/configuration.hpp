@@ -12,7 +12,7 @@ enum ExceptionMode {
 
 class Configuration {
    public:
-    static Configuration& GetInstance() {
+    static Configuration &GetInstance() {
         static Configuration instance;
         return instance;
     }
@@ -20,6 +20,7 @@ class Configuration {
    public:
     void Init(std::string args);
     ExceptionMode mode() { return mode_; };
+    bool is_dummy() { return is_dummy_; };
     std::vector<std::string> application() { return application_; };
 
    public:
@@ -30,6 +31,7 @@ class Configuration {
    private:
     ExceptionMode mode_ = EXCHAIN;
     std::vector<std::string> application_;
+    bool is_dummy_ = false;
 };
 
 }  // namespace exchain

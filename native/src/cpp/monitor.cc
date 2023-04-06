@@ -42,6 +42,12 @@ void JNICALL ExceptionCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
     task.wait();
 }
 
+void JNICALL DummyCallback(jvmtiEnv *jvmti, JNIEnv *env, jthread thread,
+                               jmethodID method, jlocation location,
+                               jobject exception, jmethodID catch_method,
+                               jlocation catch_location) {
+}
+
 JNIEXPORT void JNICALL Agent_OnUnload(JavaVM *vm) {
     PLOG_INFO << "Agent unloaded";
 }
@@ -61,7 +67,11 @@ JNIEXPORT jint JNICALL Agent_OnLoad(JavaVM *vm, char *options, void *reserved) {
     jvmti->AddCapabilities(&capabilities);
 
     jvmtiEventCallbacks callbacks = {0};
-    callbacks.Exception = ExceptionCallback;
+    if (exchain::Configuration::GetInstance().is_dummy()) {
+        callbacks.Exception = DummyCallback;
+    } else {
+        callbacks.Exception = ExceptionCallback;
+    }
     jvmti->SetEventCallbacks(&callbacks, sizeof(callbacks));
     jvmti->SetEventNotificationMode(JVMTI_ENABLE, JVMTI_EVENT_EXCEPTION, NULL);
 

@@ -7,6 +7,9 @@
 namespace exchain {
 
 void Configuration::Init(std::string args) {
+    if (args.starts_with("dummy")) {
+        is_dummy_ = true;
+    }
     char delim = ':';
     std::string line;
     std::stringstream ss(args);
