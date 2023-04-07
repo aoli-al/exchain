@@ -13,15 +13,15 @@ class AffectedVarAnalyser<V : Value>(
     val catchInsn: AbstractInsnNode?
 ) : DataFlowAnalyzer<V>(insnList, interpreter) {
 
-    override fun newControlFlowExceptionEdge(insnIndex: Int, successorIndex: Int): Boolean {
-        if (catchInsn == null) return false
-        return instructions[insnIndex] == throwInsn && instructions[successorIndex] == catchInsn
-    }
+  override fun newControlFlowExceptionEdge(insnIndex: Int, successorIndex: Int): Boolean {
+    if (catchInsn == null) return false
+    return instructions[insnIndex] == throwInsn && instructions[successorIndex] == catchInsn
+  }
 
-    override fun newControlFlowExceptionEdge(
-        insnIndex: Int,
-        tryCatchBlock: TryCatchBlockNode?
-    ): Boolean {
-        return super.newControlFlowExceptionEdge(insnIndex, tryCatchBlock)
-    }
+  override fun newControlFlowExceptionEdge(
+      insnIndex: Int,
+      tryCatchBlock: TryCatchBlockNode?
+  ): Boolean {
+    return super.newControlFlowExceptionEdge(insnIndex, tryCatchBlock)
+  }
 }
