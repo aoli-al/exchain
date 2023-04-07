@@ -28,6 +28,7 @@ object AffectedVarDriver {
             "dynamic" -> Type.Dynamic
             "static" -> Type.Static
             "hybrid" -> Type.Hybrid
+            "origin-noopt" -> Type.Static
             else -> throw RuntimeException("Wrong exchain type")
         }
         if (type == Type.Dynamic) {
