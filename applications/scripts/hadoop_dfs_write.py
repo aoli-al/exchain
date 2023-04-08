@@ -15,7 +15,7 @@ class HadoopDFSWrite(WrappedTest):
             "Lorg/apache/",
             "hadoop-dist/target/hadoop-3.3.4",
             ["./bin/hadoop", "jar", "./share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.3.4-tests.jar",
-             "TestDFSIO", f"-Dtest.build.data={EXCHAIN_WORKDIR}/dfs-write", "-Ddfs.replication=5", "-write", "-nrFiles", "50", "-size", "100MB"],
+             "TestDFSIO", f"-Dtest.build.data={EXCHAIN_WORKDIR}/dfs-write", "-Ddfs.replication=5", "-write", "-nrFiles", "100", "-size", "500MB"],
             "HADOOP_OPTS",
             is_benchmark=True,
             work_dir=os.path.join(DIR_PATH, "..", "hadoop_bench")
