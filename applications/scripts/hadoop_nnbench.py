@@ -5,6 +5,8 @@ import os
 import re
 from typing import Optional, Tuple
 
+from commons import EXCHAIN_WORKDIR
+
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 class HadoopNNBench(WrappedTest):
@@ -14,7 +16,7 @@ class HadoopNNBench(WrappedTest):
             "Lorg/apache/",
             "hadoop-dist/target/hadoop-3.3.4",
             ["./bin/hadoop", "jar", "./share/hadoop/mapreduce/hadoop-mapreduce-client-jobclient-3.3.4-tests.jar",
-             "nnbench", "-operation", "create_write", "-baseDir", "/tmp/nnbench",
+             "nnbench", "-operation", "create_write", "-baseDir", f"{EXCHAIN_WORKDIR}/nnbench",
              "-maps", "12", "-reduces", "6", "-blockSize", "1", "-bytesToWrite", "0",
              "-numberOfFiles", "1000", "-replicationFactorPerFile", "3", "-readFileAfterOpen", "true"],
             "HADOOP_OPTS",
@@ -28,11 +30,11 @@ class HadoopNNBench(WrappedTest):
             "mvn package -Pdist -DskipTests  -Dmaven.javadoc.skip=true -DskipTests=true", shell=True, cwd=self.work_dir)
 
     def pre(self):
-        shutil.rmtree("/tmp/nnbench", ignore_errors=True)
+        shutil.rmtree(f"{EXCHAIN_WORKDIR}/nnbench", ignore_errors=True)
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         out, err = cmd.communicate()
-        shutil.rmtree("/tmp/nnbench", ignore_errors=True)
+        shutil.rmtree(f"{EXCHAIN_WORKDIR}/nnbench", ignore_errors=True)
         throughput, latency = self.find_result(err.decode("utf-8"))
         with open(self.perf_result_path(type, iter, disable_cache), "w") as f:
             f.write(f"latency, {latency}\n")

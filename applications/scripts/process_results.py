@@ -137,9 +137,9 @@ def read_aggregate_perf_result(path):
 
 def map_type(t):
     if t == "static":
-        return "$\\textsc{ExChain}^{Static}$"
+        return "$\\textsc{ExChain}^{S}$"
     if t == "dynamic":
-        return "$\\textsc{ExChain}^{Dynamic}$"
+        return "$\\textsc{ExChain}^{D}$"
     if "debug" in t:
         return "JVMTi"
     if "noopt" in t:
@@ -149,7 +149,7 @@ def map_type(t):
 
 
 import pandas as pd
-def read_perf_result(app, perf_result: Dict[str, List[Any]], types = ["origin", "static", "hybrid", "dynamic"]):
+def read_perf_result(app, perf_result: Dict[str, List[Any]], types = ["origin", "static", "hybrid", "dynamic"], append_origin=True, remap_keys=True):
     name = app.test_name.split("_")[0].upper()
     origin_result = {}
     for t in types:
@@ -169,8 +169,16 @@ def read_perf_result(app, perf_result: Dict[str, List[Any]], types = ["origin", 
             if t == "origin":
                 origin_result[key] = mean
             else:
+                if append_origin:
+                    title = f"{name}\n{origin_result[key]:.1f}({app.get_measure(key)})"
+                else:
+                    title = name
                 for v in value:
-                    perf_result[key].append([f"{name}\n{origin_result[key]:.1f}({app.get_measure(key)})", map_type(t), v / origin_result[key]])
+                    if remap_keys:
+                        t_val = map_type(t)
+                    else:
+                        t_val = t
+                    perf_result[key].append([title, t_val, v / origin_result[key]])
 
 
 
@@ -199,48 +207,63 @@ def map_name(input):
         return "latency"
     return input
 
-def save_stacked_perf_to_pdf(data, path):
-    df = pd.DataFrame(data, columns=["Application", "System", "Latency"])
+def save_stacked_perf_to_pdf(df, path):
+    from matplotlib.patches import Patch
+    colors = ["#5975A4", "#CC8963", '#5F9E6E', '#B52B2B']
     sns.set(rc={'figure.figsize':(8,4), "text.usetex": True})
-    axis = sns.barplot(
+    colors = sns.color_palette(colors, desat=1.0)
+    axis = sns.histplot(
         data = df,
         x="Application",
         hue="System",
-        y="Latency",
-        hue_order=[
-            "JVMTi",
-            "$\\textsc{ExChain}^{Static}$",
-            "NoOpt",
-            "\sc{ExChain}"],
-        stacked=True
+        weights=0,
+        multiple="stack",
+        shrink=0.8,
+        hue_order=reversed(["JVMTi", "Inst+NoOpt", "Logging", "Taint"]),
+        palette=reversed(colors),
+        alpha=1.0
     )
-    axis.set_yscale("log")
     hatches = ['//', '+', 'o', 'O', '.']
     for i, bar in enumerate(axis.patches):
         hatch = hatches[i // 6]
         bar.set_hatch(hatch)
-    axis.legend(loc='upper center', bbox_to_anchor=(
-        0.5, 1.1), ncol=3, fancybox=True, shadow=True)
+    axis.set(ylabel='Latency Overhead Breakdown (\\%)')
+    # axis.legend()
+    patch_1 = Patch(label='Taint', hatch=hatches[3], facecolor=colors[3])
+    patch_2 = Patch(label='Logging', hatch=hatches[2], facecolor=colors[2])
+    patch_3 = Patch(label='Inst+NoOpt', hatch=hatches[1], facecolor=colors[1])
+    patch_4 = Patch(label='JVMTi', hatch=hatches[0], facecolor=colors[0])
+    axis.legend(handles=list(reversed([patch_1, patch_2, patch_3, patch_4])),
+                loc='upper center', bbox_to_anchor=(
+        0.5, 1.1), ncol=4, fancybox=True, shadow=True)
+    # axis.get_legnd()
     fig = axis.get_figure()
-    fig.savefig(os.path.join("stacked-latency.pdf"), bbox_inches='tight', pad_inches=0.1)
+    fig.savefig(path, bbox_inches='tight', pad_inches=0.1)
     fig.clf()
 
 
 def save_perf_data_to_pdf(data, path):
     for key, value in data.items():
-        df = pd.DataFrame(value, columns=["Application", "System", key.capitalize()])
+        y_key =key.capitalize() + " Overhead (\\%)"
+        df = pd.DataFrame(value, columns=["Application", "System", y_key])
+        df[y_key] -= 1
+        if key != "latency":
+            df[y_key] = -df[y_key]
+        df[y_key] *= 100
+
         sns.set(rc={'figure.figsize':(8,4), "text.usetex": True})
         axis = sns.barplot(
             data = df,
             x="Application",
             hue="System",
-            y=key.capitalize(),
+            y=y_key,
             hue_order=[
-                "$\\textsc{ExChain}^{Static}$",
-                "$\\textsc{ExChain}^{Dynamic}$",
+                "$\\textsc{ExChain}^{S}$",
+                "$\\textsc{ExChain}^{D}$",
                 "\sc{ExChain}"]
         )
-        axis.set_yscale("log")
+        if key == 'latency':
+            axis.set_yscale("log")
         hatches = ['//', '+', 'o', 'O', '.']
         for i, bar in enumerate(axis.patches):
             hatch = hatches[i // 6]

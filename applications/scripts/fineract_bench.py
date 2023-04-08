@@ -56,6 +56,8 @@ class FineractBench(SingleCommandTest):
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         if type == "dynamic":
             time.sleep(300)
+        elif type == "hybrid":
+            time.sleep(100)
         else:
             time.sleep(60)
         if not debug:

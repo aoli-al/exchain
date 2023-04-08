@@ -3,6 +3,7 @@ import subprocess
 import shutil
 import os
 import time
+from commons import EXCHAIN_WORKDIR
 import re
 
 DIR_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -14,7 +15,7 @@ class HadoopTerasort(WrappedTest):
             "Lorg/apache/",
             "hadoop-dist/target/hadoop-3.3.4",
             ["./bin/hadoop", "jar", "./share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.4.jar",
-                "terasort", "/tmp/workload-gen", "/tmp/workload-out"],
+                "terasort", f"{EXCHAIN_WORKDIR}/workload-gen", f"{EXCHAIN_WORKDIR}/workload-out"],
             "HADOOP_OPTS",
             is_benchmark=True,
             work_dir=os.path.join(DIR_PATH, "..", "hadoop_bench")
@@ -29,10 +30,10 @@ class HadoopTerasort(WrappedTest):
         return 10000000 / input
 
     def pre(self):
-        shutil.rmtree("/tmp/workload-gen", ignore_errors=True)
-        shutil.rmtree("/tmp/workload-out", ignore_errors=True)
+        shutil.rmtree(f"{EXCHAIN_WORKDIR}/workload-gen", ignore_errors=True)
+        shutil.rmtree(f"{EXCHAIN_WORKDIR}/workload-out", ignore_errors=True)
         print(self.origin_dist)
-        subprocess.call(["./bin/hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.4.jar teragen 10000000 /tmp/workload-gen"],
+        subprocess.call([f"./bin/hadoop jar ./share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.4.jar teragen 10000000 {EXCHAIN_WORKDIR}/workload-gen"],
                         cwd=self.origin_dist, shell=True,
                         env={
                             "JAVA_HOME": os.path.join(os.path.expanduser("~"), ".jenv", "versions", "11")
