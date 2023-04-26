@@ -15,7 +15,7 @@ class NIFI(SingleCommandTest):
             "Lorg/apache/",
             additional_args=["-noverify"],
             is_async=True,
-            is_running_service=False
+            is_implicit=False
         )
 
     # def pre(self):

@@ -31,7 +31,7 @@ class Test:
     def __init__(self, test_name: str, application_namespace: str,
                  is_async: bool = False,
                  ignored_type: List[str] = [],
-                 is_running_service: bool = True,
+                 is_implicit: bool = True,
                  is_benchmark: bool = False,
                  work_dir: Optional[str] = None,
                  test_class: str = ""):
@@ -48,7 +48,7 @@ class Test:
         self.origin_log_path = os.path.join(self.out_path, "program_out.txt")
         self.is_async = is_async
         self.ignored_type = ignored_type
-        self.is_running_service = is_running_service
+        self.is_implicit = is_implicit
         self.is_benchmark = is_benchmark
         self.test_class = test_class
         self.code_ql_out_dir = EXCHAIN_WORKDIR + "/codeql/" + self.test_name
@@ -251,9 +251,9 @@ class Test:
 
 
 class WrappedTest(Test):
-    def __init__(self, test_name: str, application_namespace: str, dist_path: str, start_command: List[str], env_key: str, is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True, is_benchmark: bool = False, work_dir: Optional[str] = None, test_class: str = ""):
+    def __init__(self, test_name: str, application_namespace: str, dist_path: str, start_command: List[str], env_key: str, is_async: bool = False, ignored_type: List[str] = [], is_implicit: bool = True, is_benchmark: bool = False, work_dir: Optional[str] = None, test_class: str = ""):
         super().__init__(test_name, application_namespace,
-                         is_async, ignored_type, is_running_service,
+                         is_async, ignored_type, is_implicit,
                          is_benchmark, work_dir, test_class)
         self.origin_dist = os.path.join(self.work_dir, dist_path)
         self.dynamic_dist = os.path.join(EXCHAIN_WORKDIR + "/dyn_dist/", self.test_name, "dyn_dist")
@@ -320,9 +320,9 @@ class WrappedTest(Test):
 
 class SingleCommandTest(Test):
 
-    def __init__(self, test_name: str, jar_name: str, origin_jar_path: str, test_class: str, application_namespace: str, additional_args: List[str] = [], additional_classpaths: List[str] = [], is_async: bool = False, ignored_type: List[str] = [], is_running_service: bool = True, is_single_jar: bool = True, is_benchmark: bool = False):
+    def __init__(self, test_name: str, jar_name: str, origin_jar_path: str, test_class: str, application_namespace: str, additional_args: List[str] = [], additional_classpaths: List[str] = [], is_async: bool = False, ignored_type: List[str] = [], is_implicit: bool = True, is_single_jar: bool = True, is_benchmark: bool = False):
         super().__init__(test_name, application_namespace,
-                         is_async, ignored_type, is_running_service,
+                         is_async, ignored_type, is_implicit,
                          is_benchmark, test_class=test_class)
         self.additional_classpaths = additional_classpaths
         self.additional_args = additional_args

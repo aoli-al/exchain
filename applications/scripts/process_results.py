@@ -137,9 +137,9 @@ def read_aggregate_perf_result(path):
 
 def map_type(t):
     if t == "static":
-        return "$\\textsc{ExChain}^{S}$"
+        return "SI+Static"
     if t == "dynamic":
-        return "$\\textsc{ExChain}^{D}$"
+        return "SI+Dynamic"
     if "debug" in t:
         return "JVMTi"
     if "noopt" in t:
@@ -207,7 +207,7 @@ def map_name(input):
         return "latency"
     return input
 
-def save_stacked_perf_to_pdf(df, path):
+def save_stacked_perf_to_pdf(df, path, key):
     from matplotlib.patches import Patch
     colors = ["#5975A4", "#CC8963", '#5F9E6E', '#B52B2B']
     sns.set(rc={'figure.figsize':(8,4), "text.usetex": True})
@@ -219,7 +219,7 @@ def save_stacked_perf_to_pdf(df, path):
         weights=0,
         multiple="stack",
         shrink=0.8,
-        hue_order=reversed(["JVMTi", "Inst+NoOpt", "Logging", "Taint"]),
+        hue_order=reversed(["JVMTi", "Inst", "Logging", "Taint"]),
         palette=reversed(colors),
         alpha=1.0
     )
@@ -227,11 +227,15 @@ def save_stacked_perf_to_pdf(df, path):
     for i, bar in enumerate(axis.patches):
         hatch = hatches[i // 6]
         bar.set_hatch(hatch)
-    axis.set(ylabel='Latency Overhead Breakdown (\\%)')
+    if key == "Latency":
+        ykey =f'{key} Overhead Breakdown (\\%)'
+    else:
+        ykey =f'{key} Degradation Breakdown (\\%)'
+    axis.set(ylabel=ykey)
     # axis.legend()
     patch_1 = Patch(label='Taint', hatch=hatches[3], facecolor=colors[3])
     patch_2 = Patch(label='Logging', hatch=hatches[2], facecolor=colors[2])
-    patch_3 = Patch(label='Inst+NoOpt', hatch=hatches[1], facecolor=colors[1])
+    patch_3 = Patch(label='Inst', hatch=hatches[1], facecolor=colors[1])
     patch_4 = Patch(label='JVMTi', hatch=hatches[0], facecolor=colors[0])
     axis.legend(handles=list(reversed([patch_1, patch_2, patch_3, patch_4])),
                 loc='upper center', bbox_to_anchor=(
@@ -244,7 +248,10 @@ def save_stacked_perf_to_pdf(df, path):
 
 def save_perf_data_to_pdf(data, path):
     for key, value in data.items():
-        y_key =key.capitalize() + " Overhead (\\%)"
+        if key == "latency":
+            y_key =key.capitalize() + " Overhead (\\%)"
+        else:
+            y_key =key.capitalize() + " Degradation (\\%)"
         df = pd.DataFrame(value, columns=["Application", "System", y_key])
         df[y_key] -= 1
         if key != "latency":
@@ -258,8 +265,8 @@ def save_perf_data_to_pdf(data, path):
             hue="System",
             y=y_key,
             hue_order=[
-                "$\\textsc{ExChain}^{S}$",
-                "$\\textsc{ExChain}^{D}$",
+                "SI+Static",
+                "SI+Dynamic",
                 "\sc{ExChain}"]
         )
         if key == 'latency':
