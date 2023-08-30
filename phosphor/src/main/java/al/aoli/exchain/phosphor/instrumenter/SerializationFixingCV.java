@@ -1,20 +1,21 @@
-//package al.aoli.exchain.phosphor.instrumenter;
+// package al.aoli.exchain.phosphor.instrumenter;
 //
-//import edu.columbia.cs.psl.phosphor.Configuration;
-//import edu.columbia.cs.psl.phosphor.control.OpcodesUtil;
-//import edu.columbia.cs.psl.phosphor.instrumenter.TaintMethodRecord;
-//import edu.columbia.cs.psl.phosphor.org.objectweb.asm.*;
-//import edu.columbia.cs.psl.phosphor.org.objectweb.asm.commons.AnalyzerAdapter;
-//import edu.columbia.cs.psl.phosphor.runtime.PhosphorStackFrame;
-//import edu.columbia.cs.psl.phosphor.runtime.Taint;
+// import edu.columbia.cs.psl.phosphor.Configuration;
+// import edu.columbia.cs.psl.phosphor.control.OpcodesUtil;
+// import edu.columbia.cs.psl.phosphor.instrumenter.TaintMethodRecord;
+// import edu.columbia.cs.psl.phosphor.org.objectweb.asm.*;
+// import edu.columbia.cs.psl.phosphor.org.objectweb.asm.commons.AnalyzerAdapter;
+// import edu.columbia.cs.psl.phosphor.runtime.PhosphorStackFrame;
+// import edu.columbia.cs.psl.phosphor.runtime.Taint;
 //
-//import java.io.IOException;
-//import java.io.Serializable;
+// import java.io.IOException;
+// import java.io.Serializable;
 //
-//import static edu.columbia.cs.psl.phosphor.instrumenter.TaintTrackingClassVisitor.CONTROL_STACK_TYPE;
+// import static
+// edu.columbia.cs.psl.phosphor.instrumenter.TaintTrackingClassVisitor.CONTROL_STACK_TYPE;
 //
 //
-//public class SerializationFixingCV extends ClassVisitor implements Opcodes {
+// public class SerializationFixingCV extends ClassVisitor implements Opcodes {
 //
 //    // ObjectInputStream class name
 //    private static final String INPUT_STREAM_NAME = "java/io/ObjectInputStream";
@@ -36,7 +37,8 @@
 //    }
 //
 //    @Override
-//    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+//    public MethodVisitor visitMethod(int access, String name, String desc, String signature,
+// String[] exceptions) {
 //        MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
 //        if (Configuration.taintTagFactory.isIgnoredMethod(className, name, desc)) {
 //            return mv;
@@ -77,7 +79,8 @@
 //            stream.writeObject(tag);
 //        }
 //
-//        private void readObject(java.io.ObjectInputStream stream) throws IOException, ClassNotFoundException {
+//        private void readObject(java.io.ObjectInputStream stream) throws IOException,
+// ClassNotFoundException {
 //            val = stream.readObject();
 //            tag = (Taint) stream.readObject();
 //        }
@@ -90,15 +93,19 @@
 //        }
 //
 //        @Override
-//        public void visitMethodInsn(final int opcode, final String owner, final String name, final String desc,
+//        public void visitMethodInsn(final int opcode, final String owner, final String name, final
+// String desc,
 //                                    final boolean isInterface) {
 //            if (OUTPUT_STREAM_NAME.equals(owner) && name.startsWith("write")) {
 //                Type[] args = Type.getArgumentTypes(desc);
-//                if (args.length > 0 && Type.getType(Configuration.TAINT_TAG_DESC).equals(args[0])) {
+//                if (args.length > 0 && Type.getType(Configuration.TAINT_TAG_DESC).equals(args[0]))
+// {
 //                    String untaintedDesc = desc;
-//                    boolean widePrimitive = Type.DOUBLE_TYPE.equals(args[1]) || Type.LONG_TYPE.equals(args[1]);
+//                    boolean widePrimitive = Type.DOUBLE_TYPE.equals(args[1]) ||
+// Type.LONG_TYPE.equals(args[1]);
 //                    if (args.length == 2) {
-//                        // TODO this is not at all set up for reference tags... but tests pass anyway?
+//                        // TODO this is not at all set up for reference tags... but tests pass
+// anyway?
 //                        // stream, taint, primitive
 //                        super.visitInsn(widePrimitive ? DUP2_X1 : DUP_X1);
 //                        super.visitInsn(widePrimitive ? POP2 : POP);
@@ -121,4 +128,4 @@
 //            super.visitMethodInsn(opcode, owner, name, desc, isInterface);
 //        }
 //    }
-//}
+// }

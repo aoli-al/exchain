@@ -1,12 +1,9 @@
 package al.aoli.exchain.phosphor.instrumenter;
 
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_ABSTRACT;
-import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ACC_NATIVE;
 import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.ASM9;
 
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.ClassVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.tree.MethodNode;
 
 public class UninstrumentedOriginPostCV extends ClassVisitor {
 
@@ -15,8 +12,15 @@ public class UninstrumentedOriginPostCV extends ClassVisitor {
     }
 
     private String owner = null;
+
     @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+    public void visit(
+            int version,
+            int access,
+            String name,
+            String signature,
+            String superName,
+            String[] interfaces) {
         super.visit(version, access, name, signature, superName, interfaces);
         owner = name;
     }

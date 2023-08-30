@@ -5,11 +5,8 @@ import static edu.columbia.cs.psl.phosphor.org.objectweb.asm.Opcodes.*;
 
 import edu.columbia.cs.psl.phosphor.Instrumenter;
 import edu.columbia.cs.psl.phosphor.instrumenter.TaintMethodRecord;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.AnnotationVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.MethodVisitor;
 import edu.columbia.cs.psl.phosphor.org.objectweb.asm.Type;
-import edu.columbia.cs.psl.phosphor.org.objectweb.asm.TypePath;
-
 import java.lang.reflect.Method;
 
 public class ReflectionFixingMethodVisitor extends MethodVisitor {
@@ -17,7 +14,8 @@ public class ReflectionFixingMethodVisitor extends MethodVisitor {
     private String className;
     private String methodName;
 
-    public ReflectionFixingMethodVisitor(MethodVisitor methodVisitor, String owner, String methodName) {
+    public ReflectionFixingMethodVisitor(
+            MethodVisitor methodVisitor, String owner, String methodName) {
         super(ASM9, methodVisitor);
         className = owner;
         this.methodName = methodName;
@@ -37,7 +35,8 @@ public class ReflectionFixingMethodVisitor extends MethodVisitor {
     @Override
     public void visitCode() {
         super.visitCode();
-        if (this.className.equals("java/lang/invoke/MethodHandles$Lookup") && this.methodName.startsWith("defineHiddenClass")) {
+        if (this.className.equals("java/lang/invoke/MethodHandles$Lookup")
+                && this.methodName.startsWith("defineHiddenClass")) {
             super.visitVarInsn(ALOAD, 1);
             INSTRUMENT_CLASS_BYTES.delegateVisit(mv);
             super.visitVarInsn(ASTORE, 1);
@@ -48,8 +47,10 @@ public class ReflectionFixingMethodVisitor extends MethodVisitor {
     public void visitMethodInsn(
             int opcode, String owner, String name, String descriptor, boolean isInterface) {
         super.visitMethodInsn(opcode, owner, name, descriptor, isInterface);
-        if (patchAnonymousClasses && name.equals("defineAnonymousClass") && Instrumenter.isUnsafeClass(owner) &&
-                descriptor.equals("(Ljava/lang/Class;[B[Ljava/lang/Object;)Ljava/lang/Class;")) {
+        if (patchAnonymousClasses
+                && name.equals("defineAnonymousClass")
+                && Instrumenter.isUnsafeClass(owner)
+                && descriptor.equals("(Ljava/lang/Class;[B[Ljava/lang/Object;)Ljava/lang/Class;")) {
             super.visitInsn(SWAP);
             INSTRUMENT_CLASS_BYTES.delegateVisit(mv);
             super.visitInsn(SWAP);

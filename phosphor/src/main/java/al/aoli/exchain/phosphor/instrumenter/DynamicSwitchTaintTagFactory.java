@@ -9,7 +9,8 @@ public class DynamicSwitchTaintTagFactory extends DataAndControlFlowTagFactory {
         if (name.contains(Constants.originMethodSuffix)) {
             return true;
         }
-        if (owner.contains("java/lang/invoke/MethodHandleImpl") && name.contains("checkSpreadArgument")) {
+        if (owner.contains("java/lang/invoke/MethodHandleImpl")
+                && name.contains("checkSpreadArgument")) {
             return true;
         }
         return super.isIgnoredMethod(owner, name, desc);
@@ -27,9 +28,9 @@ public class DynamicSwitchTaintTagFactory extends DataAndControlFlowTagFactory {
                 || className.startsWith("al/aoli/exchain/phosphor")
                 || className.startsWith("mu/")
                 || className.startsWith("kotlin")) {
-//                || className.contains("org/mockito")
-//                || className.contains("net/bytebuddy")) {
-//                || className.startsWith("org/apache/derby/exe")) {
+            //                || className.contains("org/mockito")
+            //                || className.contains("net/bytebuddy")) {
+            //                || className.startsWith("org/apache/derby/exe")) {
             return true;
         }
         return super.isIgnoredClass(className);
