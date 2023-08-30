@@ -37,7 +37,7 @@ configure(allprojects - project(":native")) {
 			trimTrailingWhitespace()
 		}
 		kotlin {
-			ktfmt()
+			ktfmt().dropboxStyle()
 		}
 		kotlinGradle {
 			target '*.gradle.kts' // default target for kotlinGradle

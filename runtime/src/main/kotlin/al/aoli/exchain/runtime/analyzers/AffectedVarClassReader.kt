@@ -13,19 +13,19 @@ import org.objectweb.asm.ClassReader
 // If the readUnsignedShort method is called before
 // creating a LDC instruction, a LDC_W is used.
 class AffectedVarClassReader : ClassReader {
-  constructor(byteCode: ByteArray) : super(byteCode)
-  constructor(className: String) : super(className)
+    constructor(byteCode: ByteArray) : super(byteCode)
+    constructor(className: String) : super(className)
 
-  var lastReadConstIndex = -1
-  var lastUnsignedShortOffset = -1
+    var lastReadConstIndex = -1
+    var lastUnsignedShortOffset = -1
 
-  override fun readConst(constantPoolEntryIndex: Int, charBuffer: CharArray?): Any {
-    lastReadConstIndex = constantPoolEntryIndex
-    return super.readConst(constantPoolEntryIndex, charBuffer)
-  }
+    override fun readConst(constantPoolEntryIndex: Int, charBuffer: CharArray?): Any {
+        lastReadConstIndex = constantPoolEntryIndex
+        return super.readConst(constantPoolEntryIndex, charBuffer)
+    }
 
-  override fun readUnsignedShort(offset: Int): Int {
-    lastUnsignedShortOffset = offset
-    return super.readUnsignedShort(offset)
-  }
+    override fun readUnsignedShort(offset: Int): Int {
+        lastUnsignedShortOffset = offset
+        return super.readUnsignedShort(offset)
+    }
 }

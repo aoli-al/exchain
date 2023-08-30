@@ -8,5 +8,5 @@ data class ExceptionElement(
     val stack: List<String>,
     val message: String?
 ) {
-  val time: Timestamp = Timestamp(System.currentTimeMillis())
+    val time: Timestamp = Timestamp(System.currentTimeMillis())
 }
