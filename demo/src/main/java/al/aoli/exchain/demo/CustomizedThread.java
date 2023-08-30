@@ -1,16 +1,12 @@
 package al.aoli.exchain.demo;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.concurrent.ThreadLocalRandom;
-
 public class CustomizedThread extends Thread {
     public static Object c1;
     public static Object c2;
     public static Object c3;
     public static Object c4;
     private int i = 0;
+
     public CustomizedThread(int i) {
         super("CustomizedThread");
         this.i = i;

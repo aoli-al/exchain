@@ -1,4 +1,3 @@
 package al.aoli.exchain.demo;
 
-public class Class5 {
-}
+public class Class5 {}

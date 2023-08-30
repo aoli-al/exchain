@@ -21,6 +21,5 @@ public class ObjectDemo extends Object {
         return "?";
     }
 
-    public static void main(String[] args) {
-    }
+    public static void main(String[] args) {}
 }

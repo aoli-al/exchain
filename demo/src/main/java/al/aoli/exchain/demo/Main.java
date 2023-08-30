@@ -5,8 +5,6 @@ package al.aoli.exchain.demo;
 // import edu.columbia.cs.psl.phosphor.struct.TaintedWithObjTag;
 
 import edu.columbia.cs.psl.phosphor.runtime.Taint;
-import org.apache.commons.math3.util.FastMath;
-
 import java.io.*;
 import java.lang.annotation.Annotation;
 import java.lang.invoke.MethodType;
@@ -64,15 +62,13 @@ public class Main {
             System.out.println(f.get(this));
         }
     }
-    private static final double[][] LN_MANT = new double[][] {
-            {1, 2},
-            {2, 3}
-    };
-    private static final double[] LN_FOO = new double[] {
-            1, 2, 3
-    };
 
-
+    private static final double[][] LN_MANT =
+            new double[][] {
+                {1, 2},
+                {2, 3}
+            };
+    private static final double[] LN_FOO = new double[] {1, 2, 3};
 
     public static class Test implements Serializable {
         private static final long serialVersionUID = -7151852354574635295L;
@@ -84,21 +80,20 @@ public class Main {
             this.method = method;
             this.args = args;
         }
-
     }
 
     public static void main(String[] args) throws Throwable {
-//        Test t = new Test("fooooo", new Object[]{"123", "456"});
-////        ByteArrayOutputStream st = new ByteArrayOutputStream();
-//        FileOutputStream fout=new FileOutputStream("/tmp/f_inst.txt");
-//        ObjectOutputStream out = new ObjectOutputStream(fout);
-//        out.writeObject(t);
-//        out.flush();
+        //        Test t = new Test("fooooo", new Object[]{"123", "456"});
+        ////        ByteArrayOutputStream st = new ByteArrayOutputStream();
+        //        FileOutputStream fout=new FileOutputStream("/tmp/f_inst.txt");
+        //        ObjectOutputStream out = new ObjectOutputStream(fout);
+        //        out.writeObject(t);
+        //        out.flush();
 
-//        byte[] bytes = st.toByteArray();
-        FileInputStream fin =new FileInputStream("/tmp/f_inst.txt");
-//
-//        ObjectInputStream inSt = new ObjectInputStream(new ByteArrayInputStream(bytes));
+        //        byte[] bytes = st.toByteArray();
+        FileInputStream fin = new FileInputStream("/tmp/f_inst.txt");
+        //
+        //        ObjectInputStream inSt = new ObjectInputStream(new ByteArrayInputStream(bytes));
         ObjectInputStream inSt = new ObjectInputStream(fin);
         Object obj = inSt.readObject();
         System.out.println(obj);
