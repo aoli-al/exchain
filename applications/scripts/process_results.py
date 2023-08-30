@@ -113,6 +113,24 @@ def get_exception_distance(result: List[Tuple[Link, LinkType]], path: str) -> in
                 src_found = True
     return max_distance + 1
 
+def get_root_cause_location(result: List[Tuple[Link, LinkType]], path: str) -> int:
+    exceptions = []
+    with open(path) as f:
+        for line in f:
+            exceptions.append(data_to_message(json.loads(line)))
+    min_loc = 9999999
+    for item in result:
+        link = item[0]
+        loc = 0
+        for exception in exceptions:
+            loc += 1
+            if link.src == exception:
+                break
+        min_loc = min(loc, min_loc)
+    return min_loc
+
+
+
 import re
 
 def read_separate_perf_result(path: str):
