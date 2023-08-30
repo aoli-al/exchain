@@ -83,7 +83,13 @@ public class Main {
     }
 
     public static void main(String[] args) throws Throwable {
-        //        Test t = new Test("fooooo", new Object[]{"123", "456"});
+        DataFlowTest test = new DataFlowTest();
+        try {
+
+            test.sceneLocal();
+        } catch (Exception e) {
+            Thread.sleep(100000);
+        }
         ////        ByteArrayOutputStream st = new ByteArrayOutputStream();
         //        FileOutputStream fout=new FileOutputStream("/tmp/f_inst.txt");
         //        ObjectOutputStream out = new ObjectOutputStream(fout);
@@ -91,12 +97,12 @@ public class Main {
         //        out.flush();
 
         //        byte[] bytes = st.toByteArray();
-        FileInputStream fin = new FileInputStream("/tmp/f_inst.txt");
+//        FileInputStream fin = new FileInputStream("/tmp/f_inst.txt");
         //
         //        ObjectInputStream inSt = new ObjectInputStream(new ByteArrayInputStream(bytes));
-        ObjectInputStream inSt = new ObjectInputStream(fin);
-        Object obj = inSt.readObject();
-        System.out.println(obj);
+//        ObjectInputStream inSt = new ObjectInputStream(fin);
+//        Object obj = inSt.readObject();
+//        System.out.println(obj);
     }
 
     public static String concat(String a) {

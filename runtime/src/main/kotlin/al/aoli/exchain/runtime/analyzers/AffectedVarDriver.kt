@@ -21,6 +21,8 @@ object AffectedVarDriver {
     val exceptionSourceIdentified = mutableMapOf<Int, Boolean>()
     var type: Type
     val store: AffectedVarStore
+    var fieldTaintMap: HashMap<Int, HashMap<String, HashSet<Int>>> = HashMap()
+    var staticFieldTaintMap: HashMap<String, HashMap<String, HashSet<Int>>> = HashMap();
 
     init {
         val t = System.getenv("EXCHAIN_TYPE")
@@ -162,7 +164,7 @@ object AffectedVarDriver {
         return obj.union(Taint.withLabel(label))
     }
 
-    fun updateAffectedFields(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
+    fun updateAffectedFieldsDynamic(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
         val label = System.identityHashCode(exception)
         //        exceptionStore[label] = exception
         if (obj != null) {
@@ -218,6 +220,45 @@ object AffectedVarDriver {
                 logger.warn { "Cannot access static field: $name, error: $e" }
             }
         }
+
+    }
+
+    fun updateAffectedFieldsHybrid(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
+        val label = System.identityHashCode(exception)
+        if (obj != null) {
+            val objIdx = System.identityHashCode(obj)
+            for (name in affectedVarResult.affectedFieldName) {
+                fieldTaintMap.getOrPut(objIdx) { HashMap() }.getOrPut(name) { HashSet() }.add(label)
+                try {
+                    val fieldRef = obj.javaClass.getDeclaredField(name)
+                    if (!fieldRef.trySetAccessible()) {
+                        continue
+                    }
+                    val fieldObj = fieldRef.get(obj)
+                    if (fieldObj != null) {
+                        val fieldIdx = System.identityHashCode(fieldObj)
+                        fieldTaintMap.getOrPut(fieldIdx) { HashMap() }.getOrPut("self") { HashSet() }.add(label)
+                    }
+                } catch (e: Exception) {
+                    logger.warn {
+                        "Cannot access field: $name for type: ${obj.javaClass.name}, " + "error: $e"
+                    }
+                }
+            }
+        }
+        for (name in affectedVarResult.affectedStaticFieldName) {
+            val (clazzName, fieldName) = name.split("#")
+            staticFieldTaintMap.getOrPut(clazzName) { HashMap() }.getOrPut(fieldName) {HashSet()}.add(label)
+        }
+    }
+
+
+    fun updateAffectedFields(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
+        if (type == Type.Dynamic) {
+            updateAffectedFieldsDynamic(obj, affectedVarResult, exception)
+        } else {
+            updateAffectedFieldsHybrid(obj, affectedVarResult, exception)
+        }
     }
 
     fun taintObject(obj: TaintedWithObjTag, exception: Any) {
@@ -252,6 +293,44 @@ object AffectedVarDriver {
                 }
             }
         }
+    }
+
+    fun analyzeSourceFieldHybrid(
+        obj: Any?,
+        affectedVarResult: AffectedVarResult,
+        exception: Any,
+        location: String
+    ): Boolean {
+        val origin = System.identityHashCode(exception)
+        var causeIdentified = false
+        if (obj != null) {
+            val objId = System.identityHashCode(obj);
+            fieldTaintMap[objId]?.let { map ->
+                val keys = affectedVarResult.sourceField + "self"
+                for (key in keys) {
+                    map[key]?.let {
+                        for (label in it) {
+                            ExceptionLogger.logDependency(label, origin)
+                            causeIdentified = true
+                        }
+                    }
+
+                }
+            }
+        }
+        for (field in affectedVarResult.sourceStaticField) {
+            val (clazzName, fieldName) = field.split("#")
+            staticFieldTaintMap[clazzName]?.let { map ->
+                map[fieldName]?.let {
+                    for (label in it) {
+                        ExceptionLogger.logDependency(label, origin)
+                        causeIdentified = true
+                    }
+                }
+            }
+        }
+        return causeIdentified
+
     }
 
     fun analyzeSourceFieldsDynamic(
@@ -326,65 +405,11 @@ object AffectedVarDriver {
         exception: Any,
         location: String
     ): Boolean {
-        val origin = System.identityHashCode(exception)
-        var causeIdentified = false
-
-        if (obj != null && obj is TaintedWithObjTag) {
-            try {
-                val taint = obj.phosphoR_TAG as Taint<*>?
-                if (taint != null) {
-                    for (label in taint.labels) {
-                        if (label is Int && label in exceptionStore && label != origin) {
-                            ExceptionLogger.logDependency(label, origin)
-                            causeIdentified = true
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                logger.warn {
-                    "Cannot access PHOSPHOR_TAG for type: ${obj.javaClass.name}, " + "error: $e"
-                }
-            }
+        if (type == Type.Dynamic) {
+            return analyzeSourceFieldsDynamic(obj, affectedVarResult, exception, location)
+        } else {
+            return analyzeSourceFieldHybrid(obj, affectedVarResult, exception, location)
         }
-
-        if (obj != null) {
-            for (name in affectedVarResult.sourceField) {
-                try {
-                    val field = obj.javaClass.getDeclaredField(name + "PHOSPHOR_TAG")
-                    field.isAccessible = true
-                    val taint = field.get(obj) as Taint<Int>? ?: continue
-                    for (label in taint.labels) {
-                        if (label is Int && label in exceptionStore && label != origin) {
-                            ExceptionLogger.logDependency(label, origin)
-                            causeIdentified = true
-                        }
-                    }
-                } catch (e: Exception) {
-                    logger.warn {
-                        "Cannot access field: ${name}PHOSRPHOR_TAG for type: ${obj.javaClass.name}, " +
-                            "error:$e"
-                    }
-                }
-            }
-        }
-
-        for (name in affectedVarResult.sourceStaticField) {
-            try {
-                val (clazzName, fieldName) = name.split("#")
-                val clazz = Class.forName(clazzName.replace("/", "."))
-                val field = clazz.getField(fieldName + "PHOSPHOR_TAG")
-                val taint = field.get(obj) as Taint<Int>? ?: continue
-                for (label in taint.labels) {
-                    if (label is Int && label in exceptionStore && label != origin) {
-                        ExceptionLogger.logDependency(label, origin)
-                        causeIdentified = true
-                    }
-                }
-            } catch (e: Exception) {
-                logger.warn { "Cannot access static field: $name, error: $e" }
-            }
-        }
-        return causeIdentified
     }
 
     fun analyzeSourceVars(obj: Any, exception: Any, location: String): Boolean {

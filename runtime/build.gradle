@@ -123,6 +123,6 @@ task createShadow(type: ShadowJar) {
 	manifest {
 		attributes "Premain-Class": "al.aoli.exchain.runtime.PreMainKt"
 	}
-	dependsOn createInstrumentedJDK
-	dependsOn createFieldOnlyInstrumentedJDK
+//	dependsOn createInstrumentedJDK
+//	dependsOn createFieldOnlyInstrumentedJDK
 }

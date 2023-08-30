@@ -119,18 +119,13 @@ task runNaiveTaintAnalysis(type: JavaExec) {
 
 task runHybridTaintAnalysis(type: JavaExec) {
 	var runtime = project(":runtime")
-	executable = "${runtime.buildDir}/jre-inst-field-only/bin/java"
-	classpath "${buildDir}/libs/instrumented-hybrid/${project.name}-${version}.jar"
+	classpath "${buildDir}/libs/${project.name}-${version}.jar"
 	mainClass = "al.aoli.exchain.demo.Main"
-	jvmArgs "-DPhosphor.INSTRUMENTATION_CLASSPATH=hybrid_instrumented_classes"
-	jvmArgs "-DPhosphor.ORIGIN_CLASSPATH=hybrid_origin_classes"
-	jvmArgs "-javaagent:${project.rootProject.projectDir}/" +
-			"dependencies/phosphor/phosphor-jigsaw-javaagent/target/" +
-			"phosphor-jigsaw-javaagent-0.1.0-SNAPSHOT.jar"
 	var nat= project(":native")
 	jvmArgs "-agentpath:${nat.buildDir}/cmake/native_release/linux-amd64/cpp/lib${nat.name}.so=exchain:Lal/aoli/exchain/demo"
 	jvmArgs "-javaagent:${runtime.buildDir}/libs/${runtime.name}-shadow." +
 			"jar=hybrid:${buildDir}/libs/instrumented_classes"
+	environment "EXCHAIN_TYPE", "hybrid"
 }
 
 task runTaintAnalysisWithDynSwitch(type: JavaExec) {
@@ -153,7 +148,6 @@ task runTaintAnalysisWithDynSwitch(type: JavaExec) {
 
 runTaintAnalysisWithDynSwitch.dependsOn instrumentJarWithDynSwitch
 runNaiveTaintAnalysis.dependsOn instrumentJarOrigin
-runHybridTaintAnalysis.dependsOn instrumentJarHybrid
 //runInstrumentedJar.dependsOn ":runtime:createInstrumentedJDK"
 
 jar {
