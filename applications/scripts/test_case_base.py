@@ -282,9 +282,12 @@ class WrappedTest(Test):
             env[self.env_key] = f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.DynamicSwitchTaintTagFactory -javaagent:{RUNTIME_JAR_PATH}=dynamic:{self.instrumentation_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}"
             work_dir = self.dynamic_dist
         if type == "hybrid":
-            env["JAVA_HOME"] = HYBRID_JAVA_HOME
-            env[self.env_key] = f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV -javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}"
-            work_dir = self.hybrid_dist
+            env["JAVA_HOME"] = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "16")
+            env[self.env_key] = f"-javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.origin_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}"
+            work_dir = self.origin_dist
+            #  env["JAVA_HOME"] = HYBRID_JAVA_HOME
+            #  env[self.env_key] = f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV -javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}"
+            #  work_dir = self.hybrid_dist
         if "origin" in type:
             if "noopt" in type:
                 env["JAVA_HOME"] = HYBRID_JAVA_HOME
@@ -363,9 +366,8 @@ class SingleCommandTest(Test):
                 self.test_class]
 
     def hybrid_commands(self) -> List[str]:
-        return ["-cp", self.get_hybrid_jar(),
-                f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV",
-                f"-javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath}",
+        return ["-cp", self.get_origin_jar(),
+                f"-javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.origin_classpath}",
                 f"-agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}",
                 self.test_class]
 
@@ -394,7 +396,7 @@ class SingleCommandTest(Test):
             java = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "16", "bin", "java")
         elif type == "hybrid":
             cmd = self.hybrid_commands()
-            java = HYBRID_JAVA_EXEC
+            java = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "16", "bin", "java")
         elif type == "dynamic":
             cmd = self.dynamic_commands()
             java = INSTRUMENTED_JAVA_EXEC
