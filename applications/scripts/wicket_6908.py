@@ -20,7 +20,7 @@ class Wicket(SingleCommandTest):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
         subprocess.call(["mvn", "install", "-DskipTests"], cwd=self.work_dir)
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, _: bool):
         time.sleep(10)
         if not debug:
             s = requests.Session()

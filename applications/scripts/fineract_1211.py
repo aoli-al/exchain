@@ -32,18 +32,17 @@ class Fineract(SingleCommandTest):
         subprocess.call(
             "./gradlew createDB -PdbName=fineract_default", shell=True, cwd=self.work_dir)
 
-    def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
-        cmd, env, work_dir, _ = super().get_exec_command(type, debug)
-        return cmd, env, work_dir, sys.stdout.buffer
+    #  def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
+        #  cmd, env, work_dir, _ = super().get_exec_command(type, debug)
+        #  return cmd, env, work_dir, sys.stdout.buffer
 
 
-    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int):
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, _: bool):
         if type == "dynamic":
             time.sleep(300)
         else:
             time.sleep(60)
         if not debug:
-            print(self.work_dir)
             subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
             subprocess.call("./gradlew :fineract-provider:triggerBug --tests org.apache.fineract.integrationtests.HookIntegrationTest.shouldSendOfficeCreationNotification",
                             env={"PERF_OUT_FILE": "/tmp/out",

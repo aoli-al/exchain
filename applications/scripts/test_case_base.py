@@ -312,11 +312,12 @@ class WrappedTest(Test):
         if type == "origin" and not self.is_benchmark:
             f = open(self.origin_log_path, "w")
         elif self.is_benchmark:
-            f = subprocess.PIPE
-            # f = open(self.origin_log_path, "w")
-            #  f = sys.stdout.buffer
+            #  f = subprocess.PIPE
+            #  f = open(self.origin_log_path, "w")
+            f = sys.stdout.buffer
         else:
             f = sys.stdout.buffer
+            #  f = open(self.origin_log_path, "w")
         return (self.start_command, env, work_dir, f)
 
 
