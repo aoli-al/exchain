@@ -39,6 +39,8 @@ def bench(dataset: str, build: bool, instrument: bool, run: bool, analyze: bool,
         if instrument:
             app.instrument()
         for t in DEFAULT_TYPES:
+            if name in TEST_APPLICATIONS and "origin-" in t:
+                continue
             if t not in skip_type:
                 if run:
                     app.run_test(t, False, iter, not cache)

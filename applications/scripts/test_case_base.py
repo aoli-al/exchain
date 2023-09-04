@@ -180,6 +180,7 @@ class Test:
 
     def run_test(self, type: str, debug: bool = False, iter: int = 1, disable_cache: bool = False):
         for i in range(iter):
+            print("?????!!!!!", type, debug, disable_cache)
             self.pre()
             cmd = self.exec(type, debug, disable_cache)
             self.post(type, debug, cmd, i, disable_cache)
@@ -243,6 +244,7 @@ class Test:
             e["EXCHAIN_ENABLE_CACHE"] = "false"
         else:
             e["EXCHAIN_ENABLE_CACHE"] = "true"
+        print(f"EXEC_TYPE: {type}")
 
         return subprocess.Popen(cmd,
                                 stdout=f,
@@ -290,10 +292,7 @@ class WrappedTest(Test):
             #  env[self.env_key] = f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV -javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath} -agentpath:{NATIVE_LIB_PATH}=exchain:{self.application_namespace}"
             #  work_dir = self.hybrid_dist
         if "origin" in type:
-            if "noopt" in type:
-                env["JAVA_HOME"] = HYBRID_JAVA_HOME
-            else:
-                env["JAVA_HOME"] = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "16")
+            env["JAVA_HOME"] = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "16")
             work_dir = self.origin_dist
             if "debug" in type:
                 if self.env_key not in env:
@@ -302,9 +301,9 @@ class WrappedTest(Test):
                     env[self.env_key] += f" -agentpath:{NATIVE_LIB_PATH}=dummy"
             if "noopt" in type:
                 if self.env_key not in env:
-                    env[self.env_key] = f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV -javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath} -agentpath:{NATIVE_LIB_PATH}=dummy"
+                    env[self.env_key] = f"-javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath} -agentpath:{NATIVE_LIB_PATH}=dummy"
                 else:
-                    env[self.env_key] += f" -javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV -javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath} -agentpath:{NATIVE_LIB_PATH}=dummy"
+                    env[self.env_key] += f" -javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath} -agentpath:{NATIVE_LIB_PATH}=dummy"
         if debug:
             if self.env_key not in env:
                 env[self.env_key] = "-agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:5005"
@@ -384,15 +383,11 @@ class SingleCommandTest(Test):
     def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
         if "origin" in type:
             cmd = self.origin_commands()
-            if "noopt" in type:
-                java =  HYBRID_JAVA_EXEC
-            else:
-                java = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "16", "bin", "java")
+            java = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "16", "bin", "java")
             if "debug" in type or "noopt" in type:
                 cmd.insert(0, f"-agentpath:{NATIVE_LIB_PATH}=dummy")
                 if "noopt" in type:
-                    cmd[1:1] = [f"-javaagent:{PHOSPHOR_AGENT_PATH}=taintTagFactory=al.aoli.exchain.phosphor.instrumenter.FieldOnlyTaintTagFactory,postClassVisitor=al.aoli.exchain.phosphor.instrumenter.UninstrumentedOriginPostCV",
-                                f"-javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath}"]
+                    cmd[1:1] = [f"-javaagent:{RUNTIME_JAR_PATH}=hybrid:{self.hybrid_classpath}"]
         elif type == "static":
             cmd = self.static_commands()
             java = os.path.join(os.path.expanduser("~"), ".jenv", "versions", "16", "bin", "java")
