@@ -22,7 +22,7 @@ object AffectedVarDriver {
     var type: Type
     val store: AffectedVarStore
     var fieldTaintMap: HashMap<Int, HashMap<String, HashSet<Int>>> = HashMap()
-    var staticFieldTaintMap: HashMap<String, HashMap<String, HashSet<Int>>> = HashMap();
+    var staticFieldTaintMap: HashMap<String, HashMap<String, HashSet<Int>>> = HashMap()
 
     init {
         val t = System.getenv("EXCHAIN_TYPE")
@@ -164,7 +164,11 @@ object AffectedVarDriver {
         return obj.union(Taint.withLabel(label))
     }
 
-    fun updateAffectedFieldsDynamic(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
+    fun updateAffectedFieldsDynamic(
+        obj: Any?,
+        affectedVarResult: AffectedVarResult,
+        exception: Any
+    ) {
         val label = System.identityHashCode(exception)
         //        exceptionStore[label] = exception
         if (obj != null) {
@@ -220,10 +224,13 @@ object AffectedVarDriver {
                 logger.warn { "Cannot access static field: $name, error: $e" }
             }
         }
-
     }
 
-    fun updateAffectedFieldsHybrid(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
+    fun updateAffectedFieldsHybrid(
+        obj: Any?,
+        affectedVarResult: AffectedVarResult,
+        exception: Any
+    ) {
         val label = System.identityHashCode(exception)
         if (obj != null) {
             val objIdx = System.identityHashCode(obj)
@@ -237,7 +244,10 @@ object AffectedVarDriver {
                     val fieldObj = fieldRef.get(obj)
                     if (fieldObj != null) {
                         val fieldIdx = System.identityHashCode(fieldObj)
-                        fieldTaintMap.getOrPut(fieldIdx) { HashMap() }.getOrPut("self") { HashSet() }.add(label)
+                        fieldTaintMap
+                            .getOrPut(fieldIdx) { HashMap() }
+                            .getOrPut("self") { HashSet() }
+                            .add(label)
                     }
                 } catch (e: Exception) {
                     logger.warn {
@@ -248,10 +258,12 @@ object AffectedVarDriver {
         }
         for (name in affectedVarResult.affectedStaticFieldName) {
             val (clazzName, fieldName) = name.split("#")
-            staticFieldTaintMap.getOrPut(clazzName) { HashMap() }.getOrPut(fieldName) {HashSet()}.add(label)
+            staticFieldTaintMap
+                .getOrPut(clazzName) { HashMap() }
+                .getOrPut(fieldName) { HashSet() }
+                .add(label)
         }
     }
-
 
     fun updateAffectedFields(obj: Any?, affectedVarResult: AffectedVarResult, exception: Any) {
         if (type == Type.Dynamic) {
@@ -304,7 +316,7 @@ object AffectedVarDriver {
         val origin = System.identityHashCode(exception)
         var causeIdentified = false
         if (obj != null) {
-            val objId = System.identityHashCode(obj);
+            val objId = System.identityHashCode(obj)
             fieldTaintMap[objId]?.let { map ->
                 val keys = affectedVarResult.sourceField + "self"
                 for (key in keys) {
@@ -314,7 +326,6 @@ object AffectedVarDriver {
                             causeIdentified = true
                         }
                     }
-
                 }
             }
         }
@@ -330,7 +341,6 @@ object AffectedVarDriver {
             }
         }
         return causeIdentified
-
     }
 
     fun analyzeSourceFieldsDynamic(

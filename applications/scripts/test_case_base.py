@@ -217,7 +217,8 @@ class Test:
         start_time = time.time()
         print(args)
         subprocess.call(["./gradlew", "static-analyzer:run", *args],
-                        cwd=os.path.join(DIR_PATH, "../.."), timeout=60 * 60 * 8)
+                        cwd=os.path.join(DIR_PATH, "../.."), timeout=60 * 60 * 8,
+                        env={"EXCHAIN_TYPE": "dynamic"})
         finish_time = time.time()
         if naive:
             out = "time.naive.txt"

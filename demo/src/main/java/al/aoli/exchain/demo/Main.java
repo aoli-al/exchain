@@ -97,12 +97,12 @@ public class Main {
         //        out.flush();
 
         //        byte[] bytes = st.toByteArray();
-//        FileInputStream fin = new FileInputStream("/tmp/f_inst.txt");
+        //        FileInputStream fin = new FileInputStream("/tmp/f_inst.txt");
         //
         //        ObjectInputStream inSt = new ObjectInputStream(new ByteArrayInputStream(bytes));
-//        ObjectInputStream inSt = new ObjectInputStream(fin);
-//        Object obj = inSt.readObject();
-//        System.out.println(obj);
+        //        ObjectInputStream inSt = new ObjectInputStream(fin);
+        //        Object obj = inSt.readObject();
+        //        System.out.println(obj);
     }
 
     public static String concat(String a) {

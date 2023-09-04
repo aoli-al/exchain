@@ -9,20 +9,20 @@ import net.bytebuddy.asm.Advice.Origin
 
 object ExceptionAdvices {
 
-  @Advice.OnMethodEnter()
-  @JvmStatic
-  fun enter(@Advice.Origin("#t@#m@#s@#r") origin: String, @Origin method: Method) {
-    if (!ExceptionServiceImpl.started) return
-    ExceptionInjector.methodEnter(origin, method)
-    ExceptionTreeAnalyzer.methodEnter(origin, method)
-  }
-
-  @Advice.OnMethodExit(onThrowable = Throwable::class)
-  @JvmStatic
-  fun exit(@Advice.Thrown e: Throwable?) {
-    if (!ExceptionServiceImpl.started) return
-    if (e != null) {
-      ExceptionInjector.thrownExceptions(e)
+    @Advice.OnMethodEnter()
+    @JvmStatic
+    fun enter(@Advice.Origin("#t@#m@#s@#r") origin: String, @Origin method: Method) {
+        if (!ExceptionServiceImpl.started) return
+        ExceptionInjector.methodEnter(origin, method)
+        ExceptionTreeAnalyzer.methodEnter(origin, method)
     }
-  }
+
+    @Advice.OnMethodExit(onThrowable = Throwable::class)
+    @JvmStatic
+    fun exit(@Advice.Thrown e: Throwable?) {
+        if (!ExceptionServiceImpl.started) return
+        if (e != null) {
+            ExceptionInjector.thrownExceptions(e)
+        }
+    }
 }
