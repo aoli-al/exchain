@@ -269,10 +269,10 @@ class WrappedTest(Test):
 
     def instrument(self, debug: bool = False):
         shutil.copytree(self.origin_dist, self.dynamic_dist, dirs_exist_ok=True)
-        shutil.copytree(self.origin_dist, self.hybrid_dist, dirs_exist_ok=True)
+        # shutil.copytree(self.origin_dist, self.hybrid_dist, dirs_exist_ok=True)
 
         self.instrument_dynamic(self.origin_dist, self.dynamic_dist, debug)
-        self.instrument_hybrid(self.origin_dist, self.hybrid_dist, debug)
+        # self.instrument_hybrid(self.origin_dist, self.hybrid_dist, debug)
 
     def get_exec_command(self, type: str, debug: bool) -> Tuple[List[str], Dict[str, str], str, Any]:
         env = {}
@@ -312,9 +312,9 @@ class WrappedTest(Test):
         if type == "origin" and not self.is_benchmark:
             f = open(self.origin_log_path, "w")
         elif self.is_benchmark:
-            #  f = subprocess.PIPE
+             f = subprocess.PIPE
             #  f = open(self.origin_log_path, "w")
-            f = sys.stdout.buffer
+            # f = sys.stdout.buffer
         else:
             f = sys.stdout.buffer
             #  f = open(self.origin_log_path, "w")
@@ -345,7 +345,7 @@ class SingleCommandTest(Test):
         else:
             input_name = self.origin_jar_path
         self.instrument_dynamic(input_name, self.instrumentation_output, debug)
-        self.instrument_hybrid(input_name, self.hybrid_output, debug)
+        # self.instrument_hybrid(input_name, self.hybrid_output, debug)
 
 #
     def get_origin_jar(self) -> str:

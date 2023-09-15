@@ -19,3 +19,14 @@ class Jena(SingleCommandTest):
     def build(self):
         subprocess.call("jenv local 11", shell=True, cwd=self.work_dir)
         subprocess.call(["mvn", "install", "-DskipTests"], cwd=self.work_dir + "/jena-tdb")
+
+    def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, _: bool):
+        print("POST!")
+        if type == "dynamic":
+            time.sleep(40)
+        else:
+            time.sleep(20)
+        if not debug:
+            cmd.kill()
+        else:
+            cmd.communicate()

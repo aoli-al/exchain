@@ -24,8 +24,6 @@ class Solr(WrappedTest):
         cmd = cmd.copy()
         if type == "dynamic":
             cmd.append(self.dynamic_dist)
-        elif type == "hybrid":
-            cmd.append(self.hybrid_dist)
         else:
             cmd.append(self.origin_dist)
         work_dir = os.path.join(self.work_dir, "solr", "benchmark")

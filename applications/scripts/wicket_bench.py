@@ -32,8 +32,8 @@ class Wicket(SingleCommandTest):
 
     def post(self, type: str, debug: bool, cmd: subprocess.Popen, iter: int, disable_cache: bool):
         time.sleep(10)
-        subprocess.call("ab -s 300 -c 200 -n 10000 http://localhost:8080/", shell=True)
-        measure = subprocess.Popen("ab -s 300 -c 200 -n 10000 http://localhost:8080/", shell=True,
+        subprocess.call("ab -c 150 -n 10000 http://localhost:8080/", shell=True)
+        measure = subprocess.Popen("ab -c 150 -n 10000 http://localhost:8080/", shell=True,
                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         out, err = measure.communicate()
         print(out.decode("utf-8"))
