@@ -48,6 +48,14 @@ public class HomePage extends WebPage
                 setResponsePage( new TestPage2( null ) );
             }
         } );
+        add( new Link<Void>( "test3" )
+        {
+            @Override
+            public void onClick()
+            {
+                setResponsePage( new TestPage2( null ) );
+            }
+        } );
     }
 
     @Override
