@@ -311,6 +311,7 @@ class WrappedTest(Test):
                 env[self.env_key] += " -agentlib:jdwp=transport=dt_socket,server=y,suspend=y,address=localhost:5005"
         if type == "origin" and not self.is_benchmark:
             f = open(self.origin_log_path, "w")
+            f = sys.stdout.buffer
         elif self.is_benchmark:
             #  f = subprocess.PIPE
             #  f = open(self.origin_log_path, "w")
@@ -405,6 +406,7 @@ class SingleCommandTest(Test):
         print(" ".join(cmd))
         if type == "origin" and not self.is_benchmark:
             f = open(self.origin_log_path, "w")
+            f = sys.stdout.buffer
         elif self.is_benchmark:
             f = subprocess.PIPE
         else:

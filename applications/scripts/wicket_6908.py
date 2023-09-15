@@ -25,11 +25,13 @@ class Wicket(SingleCommandTest):
         if not debug:
             s = requests.Session()
             s2 = requests.Session()
+            s2.get("http://localhost:8080/?0")
+            print(s2.get("http://localhost:8080/?0-1.-test3").text)
             s.get("http://localhost:8080")
             s.get("http://localhost:8080/?0-1.-test")
             s.get("http://localhost:8080/wicket/page?1-999.-btn")
-            s2.get("http://localhost:8080/?0")
-            print(s2.get("http://localhost:8080/?0-1.-test2").text)
+            s2.get("http://localhost:8080/?1")
+            print(s2.get("http://localhost:8080/?1-1.-test2").text)
 
 
             s.get("http://localhost:8080/wicket/page?1-999.-btn")
