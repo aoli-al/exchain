@@ -191,6 +191,11 @@ def read_perf_result(app, perf_result: Dict[str, List[Any]], types = ["origin", 
                     title = f"{name}\n{origin_result[key]:.1f}({app.get_measure(key)})"
                 else:
                     title = name
+                # if title == "HDFS":
+                #     print(title)
+                #     print(t)
+                #     print(sum(value) / len(value))
+                #     print(origin_result[key])
                 for v in value:
                     if remap_keys:
                         t_val = map_type(t)
@@ -237,8 +242,8 @@ def save_stacked_perf_to_pdf(df, path, key):
         weights=0,
         multiple="stack",
         shrink=0.8,
-        hue_order=reversed(["JVMTi", "Inst", "Logging", "Taint"]),
-        palette=reversed(colors),
+        hue_order=reversed(["JVMTi", "ExChain"]),
+        palette=colors,
         alpha=1.0
     )
     hatches = ['//', '+', 'o', 'O', '.']
@@ -251,11 +256,11 @@ def save_stacked_perf_to_pdf(df, path, key):
         ykey =f'{key} Degradation Breakdown (\\%)'
     axis.set(ylabel=ykey)
     # axis.legend()
-    patch_1 = Patch(label='Taint', hatch=hatches[3], facecolor=colors[3])
-    patch_2 = Patch(label='Logging', hatch=hatches[2], facecolor=colors[2])
-    patch_3 = Patch(label='Inst', hatch=hatches[1], facecolor=colors[1])
-    patch_4 = Patch(label='JVMTi', hatch=hatches[0], facecolor=colors[0])
-    axis.legend(handles=list(reversed([patch_1, patch_2, patch_3, patch_4])),
+    # patch_1 = Patch(label='Taint', hatch=hatches[3], facecolor=colors[3])
+    # patch_2 = Patch(label='Logging', hatch=hatches[2], facecolor=colors[2])
+    patch_3 = Patch(label='ExChain', hatch=hatches[1], facecolor=colors[0])
+    patch_4 = Patch(label='JVMTi', hatch=hatches[0], facecolor=colors[1])
+    axis.legend(handles=list(reversed([patch_3, patch_4])),
                 loc='upper center', bbox_to_anchor=(
         0.5, 1.1), ncol=4, fancybox=True, shadow=True)
     # axis.get_legnd()
