@@ -242,7 +242,7 @@ def save_stacked_perf_to_pdf(df, path, key):
         weights=0,
         multiple="stack",
         shrink=0.8,
-        hue_order=reversed(["JVMTi", "ExChain"]),
+        hue_order=reversed(["JVMTi", "\sc{ExChain}"]),
         palette=colors,
         alpha=1.0
     )
@@ -258,7 +258,7 @@ def save_stacked_perf_to_pdf(df, path, key):
     # axis.legend()
     # patch_1 = Patch(label='Taint', hatch=hatches[3], facecolor=colors[3])
     # patch_2 = Patch(label='Logging', hatch=hatches[2], facecolor=colors[2])
-    patch_3 = Patch(label='ExChain', hatch=hatches[1], facecolor=colors[0])
+    patch_3 = Patch(label='\sc{ExChain}', hatch=hatches[1], facecolor=colors[0])
     patch_4 = Patch(label='JVMTi', hatch=hatches[0], facecolor=colors[1])
     axis.legend(handles=list(reversed([patch_3, patch_4])),
                 loc='upper center', bbox_to_anchor=(
