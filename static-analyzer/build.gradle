@@ -27,7 +27,13 @@ test {
 	useJUnitPlatform()
 }
 
+task buildFlowDroid(type: Exec) {
+	commandLine "mvn", "-DskipTests", "install"
+	workingDir "${project.rootProject.projectDir}/dependencies/FlowDroid/"
+}
+
 run {
 	jvmArgs "-Xmx32g"
 	mainClassName = "al.aoli.exchain.analyzer.MainKt"
+	dependsOn buildFlowDroid
 }

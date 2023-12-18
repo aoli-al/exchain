@@ -16,6 +16,11 @@ dependencies {
 	compileOnly 'edu.gmu.swe.phosphor:Phosphor:0.1.0-SNAPSHOT'
 }
 
+task buildPhosphor(type: Exec) {
+	commandLine "./mvnw", "-DskipTests", "install"
+	workingDir "${project.rootProject.projectDir}/dependencies/phosphor/"
+}
+
 task mergedJar(type: Jar) {
 	archiveBaseName.set("phosphor-merged")
 	archiveClassifier.set("")
@@ -27,22 +32,10 @@ task mergedJar(type: Jar) {
 		attributes "Main-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.StandaloneJVMInstrumenter"
 		attributes "Premain-Class": "edu.columbia.cs.psl.jigsaw.phosphor.instrumenter.JLinkRegistrationAgent"
 	}
-	dependsOn ":phosphor:jar"
+	dependsOn buildPhosphor
+	dependsOn jar
 }
 
 test {
 	useJUnitPlatform()
 }
-
-//shadowJar {
-//    archiveBaseName.set('phosphor')
-//    archiveClassifier.set('')
-//    archiveVersion.set('')
-//}
-//
-//task relocateShadowJar(type: ConfigureShadowRelocation) {
-//    target = tasks.shadowJar
-//    prefix = "al.aoli.exchain.phosphor" // Default value is "shadow"
-//}
-//
-//tasks.shadowJar.dependsOn tasks.relocateShadowJar
