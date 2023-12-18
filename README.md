@@ -1,13 +1,30 @@
-ExChain: Efficient Dynamic Exception Tracing
+# ExChain: Efficient Dynamic Exception Tracing
 
-# Dependencies
 
-ExChain depends on [Phosphor](https://github.com/gmu-swe/phosphor/tree/phosphor-0.1.0-dev) and plase
-use the `phosphor-0.1.0-dev` branch.
-
-Make sure both ExChain and Phosphor are placed in `~/repos` directory.
+ExChain is a static/dynamic analysis tool aimed at pinpointing the root cause of failures resulting from exception propagation.
 
 # Build
+
+- To build ExChain and benchmark applications you need to download all dependencies.
+
+```
+git submodule update --init --recursive
+```
+
+- ExChain uses JVMTi to monitor exceptions in the application. To build the JVMTi plugin:
+
+
+```
+./gradlew :native:build
+```
+
+- ExChain uses [Phosphor](https://github.com/gmu-swe/phosphor) to perform dynamic taint tracking.
+
+
+
+
+
+# Dependencies
 
 - To build JVMTI plugin `./gradlew :native:build`
 - To build javaagent `./gradlew shadowJar`
