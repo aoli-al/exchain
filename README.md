@@ -1,5 +1,4 @@
-# ExChain: Efficient Dynamic Exception Tracing
-
+![](./figs/ExChain.png)
 
 ExChain is a static/dynamic analysis tool aimed at pinpointing the root cause of failures resulting from exception propagation.
 
