@@ -4,7 +4,7 @@ ExChain is a static/dynamic analysis tool aimed at pinpointing the root cause of
 
 ## Prerequest
 
-Different dependencies/applications uses different versions of Java🤯. To smooth the build process,
+Different dependencies/applications use different versions of Java🤯. To smooth the build process,
 we use [jenv](https://www.jenv.be/) to provide some hints.  Please make sure you have Java 8, Java 11, and Java >16 installed.
 
 
