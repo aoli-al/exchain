@@ -5,9 +5,7 @@ ExChain is a static/dynamic analysis tool aimed at pinpointing the root cause of
 
 ## Tech Detail
 
-Please read our paper
-
-[ExChain: Exception Dependency Analysis for Root Cause Diagnosis](./docs/exchain.pdf)
+Please read our paper: [ExChain: Exception Dependency Analysis for Root Cause Diagnosis](./docs/exchain.pdf)
 
 ## Prerequest
 
