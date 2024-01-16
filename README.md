@@ -29,7 +29,7 @@ git submodule update --init --recursive
 ```
 
 - ExChain uses [Phosphor](https://github.com/gmu-swe/phosphor) to perform dynamic taint tracking and uses [TaintDroid](https://github.com/secure-software-engineering/FlowDroid)
-to perform static taint tracking. Unfortunately none of those tools work smoothly for large applications such as Hadoop.
+to perform static taint tracking. Unfortunately none of those tools work smoothly for large applications such as Hadoop 🥲.
 We have to fork them and add patches.
 
 - Our build script will configure and build them for you:
