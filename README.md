@@ -2,6 +2,13 @@
 
 ExChain is a static/dynamic analysis tool aimed at pinpointing the root cause of failures resulting from exception propagation.
 
+
+## Tech Detail
+
+Please read our paper
+
+[ExChain: Exception Dependency Analysis for Root Cause Diagnosis](./docs/exchain.pdf)
+
 ## Prerequest
 
 Different dependencies/applications use different versions of Java🤯. To smooth the build process,
