@@ -2,6 +2,8 @@
 
 ExChain is a static/dynamic analysis tool aimed at pinpointing the root cause of failures resulting from exception propagation.
 
+> Writing Java is just like my current mood, exceptions everywhere, making me lose even the courage to try. -- ChatGPT4
+
 
 ## Tech Detail
 
